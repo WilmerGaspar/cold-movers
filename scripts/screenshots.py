@@ -74,6 +74,19 @@ with sync_playwright() as p:
             page.screenshot(path=os.path.join(OUT, f"desktop_{name}.png"))
         except Exception as exc:
             print(f"{name} screenshot failed:", exc)
+    # Click test: switch objects several times in a row; each click must load the new object.
+    for name in ("R Draconis", "Epsilon Indi B", "RW Aurigae", "Barnard's Star"):
+        try:
+            fr.get_by_text(f"{name} ·", exact=False).first.click()
+            ok = False
+            for _ in range(24):
+                page.wait_for_timeout(2_500)
+                if fr.locator("h3", has_text=name).count():
+                    ok = True
+                    break
+            print(f"click test {name}: {'OK' if ok else 'DID NOT LOAD'}")
+        except Exception as exc:
+            print(f"click test {name}: error {exc}")
     page.close()
 
     # Phone
