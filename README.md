@@ -1,8 +1,17 @@
 # Cold Movers
 
-**Watch the SPHEREx sky move, and measure how cold things are.**
+**Cold Movers lets anyone explore SPHEREx observations, follow changes between visits, and see explicitly when the data do not support a reliable conclusion.**
 
-NASA Space Apps Challenge 2026 · Challenge: *Planet X and SPHEREx* · Team: Cold Movers (Honduras)
+NASA Space Apps Challenge 2026 · Challenge: *Planet X and SPHEREx* · Team: Cold Movers (Honduras) · **Live app: https://cold-movers.streamlit.app**
+
+| Barnard's Star crossing the sky, visit by visit | WISE 0855, the coldest known brown dwarf, at 3.8–4.4 µm |
+|---|---|
+| ![Barnard's Star movie](data/precomputed/barnard/movie_d0.gif) | ![WISE 0855 movie](data/precomputed/wise0855/movie_d5.gif) |
+| Measured motion 11.1″ between the first and last SPHEREx visit; the catalogue predicts 11.1″. | Seen only at the longest wavelengths, moving past a background star that the checks detect and remove. |
+
+![The app: summary, 60-second guide and validation](docs/screens/desktop_top.png)
+
+*Images are real SPHEREx data processed by the app (frames carry an "AI-assisted code" mark, see AI use).*
 
 Enter sky coordinates, a star name, or pick one of the five challenge objects. Cold Movers:
 
@@ -11,8 +20,6 @@ Enter sky coordinates, a star name, or pick one of the five challenge objects. C
 3. **follows the object's proper motion** and measures it in every image to build its **0.75–5 µm spectrum**,
 4. runs the **Madhava engine**, a band-integrated Planck fit that gives a *blackbody-equivalent temperature* with an uncertainty and a **traffic light** that says how far to trust it,
 5. runs four **"Is it real?"** consistency checks (indicators, not confirmation of a discovery): seen again in another visit, clean pixels, positions consistent with the catalogue motion, and no blended neighbour.
-
-**Live app: https://cold-movers.streamlit.app**
 
 Every result can be shared as a link (`?object=wise0855` or `?ra=..&dec=..`) and downloaded as CSV or GIF.
 
