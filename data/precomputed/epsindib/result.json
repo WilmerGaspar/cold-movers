@@ -2,26 +2,26 @@
   "target": {
     "key": "epsindib",
     "name": "Epsilon Indi B",
-    "ra_deg": 331.0438,
-    "dec_deg": -56.7827,
-    "pmra_masyr": 3966.7,
-    "pmdec_masyr": -2536.2,
-    "parallax_mas": 274.8,
+    "ra_deg": 331.04414658852124,
+    "dec_deg": -56.78284419511611,
+    "pmra_masyr": 3981.977,
+    "pmdec_masyr": -2466.832,
+    "parallax_mas": 270.658,
     "ref_epoch": 2000.0,
-    "source": "fallback (motion of Epsilon Indi A, Gaia DR3)",
+    "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)",
     "note": "Pair of T-type brown dwarfs orbiting the star Epsilon Indi."
   },
   "size_deg": 0.05,
   "n_found": 458,
-  "n_used": 286,
-  "n_clean": 215,
-  "n_failures": 14,
+  "n_used": 300,
+  "n_clean": 223,
+  "n_failures": 0,
   "fit": {
-    "temperature_k": 1875.4,
-    "t_low_k": 1802.0,
-    "t_high_k": 1945.0,
-    "chi2_red": 47.521,
-    "n_points": 215,
+    "temperature_k": 1867.7,
+    "t_low_k": 1794.6,
+    "t_high_k": 1937.0,
+    "chi2_red": 47.377,
+    "n_points": 223,
     "light": "yellow",
     "reasons": [
       "not_a_single_blackbody"
@@ -32,32 +32,32 @@
       "index": 0,
       "mjd_start": 60789.855522,
       "mjd_end": 60836.189812,
-      "mjd_mid": 60795.084928,
-      "n_frames": 76,
+      "mjd_mid": 60795.084182,
+      "n_frames": 77,
       "counts": {
         "1": 2,
         "2": 22,
         "3": 17,
-        "4": 2,
+        "4": 3,
         "5": 18,
         "6": 15,
-        "0": 76
+        "0": 77
       }
     },
     {
       "index": 1,
       "mjd_start": 60946.964111,
       "mjd_end": 60991.85757,
-      "mjd_mid": 60954.299698,
-      "n_frames": 91,
+      "mjd_mid": 60954.3329275,
+      "n_frames": 96,
       "counts": {
         "1": 14,
-        "2": 18,
-        "3": 14,
+        "2": 20,
+        "3": 15,
         "4": 18,
-        "5": 12,
+        "5": 14,
         "6": 15,
-        "0": 91
+        "0": 96
       }
     },
     {
@@ -65,36 +65,36 @@
       "mjd_start": 61148.84479,
       "mjd_end": 61164.11695,
       "mjd_mid": 61155.09135,
-      "n_frames": 45,
+      "n_frames": 48,
       "counts": {
-        "1": 11,
+        "1": 12,
         "2": 5,
-        "3": 6,
+        "3": 7,
         "4": 13,
         "5": 3,
-        "6": 7,
-        "0": 45
+        "6": 8,
+        "0": 48
       }
     },
     {
       "index": 3,
       "mjd_start": 61305.226906,
       "mjd_end": 61315.478076,
-      "mjd_mid": 61310.7255365,
-      "n_frames": 74,
+      "mjd_mid": 61310.658696,
+      "n_frames": 79,
       "counts": {
-        "2": 15,
-        "3": 21,
-        "5": 14,
-        "6": 24,
-        "0": 74
+        "2": 16,
+        "3": 23,
+        "5": 15,
+        "6": 25,
+        "0": 79
       }
     }
   ],
   "ref_wcs": {
     "crval": [
-      331.09565748884467,
-      -56.80086352852974
+      331.0962069953355,
+      -56.80051194776388
     ],
     "crpix": [
       16.0,
@@ -126,9 +126,9 @@
     "spherex_qr3"
   ],
   "timings": {
-    "search_s": 2.3,
-    "download_s": 90.6,
-    "total_s": 94.4
+    "search_s": 3.1,
+    "download_s": 334.1,
+    "total_s": 338.3
   },
-  "generated_utc": "2026-11-14 20:10 UTC"
+  "generated_utc": "2026-11-14 20:25 UTC"
 }

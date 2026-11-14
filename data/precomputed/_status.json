@@ -1,0 +1,82 @@
+{
+  "barnard": {
+    "ok": true,
+    "fit": {
+      "temperature_k": NaN,
+      "t_low_k": NaN,
+      "t_high_k": NaN,
+      "chi2_red": NaN,
+      "n_points": 0,
+      "light": "red",
+      "reasons": [
+        "too_bright"
+      ]
+    },
+    "n_used": 300,
+    "n_found": 358
+  },
+  "epsindib": {
+    "ok": true,
+    "fit": {
+      "temperature_k": 1867.7,
+      "t_low_k": 1794.6,
+      "t_high_k": 1937.0,
+      "chi2_red": 47.377,
+      "n_points": 223,
+      "light": "yellow",
+      "reasons": [
+        "not_a_single_blackbody"
+      ]
+    },
+    "n_used": 300,
+    "n_found": 458
+  },
+  "wise0855": {
+    "ok": true,
+    "fit": {
+      "temperature_k": 5715.3,
+      "t_low_k": 5568.5,
+      "t_high_k": 5886.4,
+      "chi2_red": 2.329,
+      "n_points": 201,
+      "light": "yellow",
+      "reasons": [
+        "peak_below_0p75um"
+      ]
+    },
+    "n_used": 258,
+    "n_found": 258
+  },
+  "rwaur": {
+    "ok": true,
+    "fit": {
+      "temperature_k": 3461.1,
+      "t_low_k": 3060.0,
+      "t_high_k": 4025.1,
+      "chi2_red": 14.407,
+      "n_points": 16,
+      "light": "yellow",
+      "reasons": [
+        "not_a_single_blackbody"
+      ]
+    },
+    "n_used": 300,
+    "n_found": 335
+  },
+  "rdra": {
+    "ok": true,
+    "fit": {
+      "temperature_k": NaN,
+      "t_low_k": NaN,
+      "t_high_k": NaN,
+      "chi2_red": NaN,
+      "n_points": 0,
+      "light": "red",
+      "reasons": [
+        "too_bright"
+      ]
+    },
+    "n_used": 300,
+    "n_found": 539
+  }
+}

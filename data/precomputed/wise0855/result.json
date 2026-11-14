@@ -1,0 +1,134 @@
+{
+  "target": {
+    "key": "wise0855",
+    "name": "WISE 0855-0714",
+    "ra_deg": 133.81890825,
+    "dec_deg": -7.247048,
+    "pmra_masyr": -8123.7,
+    "pmdec_masyr": 673.2,
+    "parallax_mas": 439.0,
+    "ref_epoch": 2000.0,
+    "source": "SIMBAD via Sesame (position: 2021ApJS..253....7K)",
+    "note": "The coldest known brown dwarf, near the temperature of the North Pole."
+  },
+  "size_deg": 0.05,
+  "n_found": 258,
+  "n_used": 258,
+  "n_clean": 201,
+  "n_failures": 0,
+  "fit": {
+    "temperature_k": 5715.3,
+    "t_low_k": 5568.5,
+    "t_high_k": 5886.4,
+    "chi2_red": 2.329,
+    "n_points": 201,
+    "light": "yellow",
+    "reasons": [
+      "peak_below_0p75um"
+    ]
+  },
+  "epochs": [
+    {
+      "index": 0,
+      "mjd_start": 60800.700028,
+      "mjd_end": 60801.518654,
+      "mjd_mid": 60801.44564,
+      "n_frames": 30,
+      "counts": {
+        "1": 4,
+        "2": 8,
+        "3": 3,
+        "4": 4,
+        "5": 8,
+        "6": 3,
+        "0": 30
+      }
+    },
+    {
+      "index": 1,
+      "mjd_start": 60979.722677,
+      "mjd_end": 60993.912885,
+      "mjd_mid": 60986.787279,
+      "n_frames": 110,
+      "counts": {
+        "1": 18,
+        "2": 19,
+        "3": 18,
+        "4": 18,
+        "5": 19,
+        "6": 18,
+        "0": 110
+      }
+    },
+    {
+      "index": 2,
+      "mjd_start": 61020.803689,
+      "mjd_end": 61022.368105,
+      "mjd_mid": 61021.823521,
+      "n_frames": 18,
+      "counts": {
+        "2": 6,
+        "3": 3,
+        "5": 6,
+        "6": 3,
+        "0": 18
+      }
+    },
+    {
+      "index": 3,
+      "mjd_start": 61151.197933,
+      "mjd_end": 61174.287218,
+      "mjd_mid": 61162.402278,
+      "n_frames": 100,
+      "counts": {
+        "1": 14,
+        "2": 15,
+        "3": 21,
+        "4": 14,
+        "5": 15,
+        "6": 21,
+        "0": 100
+      }
+    }
+  ],
+  "ref_wcs": {
+    "crval": [
+      133.76006037892398,
+      -7.242210314051795
+    ],
+    "crpix": [
+      16.0,
+      16.0
+    ],
+    "cdelt": [
+      -0.0017083333333333334,
+      0.0017083333333333334
+    ],
+    "shape": [
+      31,
+      31
+    ]
+  },
+  "gifs": {
+    "0": "movie_d0.gif",
+    "1": "movie_d1.gif",
+    "2": "movie_d2.gif",
+    "3": "movie_d3.gif",
+    "4": "movie_d4.gif",
+    "5": "movie_d5.gif",
+    "6": "movie_d6.gif"
+  },
+  "versions": [
+    "7.0.5"
+  ],
+  "collections": [
+    "spherex_dr1",
+    "spherex_qr3"
+  ],
+  "timings": {
+    "search_s": 2.6,
+    "download_s": 250.8,
+    "total_s": 254.9
+  },
+  "generated_utc": "2026-11-14 20:29 UTC"
+}

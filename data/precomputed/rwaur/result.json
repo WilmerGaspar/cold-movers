@@ -1,0 +1,120 @@
+{
+  "target": {
+    "key": "rwaur",
+    "name": "RW Aurigae",
+    "ra_deg": 76.95652603458,
+    "dec_deg": 30.40143817389,
+    "pmra_masyr": 7.23,
+    "pmdec_masyr": -20.33,
+    "parallax_mas": 15.42,
+    "ref_epoch": 2000.0,
+    "source": "SIMBAD via Sesame (position: 2007A&A...474..653V)",
+    "note": "Young star still surrounded by its dusty planet-forming disk."
+  },
+  "size_deg": 0.05,
+  "n_found": 335,
+  "n_used": 300,
+  "n_clean": 16,
+  "n_failures": 0,
+  "fit": {
+    "temperature_k": 3461.1,
+    "t_low_k": 3060.0,
+    "t_high_k": 4025.1,
+    "chi2_red": 14.407,
+    "n_points": 16,
+    "light": "yellow",
+    "reasons": [
+      "not_a_single_blackbody"
+    ]
+  },
+  "epochs": [
+    {
+      "index": 0,
+      "mjd_start": 60919.419647,
+      "mjd_end": 60938.232058,
+      "mjd_mid": 60927.8407595,
+      "n_frames": 100,
+      "counts": {
+        "1": 18,
+        "2": 16,
+        "3": 17,
+        "4": 16,
+        "5": 16,
+        "6": 17,
+        "0": 100
+      }
+    },
+    {
+      "index": 1,
+      "mjd_start": 61091.719616,
+      "mjd_end": 61111.002087,
+      "mjd_mid": 61103.331099,
+      "n_frames": 102,
+      "counts": {
+        "1": 16,
+        "2": 17,
+        "3": 18,
+        "4": 18,
+        "5": 17,
+        "6": 16,
+        "0": 102
+      }
+    },
+    {
+      "index": 2,
+      "mjd_start": 61285.097169,
+      "mjd_end": 61299.895897,
+      "mjd_mid": 61295.962793,
+      "n_frames": 98,
+      "counts": {
+        "1": 16,
+        "2": 16,
+        "3": 14,
+        "4": 17,
+        "5": 18,
+        "6": 17,
+        "0": 98
+      }
+    }
+  ],
+  "ref_wcs": {
+    "crval": [
+      76.95658697293622,
+      30.401290382406938
+    ],
+    "crpix": [
+      16.0,
+      16.0
+    ],
+    "cdelt": [
+      -0.0017083333333333334,
+      0.0017083333333333334
+    ],
+    "shape": [
+      31,
+      31
+    ]
+  },
+  "gifs": {
+    "0": "movie_d0.gif",
+    "1": "movie_d1.gif",
+    "2": "movie_d2.gif",
+    "3": "movie_d3.gif",
+    "4": "movie_d4.gif",
+    "5": "movie_d5.gif",
+    "6": "movie_d6.gif"
+  },
+  "versions": [
+    "7.0.5"
+  ],
+  "collections": [
+    "spherex_dr1",
+    "spherex_qr3"
+  ],
+  "timings": {
+    "search_s": 1.9,
+    "download_s": 307.1,
+    "total_s": 309.7
+  },
+  "generated_utc": "2026-11-14 20:34 UTC"
+}

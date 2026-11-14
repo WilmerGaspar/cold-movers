@@ -1,21 +1,75 @@
-[20:11:58] probe: 358 images; first url: https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/6/level2_2025W33_2C_0321_1D6_spx_l2b-v27-2026-228.fits
-[20:12:02] probe: HDU PRIMARY shape=None
-[20:12:02] probe: HDU IMAGE shape=(29, 29)
-[20:12:02] probe: HDU FLAGS shape=(29, 29)
-[20:12:02] probe: HDU VARIANCE shape=(29, 29)
-[20:12:02] probe: HDU ZODI shape=(29, 29)
-[20:12:02] probe: HDU EPSF shape=(441,)
-[20:12:02] probe: HDU WCS-WAVE shape=(1,)
-[20:12:02] probe: IMAGE header keys: XTENSION, BITPIX, NAXIS, NAXIS1, NAXIS2, PCOUNT, GCOUNT, EXTNAME, EXTTYPE, BUNIT, DETECTOR, OBSID, EXPIDN, DATE, TSAMP, KOVR_A, KOVR_R, KOVR_P, OVRDLY, SURLIM, SURDLY, TRANDLY, TCUT, KEN_A, KEN_R, KEN_P, KSN_A, KSN_R, KSN_P, NSKIP, NVISITROW, NVISITCOL, MPHAN, NCHANNEL, WCHANNEL, JREF, KREF, JACTIVE, KACTIVE, SPS_TARGET, SPS_FLAGS, OBS_IN_SBAND, NON_SURVEY, SGT_LAT_MIDPT, SGT_LON_MIDPT, SGT_MIN_GCD2SAA, SPS_ELON, SPS_ELAT, SPS_EPA, DETCOORD, L1DQAFLG, RADESYS, X_SC_START, Y_SC_START, Z_SC_START, VX_SC_START, VY_SC_START, VZ_SC_START, XYZ_SC_SYSTEM, VXYZ_SC_SYSTEM, X_SC, Y_SC, Z_SC, VX_SC, VY_SC, VZ_SC, X_SC_END, Y_SC_END, Z_SC_END, VX_SC_END, VY_SC_END, VZ_SC_END, SNWSTRK, NBLMSRCS, SNW7-5CT, SNW3-1CT, SNW2-5CT, SNW6-5CT, NSNOWSRC, NBLM5SCS, L2 N_NONLINEAR, PSTHRESH, L2 N_PERSIST, L2 N_HOT, L2 N_COLD, L2 N_TRAN_NB, L2 N_PERS_NB, OMEGA_MEDIAN, OMEGA_STDDEV, FINAST, DAXIS, CONTRAST, MATCH_NSTARS, QS_NMATCH_VAR, ASTRONETSOLVED, PXSRCMSK, L2 N_SOURCE, L2 N_XTALK, L2 N_GHOST, L2 N_GHOST_FPA, L2 N_GHOST_EXT, L2 N_BLOOM_NS, L2 N_SNOW_NS, L2 N_OUTLIER, L2 SATSTRKS_PXS, L2 SATSTRKS, PSF_FWHM, AURORA_CORR, SHUTTLE_GLOW_CORR, HE_AIRGLOW_CONT, SHUTTLE_GLOW_CONT, AURORA_CONT, L2DQAFLG, L2 N_TRANSIENT, L2 N_OVERFLOW, L2 N_SUR_ERROR, L2 N_NONFUNC, L2 N_DICHROIC, L2 N_MISSING, L2 N_FULLSAMPLE
-[20:12:02] probe: BUNIT = MJy / sr
-[20:12:02] probe: DATE = 2026-08-16T13:49:47.923
-[20:12:02] probe: MJD-AVG = 60902.865380738
-[20:12:02] probe: MJD-BEG = 60902.864714549
-[20:12:02] probe: MJD-END = 60902.866046927
-[20:12:02] probe: DETECTOR = 6
-[20:12:02] probe: CTYPE1 = RA---TAN-SIP
-[20:12:02] probe: CTYPE1W = WAVE-TAB
-[20:12:02] probe: primary VERSION = 7.0.5
-[20:12:02] probe: target pixel (14.5, 14.1) wavelength (4.928847110761348, 0.0369633730257621) pixel_sr 8.912e-10
-[20:12:02] === barnard ===
-[20:12:06]    SIMBAD: {"key": "barnard", "name": "Barnard's Star", "ra_deg": 269.4520769586187, "dec_deg": 4.69336496657667, "pmra_masyr": -801.551, "pmdec_masyr": 10362.394, "parallax_mas": 546.9759, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)", "note": "Red dwarf with the largest proper motion of any star."}
+[20:12:56] probe: 358 images; first url: https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/6/level2_2025W33_2C_0321_1D6_spx_l2b-v27-2026-228.fits
+[20:12:59] probe: HDU PRIMARY shape=None
+[20:12:59] probe: HDU IMAGE shape=(29, 29)
+[20:12:59] probe: HDU FLAGS shape=(29, 29)
+[20:12:59] probe: HDU VARIANCE shape=(29, 29)
+[20:12:59] probe: HDU ZODI shape=(29, 29)
+[20:12:59] probe: HDU EPSF shape=(441,)
+[20:13:00] probe: HDU WCS-WAVE shape=(1,)
+[20:13:00] probe: IMAGE header keys: XTENSION, BITPIX, NAXIS, NAXIS1, NAXIS2, PCOUNT, GCOUNT, EXTNAME, EXTTYPE, BUNIT, DETECTOR, OBSID, EXPIDN, DATE, TSAMP, KOVR_A, KOVR_R, KOVR_P, OVRDLY, SURLIM, SURDLY, TRANDLY, TCUT, KEN_A, KEN_R, KEN_P, KSN_A, KSN_R, KSN_P, NSKIP, NVISITROW, NVISITCOL, MPHAN, NCHANNEL, WCHANNEL, JREF, KREF, JACTIVE, KACTIVE, SPS_TARGET, SPS_FLAGS, OBS_IN_SBAND, NON_SURVEY, SGT_LAT_MIDPT, SGT_LON_MIDPT, SGT_MIN_GCD2SAA, SPS_ELON, SPS_ELAT, SPS_EPA, DETCOORD, L1DQAFLG, RADESYS, X_SC_START, Y_SC_START, Z_SC_START, VX_SC_START, VY_SC_START, VZ_SC_START, XYZ_SC_SYSTEM, VXYZ_SC_SYSTEM, X_SC, Y_SC, Z_SC, VX_SC, VY_SC, VZ_SC, X_SC_END, Y_SC_END, Z_SC_END, VX_SC_END, VY_SC_END, VZ_SC_END, SNWSTRK, NBLMSRCS, SNW7-5CT, SNW3-1CT, SNW2-5CT, SNW6-5CT, NSNOWSRC, NBLM5SCS, L2 N_NONLINEAR, PSTHRESH, L2 N_PERSIST, L2 N_HOT, L2 N_COLD, L2 N_TRAN_NB, L2 N_PERS_NB, OMEGA_MEDIAN, OMEGA_STDDEV, FINAST, DAXIS, CONTRAST, MATCH_NSTARS, QS_NMATCH_VAR, ASTRONETSOLVED, PXSRCMSK, L2 N_SOURCE, L2 N_XTALK, L2 N_GHOST, L2 N_GHOST_FPA, L2 N_GHOST_EXT, L2 N_BLOOM_NS, L2 N_SNOW_NS, L2 N_OUTLIER, L2 SATSTRKS_PXS, L2 SATSTRKS, PSF_FWHM, AURORA_CORR, SHUTTLE_GLOW_CORR, HE_AIRGLOW_CONT, SHUTTLE_GLOW_CONT, AURORA_CONT, L2DQAFLG, L2 N_TRANSIENT, L2 N_OVERFLOW, L2 N_SUR_ERROR, L2 N_NONFUNC, L2 N_DICHROIC, L2 N_MISSING, L2 N_FULLSAMPLE
+[20:13:00] probe: BUNIT = MJy / sr
+[20:13:00] probe: DATE = 2026-08-16T13:49:47.923
+[20:13:00] probe: MJD-AVG = 60902.865380738
+[20:13:00] probe: MJD-BEG = 60902.864714549
+[20:13:00] probe: MJD-END = 60902.866046927
+[20:13:00] probe: DETECTOR = 6
+[20:13:00] probe: CTYPE1 = RA---TAN-SIP
+[20:13:00] probe: CTYPE1W = WAVE-TAB
+[20:13:00] probe: primary VERSION = 7.0.5
+[20:13:00] probe: target pixel (14.5, 14.1) wavelength (4.928847110761348, 0.0369633730257621) pixel_sr 8.912e-10
+[20:13:00] === barnard ===
+[20:13:03]    SIMBAD: {"key": "barnard", "name": "Barnard's Star", "ra_deg": 269.4520769586187, "dec_deg": 4.69336496657667, "pmra_masyr": -801.551, "pmdec_masyr": 10362.394, "parallax_mas": 546.9759, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)", "note": "Red dwarf with the largest proper motion of any star."}
+[20:19:25]    D1: 46 images, 0 clean, median S/N nan
+[20:19:25]    D2: 50 images, 0 clean, median S/N nan
+[20:19:25]    D3: 47 images, 0 clean, median S/N nan
+[20:19:25]    D4: 53 images, 0 clean, median S/N nan
+[20:19:25]    D5: 55 images, 0 clean, median S/N nan
+[20:19:25]    D6: 49 images, 0 clean, median S/N nan
+[20:19:25]    epochs: [(60903, 60923, 91), (60949, 60949, 8), (61110, 61140, 95), (61164, 61165, 6), (61269, 61285, 98), (61306, 61306, 2)]
+[20:19:25]    fit: {"temperature_k": NaN, "t_low_k": NaN, "t_high_k": NaN, "chi2_red": NaN, "n_points": 0, "light": "red", "reasons": ["too_bright"]}
+[20:19:25]    timings: {'search_s': 2.4, 'download_s': 379.5, 'total_s': 382.2}; failures: 0; versions: ['7.0.5']
+[20:19:27] === epsindib ===
+[20:19:30]    SIMBAD: {"key": "epsindib", "name": "Epsilon Indi B", "ra_deg": 331.04414658852124, "dec_deg": -56.78284419511611, "pmra_masyr": 3981.977, "pmdec_masyr": -2466.832, "parallax_mas": 270.658, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)", "note": "Pair of T-type brown dwarfs orbiting the star Epsilon Indi."}
+[20:25:08]    D1: 28 images, 20 clean, median S/N 30.4
+[20:25:08]    D2: 63 images, 44 clean, median S/N 111.8
+[20:25:08]    D3: 62 images, 51 clean, median S/N 114.7
+[20:25:08]    D4: 34 images, 23 clean, median S/N 100.5
+[20:25:08]    D5: 50 images, 37 clean, median S/N 122.4
+[20:25:08]    D6: 63 images, 48 clean, median S/N 55.3
+[20:25:08]    epochs: [(60790, 60836, 77), (60947, 60992, 96), (61149, 61164, 48), (61305, 61315, 79)]
+[20:25:08]    fit: {"temperature_k": 1867.7, "t_low_k": 1794.6, "t_high_k": 1937.0, "chi2_red": 47.377, "n_points": 223, "light": "yellow", "reasons": ["not_a_single_blackbody"]}
+[20:25:08]    timings: {'search_s': 3.1, 'download_s': 334.1, 'total_s': 338.3}; failures: 0; versions: ['7.0.5']
+[20:25:09] === wise0855 ===
+[20:25:12]    SIMBAD: {"key": "wise0855", "name": "WISE 0855-0714", "ra_deg": 133.81890825, "dec_deg": -7.247048, "pmra_masyr": -8123.7, "pmdec_masyr": 673.2, "parallax_mas": 439.0, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2021ApJS..253....7K)", "note": "The coldest known brown dwarf, near the temperature of the North Pole."}
+[20:29:27]    D1: 36 images, 30 clean, median S/N 12.3
+[20:29:27]    D2: 48 images, 36 clean, median S/N 11.7
+[20:29:27]    D3: 45 images, 40 clean, median S/N 9.2
+[20:29:27]    D4: 36 images, 29 clean, median S/N 5.1
+[20:29:27]    D5: 48 images, 31 clean, median S/N 3.2
+[20:29:27]    D6: 45 images, 35 clean, median S/N 2.2
+[20:29:27]    epochs: [(60801, 60802, 30), (60980, 60994, 110), (61021, 61022, 18), (61151, 61174, 100)]
+[20:29:27]    fit: {"temperature_k": 5715.3, "t_low_k": 5568.5, "t_high_k": 5886.4, "chi2_red": 2.329, "n_points": 201, "light": "yellow", "reasons": ["peak_below_0p75um"]}
+[20:29:27]    timings: {'search_s': 2.6, 'download_s': 250.8, 'total_s': 254.9}; failures: 0; versions: ['7.0.5']
+[20:29:28] === rwaur ===
+[20:29:30]    SIMBAD: {"key": "rwaur", "name": "RW Aurigae", "ra_deg": 76.95652603458, "dec_deg": 30.40143817389, "pmra_masyr": 7.23, "pmdec_masyr": -20.33, "parallax_mas": 15.42, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2007A&A...474..653V)", "note": "Young star still surrounded by its dusty planet-forming disk."}
+[20:34:40]    D1: 50 images, 16 clean, median S/N 318.5
+[20:34:40]    D2: 49 images, 0 clean, median S/N nan
+[20:34:40]    D3: 49 images, 0 clean, median S/N nan
+[20:34:40]    D4: 51 images, 0 clean, median S/N nan
+[20:34:40]    D5: 51 images, 0 clean, median S/N nan
+[20:34:40]    D6: 50 images, 0 clean, median S/N nan
+[20:34:40]    epochs: [(60919, 60938, 100), (61092, 61111, 102), (61285, 61300, 98)]
+[20:34:40]    fit: {"temperature_k": 3461.1, "t_low_k": 3060.0, "t_high_k": 4025.1, "chi2_red": 14.407, "n_points": 16, "light": "yellow", "reasons": ["not_a_single_blackbody"]}
+[20:34:40]    timings: {'search_s': 1.9, 'download_s': 307.1, 'total_s': 309.7}; failures: 0; versions: ['7.0.5']
+[20:34:41] === rdra ===
+[20:34:44]    SIMBAD: {"key": "rdra", "name": "R Draconis", "ra_deg": 248.16761083295, "dec_deg": 66.75497941722, "pmra_masyr": -20.643, "pmdec_masyr": 6.149, "parallax_mas": 1.2509, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)", "note": "Pulsating red giant (Mira variable) that brightens and fades over months."}
+[20:39:30]    D1: 53 images, 0 clean, median S/N nan
+[20:39:30]    D2: 43 images, 0 clean, median S/N nan
+[20:39:30]    D3: 47 images, 0 clean, median S/N nan
+[20:39:30]    D4: 46 images, 0 clean, median S/N nan
+[20:39:30]    D5: 55 images, 0 clean, median S/N nan
+[20:39:30]    D6: 56 images, 0 clean, median S/N nan
+[20:39:30]    epochs: [(60812, 60879, 85), (60966, 61053, 118), (61152, 61238, 97)]
+[20:39:30]    fit: {"temperature_k": NaN, "t_low_k": NaN, "t_high_k": NaN, "chi2_red": NaN, "n_points": 0, "light": "red", "reasons": ["too_bright"]}
+[20:39:30]    timings: {'search_s': 2.8, 'download_s': 282.7, 'total_s': 285.8}; failures: 0; versions: ['7.0.5']
+[20:39:30] finished
