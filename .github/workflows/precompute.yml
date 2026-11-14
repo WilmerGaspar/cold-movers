@@ -1,6 +1,7 @@
 name: SPHEREx precompute
 
 on:
+  # Frozen for judging (Nov 14, 2026): results only change when the team runs this by hand.
   workflow_dispatch:
     inputs:
       objects:
@@ -9,14 +10,6 @@ on:
       max_frames:
         description: "Maximum images per object"
         default: "300"
-  push:
-    branches: [main]
-    paths:
-      - "coldmovers/**"
-      - "scripts/precompute.py"
-      - "scripts/smoke_app.py"
-      - "app.py"
-      - ".github/workflows/precompute.yml"
 
 permissions:
   contents: write
