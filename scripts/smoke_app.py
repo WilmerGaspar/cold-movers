@@ -32,8 +32,12 @@ for key in SHOWCASE:
                 print("   ", "\n    ".join(str(s) for s in e.stack_trace[-12:]))
         else:
             heads = [m.value for m in at.markdown if str(m.value).startswith("###")]
+            if len(heads) < 6:
+                failed += 1
+                print(f"{key}: MISSING SECTIONS, only {len(heads)} found")
             print(f"{key}: OK  sections={heads}  errors={[e.value for e in at.error]}  warnings={[w.value for w in at.warning]}")
     except Exception:
         failed += 1
         print(f"{key}: CRASH\n{traceback.format_exc()}")
 print("SMOKE", "FAILED" if failed else "PASSED")
+sys.exit(1 if failed else 0)

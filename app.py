@@ -27,6 +27,24 @@ DET_COLORS = {1: "#5b8def", 2: "#41b6c4", 3: "#7fcd8b", 4: "#f2c94c", 5: "#f2994
 LIGHT_YEARS_PER_PC = 3.26156
 MOON_DIAMETER_ARCSEC = 1865.0
 LIVE_TIME_BUDGET_S = 240  # a live search keeps what arrived after 4 minutes
+# What each challenge object demonstrates (short label, longer explanation).
+DEMO = {
+    "barnard": ("fast motion",
+                "the fastest-moving star in the sky crossing SPHEREx's field over a year. It is too bright for "
+                "SPHEREx's detectors, so it shows motion, not a reliable temperature."),
+    "epsindib": ("motion + temperature",
+                 "a pair of nearby brown dwarfs: motion and a full temperature fit, flagged yellow because "
+                 "methane and water bands make it unlike a single blackbody."),
+    "wise0855": ("faint cold mover",
+                 "the coldest known brown dwarf, visible only beyond 3.8 µm, passing a background star that the "
+                 "checks detect and remove."),
+    "rwaur": ("young star, disk",
+              "a young star with a dusty disk; it saturates SPHEREx beyond 1.1 µm, so it tests the brightness "
+              "check between visits (measured from the star's wings) and the limits of the temperature fit."),
+    "rdra": ("pulsating giant",
+             "a pulsating red giant (Mira variable); it saturates SPHEREx, so it tests the brightness check "
+             "between visits from the star's wings."),
+}
 
 st.markdown(
     """
@@ -65,13 +83,67 @@ initial = read_query_params()
 
 st.title("Cold Movers")
 st.markdown(
-    "**Watch the SPHEREx sky move, and measure how cold things are.** "
-    "Pick an object or type sky coordinates. We fetch every SPHEREx image of that spot from NASA's "
-    "archive, play them as a movie so anything that moves stands out, and fit its infrared spectrum "
-    "to estimate its temperature."
+    "**Cold Movers lets anyone explore SPHEREx observations, follow changes between visits, and see explicitly "
+    "when the data do not support a reliable conclusion.** Pick an object or type sky coordinates: we fetch every "
+    "SPHEREx image of that spot from NASA's archive, play the visits as a movie so anything that moves stands out, "
+    "and fit its infrared light to estimate how cold it is."
 )
 st.caption("Team Cold Movers (Honduras) · NASA Space Apps 2026 · built with AI-assisted code (Claude, Anthropic); "
            "see the AI note at the bottom. Not an official NASA product.")
+
+
+@st.cache_data(show_spinner=False)
+def validation_table():
+    from coldmovers import validation
+
+    return validation.validate(PRECOMPUTED)
+
+
+def validation_summary(vt) -> str:
+    """One sentence computed from the validation table (never typed by hand)."""
+    movers = [v for v in vt if v["pm_arcsec_yr"] >= 0.5]
+    good = [v for v in movers if v["moved_measured"] is not None
+            and abs(v["moved_measured"] - v["moved_predicted"]) < 2.0]
+    worst = max((abs(v["moved_measured"] - v["moved_predicted"]) for v in good), default=0.0)
+    temp_ok = [v for v in vt if v["light"] in ("green", "yellow")]
+    bright = [v for v in vt if "too_bright" in v["reasons"]]
+    images = sum(v["images"] for v in vt)
+    return (f"<b>{images:,} SPHEREx images, {len(vt)} objects.</b> Motion recovered for <b>{len(good)} of "
+            f"{len(movers)}</b> fast-moving objects, within {worst:.1f}″ of the catalogue prediction. "
+            f"A temperature could be measured for <b>{len(temp_ok)} of {len(vt)}</b>; <b>{len(bright)}</b> are too "
+            "bright for SPHEREx, and the app says so instead of inventing a number.")
+
+
+g1, g2 = st.columns([1, 1])
+with g1:
+    st.markdown(
+        "<div class='cm-card'><b>How to read this page in 60 seconds</b><ol style='margin:6px 0 0 0'>"
+        "<li>Pick an object below; each one demonstrates something different.</li>"
+        "<li><a href='#at-a-glance'>At a glance</a>: does it move, how cold is it, is it real; each answer can be "
+        "audited in one click.</li>"
+        "<li><a href='#the-sky'>The movie</a>: the circle and arrow show where it should be on each date; watch "
+        "whether a dot follows them while the background stays still.</li>"
+        "<li><a href='#is-it-real'>Is it real?</a> and the traffic light: where the data cannot support a "
+        "conclusion, the app says why.</li></ol></div>",
+        unsafe_allow_html=True,
+    )
+with g2:
+    try:
+        vt_top = validation_table()
+    except Exception:
+        vt_top = []
+    if vt_top:
+        st.markdown(f"<div class='cm-card'><b>Tested on the five challenge objects</b>"
+                    f"<div style='margin-top:6px'>{validation_summary(vt_top)}</div></div>",
+                    unsafe_allow_html=True)
+    st.markdown(
+        "<div class='cm-card' style='margin-top:10px'><b>Intended use</b> <span class='cm-muted'>(not yet tested "
+        "with users)</span><div style='margin-top:4px'>Citizen scientists checking whether a SPHEREx source moves; "
+        "teachers showing motion, light and uncertainty with real NASA data; astronomers taking a quick, traceable "
+        "first look at any position.</div></div>",
+        unsafe_allow_html=True,
+    )
+st.write("")
 
 tab_obj, tab_coords, tab_name = st.tabs(["Challenge objects", "Coordinates", "Name"])
 request = None
@@ -81,9 +153,9 @@ with tab_obj:
     default_idx = keys.index(initial["key"]) if initial["mode"] == "object" else 0
     choice = st.radio(
         "Object", keys, index=default_idx, horizontal=True,
-        format_func=lambda k: SHOWCASE[k].name, label_visibility="collapsed",
+        format_func=lambda k: f"{SHOWCASE[k].name} · {DEMO[k][0]}", label_visibility="collapsed",
     )
-    st.caption(SHOWCASE[choice].note)
+    st.caption(f"{SHOWCASE[choice].note} **What it demonstrates:** {DEMO[choice][1]}")
     prev = st.session_state.get("request")
     if (
         st.button("Show", key="show_obj", type="primary")
@@ -272,6 +344,8 @@ st.caption(
 
 # ------------------------------------------------------------------ verdict at a glance
 
+st.markdown("<div id='at-a-glance'></div>", unsafe_allow_html=True)
+
 fit = pipeline.fit_rows(rows)
 real = checks.run_checks(rows, epochs, view["stacks"], marker) if view.get("stacks") else None
 lc = variability.light_curve(rows, epochs)
@@ -315,8 +389,61 @@ if real:
     s3.markdown(summary_card("Is it real?", f"{n_pass} of {len(real['checks'])} checks pass", icons, color),
                 unsafe_allow_html=True)
 
+with st.expander("How were these three answers calculated? (audit trail)"):
+    from astropy.time import Time
+
+    a_mot, a_temp, a_real = st.tabs(["Motion", "Temperature", "Is it real?"])
+    with a_mot:
+        if real and real.get("positions"):
+            import pandas as pd
+
+            st.dataframe(pd.DataFrame([{
+                "Visit (date)": Time(p["mjd"], format="mjd").iso[:10],
+                "Predicted x, y (px)": f"{p['pred_x']:.2f}, {p['pred_y']:.2f}",
+                "Measured x, y (px)": (f"{p['x']:.2f}, {p['y']:.2f}" if np.isfinite(p["x"]) else "—"),
+                "Offset (arcsec)": (round(float(np.hypot(p["x"] - p["pred_x"], p["y"] - p["pred_y"]))
+                                    * checks.PIXEL_ARCSEC, 1) if np.isfinite(p["x"]) else None),
+                "Peak S/N": round(float(p["snr"]), 1) if np.isfinite(p["snr"]) else None,
+                "Used": "yes" if p["detected"] else "no (S/N < 5 or too far)",
+            } for p in real["positions"]]), use_container_width=True, hide_index=True)
+            st.caption(f"Positions are flux-weighted centroids in the visit stacks of detector {real['detector']} "
+                       "(the one where the target is brightest and not blended). Predicted positions come from "
+                       f"{target.source}, propagated with the proper motion to each visit. 1 px = 6.15 arcsec.")
+        else:
+            st.caption("No aligned images, so positions could not be measured.")
+    with a_temp:
+        inside = [r for r in rows if r["inside"]]
+        n_sat = sum(bool(r.get("saturated")) for r in inside)
+        n_flag = sum(r["hard_flag"] and not r.get("saturated") for r in inside)
+        n_blend = sum(bool(r.get("blend")) and not r["hard_flag"] for r in inside)
+        n_out = len(rows) - len(inside)
+        lam_used = [r["wavelength_um"] for r in clean]
+        st.markdown(
+            f"- **Used in the fit:** {fit.n_points} measurements"
+            + (f", from {min(lam_used):.2f} to {max(lam_used):.2f} µm" if lam_used else "") + "\n"
+            f"- **Left out:** {n_sat} saturated, {n_flag} with other SPHEREx quality flags, {n_blend} blended with a "
+            f"neighbour, {n_out} with the target outside the cutout\n"
+            f"- **Model:** one blackbody integrated exactly over each band; free temperature and scale; errors = "
+            f"measurement error plus an 8 % systematic floor\n"
+            + (f"- **Result:** {fit.temperature:,.0f} K, interval {fit.t_low:,.0f}–{fit.t_high:,.0f} K "
+               f"(where χ² rises by max(1, χ²/dof) = {max(1.0, fit.chi2_red):.1f}); reduced χ² {fit.chi2_red:.2f}\n"
+               if np.isfinite(fit.temperature) else "- **Result:** no temperature\n")
+            + f"- **Traffic light:** {LIGHT_WORDS[fit.light]}: "
+            + "; ".join(madhava.REASON_TEXT.get(r, r) for r in fit.reasons)
+        )
+        pub = PUBLISHED.get(target.key)
+        if pub:
+            st.caption(f"Published value for comparison: {pub['text']} ({pub['ref']}).")
+    with a_real:
+        if real:
+            for c in real["checks"]:
+                st.markdown(f"{STATUS_ICON[c['status']]} **{c['name']}**: {c['text']}")
+        else:
+            st.caption("No aligned images, so the checks cannot run.")
+
 # ------------------------------------------------------------------ sky movie
 
+st.markdown("<div id='the-sky'></div>", unsafe_allow_html=True)
 st.markdown("### 1 · The sky, visit by visit")
 left, right = st.columns([3, 2])
 with right:
@@ -583,6 +710,7 @@ with v_plot:
 
 # ------------------------------------------------------------------ is it real?
 
+st.markdown("<div id='is-it-real'></div>", unsafe_allow_html=True)
 st.markdown("### 4 · Is it real, or a ghost in the detector?")
 if real:
     cols = st.columns(len(real["checks"]))
@@ -645,19 +773,10 @@ if rows:
                        file_name=f"coldmovers_{target.key}.csv", mime="text/csv")
 
 
-@st.cache_data(show_spinner=False)
-def validation_table():
-    from coldmovers import validation
-
-    return validation.validate(PRECOMPUTED)
-
-
-with st.expander("How well does it work? Validation on the five challenge objects"):
-    try:
-        vt = validation_table()
-    except Exception as exc:
-        vt = []
-        st.caption(f"Validation unavailable: {exc}")
+with st.expander("How well does it work? Validation table for the five challenge objects"):
+    vt = vt_top
+    if not vt:
+        st.caption("Validation unavailable right now.")
     if vt:
         import pandas as pd
 

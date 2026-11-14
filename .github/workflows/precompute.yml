@@ -38,26 +38,56 @@ jobs:
       - name: Install
         run: pip install -r requirements.txt pytest
       - name: Unit tests
+        id: tests
         continue-on-error: true
         run: |
+          set -o pipefail
           mkdir -p data/precomputed
           python -m pytest -q 2>&1 | tee data/precomputed/_tests.txt
       - name: Precompute the five challenge objects
+        id: precompute
+        if: steps.tests.outcome == 'success'
         continue-on-error: true
         run: |
+          set -o pipefail
           python scripts/precompute.py --objects "${{ github.event.inputs.objects || 'all' }}" \
             --max-frames "${{ github.event.inputs.max_frames || '300' }}" 2>&1 | tee data/precomputed/_log.txt
-      - name: Smoke-test the app
+      - name: Check the five results exist and open
+        id: results
+        if: always()
         continue-on-error: true
-        run: python scripts/smoke_app.py 2>&1 | tee data/precomputed/_smoke.txt
-      - name: Commit results
+        run: |
+          set -o pipefail
+          python scripts/check_results.py 2>&1 | tee data/precomputed/_results_check.txt
+      - name: Smoke-test the app
+        id: smoke
+        if: always()
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python scripts/smoke_app.py 2>&1 | tee data/precomputed/_smoke.txt
+      - name: Commit results (only logs if a check failed)
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/precomputed
+          if [ "${{ steps.tests.outcome }}" = "success" ] && [ "${{ steps.results.outcome }}" = "success" ] \
+             && [ "${{ steps.smoke.outcome }}" = "success" ]; then
+            git add data/precomputed
+          else
+            mkdir -p /tmp/cm_logs && cp data/precomputed/_*.txt /tmp/cm_logs/ 2>/dev/null || true
+            git checkout -- data/precomputed 2>/dev/null || true
+            cp /tmp/cm_logs/_*.txt data/precomputed/ 2>/dev/null || true
+            git add data/precomputed/_*.txt
+          fi
           git commit -m "Update precomputed SPHEREx results" || { echo "nothing to commit"; exit 0; }
           for i in 1 2 3; do
             git pull --rebase -X theirs origin main && git push origin HEAD:main && break
             sleep 5
           done
+      - name: Fail the run if a check failed
+        if: always()
+        run: |
+          echo "tests=${{ steps.tests.outcome }} precompute=${{ steps.precompute.outcome }} results=${{ steps.results.outcome }} smoke=${{ steps.smoke.outcome }}"
+          [ "${{ steps.tests.outcome }}" = "success" ] && [ "${{ steps.results.outcome }}" = "success" ] \
+            && [ "${{ steps.smoke.outcome }}" = "success" ]
