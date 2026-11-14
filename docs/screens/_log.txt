@@ -1,7 +1,7 @@
+click test R Draconis: OK
+click test Epsilon Indi B: OK
+click test RW Aurigae: OK
+click test Barnard's Star: OK
 atlas: service did not answer (message shown)
 atlas screenshot saved
-click test R Draconis: OK
-click test Epsilon Indi B: DID NOT LOAD
-click test RW Aurigae: OK
-click test Barnard's Star: DID NOT LOAD
 done
