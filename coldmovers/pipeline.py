@@ -153,6 +153,21 @@ PHOT_COLUMNS = ["mjd", "detector", "wavelength_um", "bandwidth_um", "flux_ujy", 
                 "ra", "dec", "url"]
 
 
+def json_safe(obj):
+    """Replace NaN and infinity by None so the files are valid JSON (null)."""
+    if isinstance(obj, dict):
+        return {str(k): json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [json_safe(v) for v in obj]
+    if isinstance(obj, (float, np.floating)):
+        return float(obj) if np.isfinite(obj) else None
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    return obj
+
+
 def save(result: RunResult, outdir: str) -> dict:
     """Write result.json, photometry.csv, epoch stacks (npz) and GIFs to outdir."""
     import csv
@@ -203,7 +218,7 @@ def save(result: RunResult, outdir: str) -> dict:
         "generated_utc": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()),
     }
     with open(os.path.join(outdir, "result.json"), "w") as fh:
-        json.dump(summary, fh, indent=2, default=float)
+        json.dump(json_safe(summary), fh, indent=2, allow_nan=False)
     return summary
 
 

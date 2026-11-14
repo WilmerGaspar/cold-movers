@@ -70,7 +70,7 @@ def summarize(result):
         med = np.median(s["snr"]) if s["snr"] else float("nan")
         log(f"   D{det}: {s['n']} images, {s['clean']} clean, median S/N {med:.1f}")
     log(f"   epochs: {[(round(e['mjd_start']), round(e['mjd_end']), e['n_frames']) for e in result.epochs]}")
-    log(f"   fit: {json.dumps(result.fit.as_dict())}")
+    log(f"   fit: {json.dumps(pipeline.json_safe(result.fit.as_dict()))}")
     log(f"   timings: {result.timings}; failures: {len(result.failures)}; versions: {result.versions}")
     if result.failures:
         log(f"   first failure: {result.failures[0]}")
@@ -117,7 +117,7 @@ def main():
             status[key] = {"ok": False, "error": tb[-1500:]}
 
     with open(os.path.join(OUT, "_status.json"), "w") as fh:
-        json.dump(status, fh, indent=2, default=float)
+        json.dump(pipeline.json_safe(status), fh, indent=2, allow_nan=False)
     log("finished")
 
 

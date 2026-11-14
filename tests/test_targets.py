@@ -29,3 +29,12 @@ def test_barnard_has_moved_far_since_2000():
 
 def test_distance_from_parallax():
     assert SHOWCASE["barnard"].distance_pc == pytest.approx(1.828, abs=0.01)
+
+
+def test_json_safe_writes_null_for_nan():
+    import json
+
+    from coldmovers.pipeline import json_safe
+
+    text = json.dumps(json_safe({"t": float("nan"), "x": [1.0, float("inf")], "n": np.int64(3)}), allow_nan=False)
+    assert text == '{"t": null, "x": [1.0, null], "n": 3}'

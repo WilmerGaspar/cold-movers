@@ -2,10 +2,10 @@
   "barnard": {
     "ok": true,
     "fit": {
-      "temperature_k": NaN,
-      "t_low_k": NaN,
-      "t_high_k": NaN,
-      "chi2_red": NaN,
+      "temperature_k": null,
+      "t_low_k": null,
+      "t_high_k": null,
+      "chi2_red": null,
       "n_points": 0,
       "light": "red",
       "reasons": [
@@ -69,10 +69,10 @@
   "rdra": {
     "ok": true,
     "fit": {
-      "temperature_k": NaN,
-      "t_low_k": NaN,
-      "t_high_k": NaN,
-      "chi2_red": NaN,
+      "temperature_k": null,
+      "t_low_k": null,
+      "t_high_k": null,
+      "chi2_red": null,
       "n_points": 0,
       "light": "red",
       "reasons": [

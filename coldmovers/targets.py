@@ -126,17 +126,27 @@ def _num(value):
         return None
 
 
+SESAME_MIRRORS = (
+    "https://cds.unistra.fr/cgi-bin/nph-sesame/-ox/S?",
+    "https://vizier.cfa.harvard.edu/viz-bin/nph-sesame/-ox/S?",
+)
+
+
+class ServiceDown(RuntimeError):
+    """The name services (SIMBAD and Sesame) did not answer."""
+
+
 def resolve_simbad(name: str, key: str | None = None) -> Target:
-    """Look up a name in SIMBAD; if its TAP service fails, ask the CDS Sesame resolver."""
+    """Look up a name in SIMBAD; if its TAP service fails, ask the Sesame resolver (two mirrors).
+
+    Raises LookupError when the name is unknown and ServiceDown when no service answers.
+    """
     try:
         return _resolve_simbad_tap(name, key)
     except LookupError:
         raise
-    except Exception as first_error:
-        try:
-            return resolve_sesame(name, key)
-        except Exception as second_error:
-            raise RuntimeError(f"SIMBAD: {first_error}; Sesame: {second_error}") from second_error
+    except Exception:
+        return resolve_sesame(name, key)
 
 
 def resolve_sesame(name: str, key: str | None = None) -> Target:
@@ -146,10 +156,17 @@ def resolve_sesame(name: str, key: str | None = None) -> Target:
 
     import requests
 
-    url = "https://cds.unistra.fr/cgi-bin/nph-sesame/-ox/S?" + urllib.parse.quote(name)
-    resp = requests.get(url, timeout=30)
-    resp.raise_for_status()
-    root = ET.fromstring(resp.content)
+    root, last = None, None
+    for base_url in SESAME_MIRRORS:  # CDS (France) first, then its mirror at Harvard (USA)
+        try:
+            resp = requests.get(base_url + urllib.parse.quote(name), timeout=20)
+            resp.raise_for_status()
+            root = ET.fromstring(resp.content)
+            break
+        except Exception as exc:
+            last = exc
+    if root is None:
+        raise ServiceDown(f"name resolvers unreachable ({last})")
     res = next((r for r in root.iter("Resolver") if r.find("jradeg") is not None), None)
     if res is None:
         raise LookupError(f"SIMBAD does not know '{name}'.")

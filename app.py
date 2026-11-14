@@ -15,7 +15,7 @@ import streamlit as st
 
 from coldmovers import checks, madhava, movie, pipeline, variability
 from coldmovers.references import PUBLISHED
-from coldmovers.targets import SHOWCASE, Target, parse_coordinates, resolve_simbad
+from coldmovers.targets import SHOWCASE, ServiceDown, Target, parse_coordinates, resolve_simbad
 
 st.set_page_config(page_title="Cold Movers", page_icon="🛰️", layout="wide")
 
@@ -200,7 +200,14 @@ else:
     try:
         tgt = make_target(request)
     except Exception as exc:
-        st.error(f"Lookup failed: {exc}")
+        if isinstance(exc, ServiceDown):
+            st.error("The star-name service (SIMBAD, CDS Strasbourg) is not answering right now. "
+                     "Please use the Coordinates tab, or pick one of the challenge objects.")
+        elif isinstance(exc, LookupError):
+            st.error(f"SIMBAD does not know the name '{request.get('name', '')}'. Check the spelling or use "
+                     "the Coordinates tab.")
+        else:
+            st.error("The name lookup failed. Please use the Coordinates tab.")
         st.stop()
     st.query_params.clear()
     st.query_params.update({"ra": f"{tgt.ra_deg:.6f}", "dec": f"{tgt.dec_deg:.6f}", "size": str(request["size"]),
