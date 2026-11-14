@@ -99,3 +99,25 @@ def test_peak_outside_range_is_yellow():
     assert res.light in ("yellow", "red")
     if res.light == "yellow":
         assert "peak_below_0p75um" in res.reasons
+
+
+def test_limits_lambda_zero_and_infinity():
+    # Reviewer's finding: lambda -> 0 must give 0 (no energy below), lambda -> inf gives 1.
+    assert m.blackbody_fraction(0.0, 1000.0) == 0.0
+    assert m.blackbody_fraction(np.inf, 1000.0) == pytest.approx(1.0)
+
+
+def test_uncertainty_interval_ignores_a_separate_minimum():
+    grid = np.linspace(100, 1000, 901)
+    chi = np.minimum((grid - 300) ** 2 / 100.0, (grid - 800) ** 2 / 100.0 + 0.5)
+    lo, hi = m._contiguous_interval(grid, chi, 300.0, level=1.0)
+    assert lo == pytest.approx(290, abs=1) and hi == pytest.approx(310, abs=1)
+
+
+def test_error_floor_does_not_vanish_for_faint_points():
+    lam = np.linspace(1, 2, 21)
+    f = np.full(21, 100.0)
+    f[10] = 0.5  # a point that came out near zero
+    ref = m._floor_reference(lam, f)
+    assert ref[10] == pytest.approx(100.0)
+    assert np.all(ref >= np.abs(f))

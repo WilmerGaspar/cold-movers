@@ -98,12 +98,15 @@ def blackbody_fraction(lam_um, temperature_k) -> np.ndarray:
     with np.errstate(divide="ignore", over="ignore"):
         x = C2_UM_K / (lam * temp)
     out = np.empty(x.shape, dtype=float)
-    big = x >= _SMALL_X
+    finite = np.isfinite(x)
+    big = finite & (x >= _SMALL_X)
+    small = finite & (x < _SMALL_X)
     if np.any(big):
         out[big] = _fraction_large_x(x[big])
-    if np.any(~big):
-        out[~big] = _fraction_small_x(x[~big])
-    out[~np.isfinite(x)] = 1.0  # lam -> infinity
+    if np.any(small):
+        out[small] = _fraction_small_x(x[small])
+    out[np.isposinf(x)] = 0.0  # lam -> 0 (or T -> 0): no energy below
+    out[np.isnan(x)] = np.nan
     return np.clip(out, 0.0, 1.0)
 
 
@@ -179,6 +182,36 @@ def _chi2_for(temp, lam, bw, flux, sigma):
     return float(np.sum(resid * resid)), float(scale)
 
 
+def _floor_reference(lam, f, window: int = 9) -> np.ndarray:
+    """Flux used for the systematic floor: |f|, or the local running median if larger.
+
+    With |f| alone, a point whose flux came out near zero (or negative after the
+    background was removed) would get almost no floor and too much weight.
+    """
+    order = np.argsort(lam)
+    fs = np.abs(f[order])
+    half = window // 2
+    local = np.array([np.median(fs[max(0, i - half): i + half + 1]) for i in range(fs.size)])
+    ref = np.empty_like(fs)
+    ref[order] = np.maximum(fs, local)
+    return ref
+
+
+def _contiguous_interval(grid, chi, t_best, level):
+    """Lowest and highest grid temperature of the connected region around t_best
+    where chi2 <= level (a second, separate minimum does not widen the interval)."""
+    ok = chi <= level
+    i0 = int(np.argmin(np.abs(grid - t_best)))
+    if not ok[i0]:
+        return float(t_best), float(t_best)
+    lo = hi = i0
+    while lo > 0 and ok[lo - 1]:
+        lo -= 1
+    while hi < grid.size - 1 and ok[hi + 1]:
+        hi += 1
+    return float(grid[lo]), float(grid[hi])
+
+
 def fit_temperature(
     lam_um,
     bandwidth_um,
@@ -210,7 +243,7 @@ def fit_temperature(
             reasons=["not_enough_signal"],
         )
 
-    sigma = np.sqrt(e**2 + (error_floor * np.abs(f)) ** 2)
+    sigma = np.sqrt(e**2 + (error_floor * _floor_reference(lam, f)) ** 2)
     grid = np.geomspace(t_min, t_max, n_grid)
     chi = np.array([_chi2_for(t, lam, bw, f, sigma)[0] for t in grid])
     i = int(np.nanargmin(chi))
@@ -233,9 +266,7 @@ def fit_temperature(
     delta = max(1.0, chi2_red)
     fine = np.geomspace(max(t_min, t_best / 4), min(t_max, t_best * 4), 800)
     chi_fine = np.array([_chi2_for(t, lam, bw, f, sigma)[0] for t in fine])
-    inside = fine[chi_fine <= chi_best + delta]
-    t_low = float(inside.min()) if inside.size else t_best
-    t_high = float(inside.max()) if inside.size else t_best
+    t_low, t_high = _contiguous_interval(fine, chi_fine, t_best, chi_best + delta)
 
     result = FitResult(
         temperature=t_best, t_low=t_low, t_high=t_high, scale=scale, chi2=chi_best,

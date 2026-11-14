@@ -48,6 +48,11 @@ def reproject_frame(frame, ref_wcs, shape, with_saturation: bool = False):
 
     Dead, missing and saturated pixels become NaN. With with_saturation=True a second
     map gives, for each output pixel, whether it came from saturated pixels.
+
+    The median of each frame is subtracted (it is not added back): stacks and
+    difference images are in MJy/sr *relative to the local sky level*, which removes
+    the zodiacal light that changes from visit to visit. Photometry does not use
+    these images; it runs on the raw cutouts.
     """
     ny, nx = shape
     yy, xx = np.mgrid[0:ny, 0:nx]
@@ -165,7 +170,9 @@ def render_frames(epochs, det: int, marker_pixels=None, title_fn=None, dpi: int 
         ax.imshow(np.nan_to_num(norm, nan=0.0), origin="lower", cmap="gray", vmin=0, vmax=1, interpolation="nearest")
         if track:
             tx, ty = zip(*track)
-            ax.plot(tx, ty, ls="--", color="#ffb199", lw=1.0, alpha=0.8)
+            ax.plot(tx, ty, ls="--", color="#ffb199", lw=1.2, alpha=0.9)
+            ax.annotate("", xy=track[-1], xytext=track[-3],
+                        arrowprops=dict(arrowstyle="-|>", color="#ffb199", lw=1.2))
         if marker_pixels is not None:
             px, py = marker_pixels(ep["mjd_mid"])
             ax.add_patch(plt.Circle((px, py), 3.0, fill=False, color="#ff5a36", lw=1.5))

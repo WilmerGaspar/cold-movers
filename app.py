@@ -26,6 +26,7 @@ LIGHT_WORDS = {"green": "Trust it", "yellow": "Read with care", "red": "No relia
 DET_COLORS = {1: "#5b8def", 2: "#41b6c4", 3: "#7fcd8b", 4: "#f2c94c", 5: "#f2994a", 6: "#eb5757"}
 LIGHT_YEARS_PER_PC = 3.26156
 MOON_DIAMETER_ARCSEC = 1865.0
+LIVE_TIME_BUDGET_S = 240  # a live search keeps what arrived after 4 minutes
 
 st.markdown(
     """
@@ -102,7 +103,8 @@ with tab_coords:
         pmra = d1.number_input("pmRA* (mas/yr)", value=float(initial.get("pmra", 0.0)))
         pmdec = d2.number_input("pmDec (mas/yr)", value=float(initial.get("pmdec", 0.0)))
         epoch = d3.number_input("Epoch of RA/Dec (year)", value=float(initial.get("epoch", 2000.0)))
-        size_arcmin = d4.slider("Field of view (arcmin)", 2.0, 8.0, float(initial.get("size", 3.0)), 0.5)
+        size_arcmin = d4.slider("Field of view (arcmin)", 2.0, 8.0,
+                                float(np.clip(initial.get("size", 3.0), 2.0, 8.0)), 0.5)
         max_frames = st.slider("Maximum images to download", 40, 400, 150, 10,
                                help="More images give a better spectrum but take longer.")
     if st.button("Search SPHEREx", key="go_coords", type="primary") or (
@@ -157,7 +159,8 @@ def live_run(target_json: str, size_deg: float, max_frames: int):
     def progress(stage, frac):
         bar.progress(min(max(frac, 0.0), 1.0), text=stage)
 
-    result = pipeline.run(target, size_deg=size_deg, max_frames=max_frames, workers=8, progress=progress)
+    result = pipeline.run(target, size_deg=size_deg, max_frames=max_frames, workers=8, progress=progress,
+                          time_budget_s=LIVE_TIME_BUDGET_S)
     bar.empty()
     if len(cache) > 4:
         cache.pop(next(iter(cache)))
@@ -319,8 +322,8 @@ left, right = st.columns([3, 2])
 with right:
     st.markdown(
         "Each frame stacks every SPHEREx image of one detector taken during one visit, all aligned on the "
-        "same patch of sky. The orange circle is where the object should be on that date and the dashed line "
-        "is its predicted path. **If a dot follows the circle while the background stays still, you are "
+        "same patch of sky. The orange circle is where the object should be on that date and the dashed arrow "
+        "is its predicted path, from 2.5 years before the first visit to 2.5 years after the last. **If a dot follows the circle while the background stays still, you are "
         "watching real motion across the sky.**"
     )
     st.markdown(
@@ -363,7 +366,7 @@ with left:
             import matplotlib.pyplot as plt
 
             diff = view["stacks"][usable[-1]["index"]][det] - view["stacks"][usable[0]["index"]][det]
-            v = np.nanpercentile(np.abs(diff), 99) or 1.0
+            v = np.nanpercentile(np.abs(diff), 99) or 1.0  # relative to each visit's sky level
             fig, ax = plt.subplots(figsize=(4.2, 4.4), dpi=110)
             ax.imshow(np.nan_to_num(diff), origin="lower", cmap="RdBu_r", vmin=-v, vmax=v, interpolation="nearest")
             path = pipeline.track_points(marker, epochs)
@@ -511,8 +514,8 @@ with c_card:
         f"<div class='cm-card'><div class='cm-muted'>Blackbody-equivalent temperature</div>{temp_html}"
         f"<div style='margin-top:10px'><span class='cm-light' style='background:{LIGHT_COLORS[light]}'></span>"
         f"<b>{LIGHT_WORDS[light]}</b></div><ul style='margin:6px 0 0 0; padding-left:18px'>{reasons}</ul>"
-        f"<div class='cm-muted' style='margin-top:8px'>{fit.n_points} clean measurements · "
-        f"reduced chi² {fit.chi2_red:.2f}</div></div>",
+        f"<div class='cm-muted' style='margin-top:8px'>{fit.n_points} clean measurements"
+        + (f" · reduced chi² {fit.chi2_red:.2f}" if np.isfinite(fit.chi2_red) else "") + "</div></div>",
         unsafe_allow_html=True,
     )
     pub = PUBLISHED.get(target.key)

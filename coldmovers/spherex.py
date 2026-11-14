@@ -288,13 +288,46 @@ def parse_cutout(data: bytes, row: dict) -> Frame:
     )
 
 
-def download_frames(rows, center_for_row, size_deg: float, workers: int = 6, progress=None):
+MAX_CACHE_BYTES = 500 * 1024 * 1024
+
+
+def prune_cache(max_bytes: int = MAX_CACHE_BYTES):
+    """Keep the local cutout cache under max_bytes by deleting the oldest files."""
+    files = []
+    for root, _, names in os.walk(CACHE_DIR):
+        for n in names:
+            p = os.path.join(root, n)
+            try:
+                st = os.stat(p)
+                files.append((st.st_mtime, st.st_size, p))
+            except OSError:
+                pass
+    total = sum(f[1] for f in files)
+    if total <= max_bytes:
+        return
+    for _, size, p in sorted(files):
+        try:
+            os.remove(p)
+            total -= size
+        except OSError:
+            pass
+        if total <= 0.8 * max_bytes:
+            break
+
+
+def download_frames(rows, center_for_row, size_deg: float, workers: int = 6, progress=None,
+                    time_budget_s: float | None = None):
     """Download and parse cutouts in parallel.
 
     center_for_row(row) -> (ra, dec) gives the cutout centre for each image.
     progress(done, total) is called as downloads finish.
+    time_budget_s: stop waiting after this many seconds and keep what arrived
+    (used in the live app so a slow archive does not exhaust the user's patience).
     Returns (frames, failures).
     """
+    from concurrent.futures import TimeoutError as FuturesTimeout
+
+    prune_cache()
     frames, failures = [], []
     total = len(rows)
 
@@ -303,14 +336,22 @@ def download_frames(rows, center_for_row, size_deg: float, workers: int = 6, pro
         data = fetch_bytes(cutout_url(row["url"], ra, dec, size_deg))
         return parse_cutout(data, row)
 
-    with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
-        futures = {pool.submit(job, r): r for r in rows}
-        for done, fut in enumerate(as_completed(futures), start=1):
+    pool = ThreadPoolExecutor(max_workers=max(1, workers))
+    futures = {pool.submit(job, r): r for r in rows}
+    done = 0
+    try:
+        for fut in as_completed(futures, timeout=time_budget_s):
+            done += 1
             try:
                 frames.append(fut.result())
             except Exception as exc:
                 failures.append({"url": futures[fut]["url"], "error": str(exc)[:200]})
             if progress:
                 progress(done, total)
+    except FuturesTimeout:
+        skipped = [futures[f]["url"] for f in futures if not f.done()]
+        failures += [{"url": u, "error": "skipped: time budget reached"} for u in skipped]
+    finally:
+        pool.shutdown(wait=time_budget_s is None, cancel_futures=True)
     frames.sort(key=lambda f: f.mjd)
     return frames, failures

@@ -82,7 +82,7 @@ def fit_rows(rows) -> madhava.FitResult:
 
 
 def run(target: Target, size_deg: float = DEFAULT_SIZE_DEG, max_frames: int = DEFAULT_MAX_FRAMES,
-        workers: int = 12, progress=None) -> RunResult:
+        workers: int = 12, progress=None, time_budget_s: float | None = None) -> RunResult:
     def say(stage, frac):
         if progress:
             progress(stage, frac)
@@ -103,7 +103,8 @@ def run(target: Target, size_deg: float = DEFAULT_SIZE_DEG, max_frames: int = DE
 
     t1 = time.time()
     # Download a margin around the field so the aligned (rotated) frames fill it completely.
-    frames, failures = spherex.download_frames(rows, centre, size_deg * 1.45, workers=workers, progress=dl_progress)
+    frames, failures = spherex.download_frames(rows, centre, size_deg * 1.45, workers=workers, progress=dl_progress,
+                                               time_budget_s=time_budget_s)
     t_download = time.time() - t1
 
     say("Measuring the target in every image", 0.82)
@@ -139,12 +140,13 @@ def run(target: Target, size_deg: float = DEFAULT_SIZE_DEG, max_frames: int = DE
     )
 
 
-def track_points(marker, epochs, n: int = 25):
-    """Predicted path across the visits (pixels), or None if it moves less than a pixel."""
+def track_points(marker, epochs, n: int = 25, extend_years: float = 2.5):
+    """Predicted path (pixels) from extend_years before the first visit to extend_years after
+    the last one, so the direction of motion is visible; None if it moves less than a pixel."""
     if not epochs:
         return None
-    t0 = min(ep["mjd_start"] for ep in epochs) - 30
-    t1 = max(ep["mjd_end"] for ep in epochs) + 30
+    t0 = min(ep["mjd_start"] for ep in epochs) - extend_years * 365.25
+    t1 = max(ep["mjd_end"] for ep in epochs) + extend_years * 365.25
     pts = [marker(t) for t in np.linspace(t0, t1, n)]
     if np.hypot(pts[-1][0] - pts[0][0], pts[-1][1] - pts[0][1]) < 1.0:
         return None
