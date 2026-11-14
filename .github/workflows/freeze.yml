@@ -1,0 +1,38 @@
+name: record library versions
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "requirements.txt"
+      - ".github/workflows/freeze.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install exactly what the app needs and record the versions
+        run: |
+          pip install -r requirements.txt pytest
+          mkdir -p docs
+          pip freeze > docs/pip_freeze.txt
+          python -m pytest -q 2>&1 | tail -3 | tee docs/pip_freeze_tests.txt
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/pip_freeze.txt docs/pip_freeze_tests.txt
+          git commit -m "Record library versions" || { echo "nothing to commit"; exit 0; }
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push origin HEAD:main && break
+            sleep 5
+          done
