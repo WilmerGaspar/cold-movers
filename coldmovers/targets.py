@@ -101,6 +101,17 @@ SHOWCASE = {
     ),
 }
 
+# Extra objects beyond the challenge brief. Starting values (SIMBAD, epoch J2000) are refined
+# with Gaia DR3 astrometry before any computation.
+EXTRAS = {
+    "trappist1": Target(
+        key="trappist1", name="TRAPPIST-1", ra_deg=346.6223667, dec_deg=-5.0414000,
+        pmra_masyr=930.9, pmdec_masyr=-479.4, parallax_mas=80.2,
+        source="starting values (SIMBAD J2000), refined with Gaia DR3",
+        note="Ultracool red dwarf with seven Earth-sized planets.",
+    ),
+}
+
 SIMBAD_IDS = {
     "barnard": "Barnard's star",
     "epsindib": "eps Ind B",
@@ -267,3 +278,30 @@ def parse_coordinates(text: str):
 
     c = SkyCoord(text, unit=(u.hourangle, u.deg), frame="icrs")
     return float(c.ra.deg), float(c.dec.deg)
+
+
+def refine_with_gaia(target: Target, radius_arcsec: float = 6.0) -> Target:
+    """Replace position, proper motion and parallax by Gaia DR3 values (epoch 2016.0).
+
+    The Gaia source is the brightest one within radius_arcsec of the target's predicted
+    2016.0 position. Raises LookupError if there is none.
+    """
+    from astroquery.gaia import Gaia
+
+    ra, dec = target.position_at(year_to_mjd(2016.0))
+    query = f"""
+    SELECT TOP 3 source_id, ra, dec, pmra, pmdec, parallax, phot_g_mean_mag
+    FROM gaiadr3.gaia_source
+    WHERE 1 = CONTAINS(POINT('ICRS', ra, dec), CIRCLE('ICRS', {float(ra)}, {float(dec)}, {radius_arcsec / 3600.0}))
+      AND pmra IS NOT NULL
+    ORDER BY phot_g_mean_mag ASC
+    """
+    table = Gaia.launch_job(query).get_results()
+    if len(table) == 0:
+        raise LookupError(f"no Gaia DR3 source within {radius_arcsec} arcsec")
+    row = table[0]
+    return Target(
+        key=target.key, name=target.name, ra_deg=float(row["ra"]), dec_deg=float(row["dec"]),
+        pmra_masyr=float(row["pmra"]), pmdec_masyr=float(row["pmdec"]), parallax_mas=float(row["parallax"]),
+        ref_epoch=2016.0, source=f"Gaia DR3 {int(row['source_id'])}", note=target.note,
+    )

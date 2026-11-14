@@ -20,7 +20,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from coldmovers import pipeline, spherex  # noqa: E402
-from coldmovers.targets import SHOWCASE, SIMBAD_IDS, gaia_parallax, resolve_simbad  # noqa: E402
+from coldmovers.targets import EXTRAS, SHOWCASE, SIMBAD_IDS, gaia_parallax, refine_with_gaia, resolve_simbad  # noqa: E402
 
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "precomputed")
 
@@ -81,16 +81,23 @@ def main():
     ap.add_argument("--objects", default="all")
     ap.add_argument("--max-frames", type=int, default=300)
     ap.add_argument("--size", type=float, default=pipeline.DEFAULT_SIZE_DEG)
+    ap.add_argument("--out", default=None, help="output folder (default data/precomputed)")
     args = ap.parse_args()
+    global OUT
+    if args.out:
+        OUT = args.out
 
     keys = list(SHOWCASE) if args.objects in ("all", "") else [k.strip() for k in args.objects.split(",")]
+    if args.out is None and any(k in EXTRAS for k in keys):
+        raise SystemExit("extra objects must go to a separate --out folder until reviewed")
     os.makedirs(OUT, exist_ok=True)
     status = {}
 
-    try:
-        probe_header(SHOWCASE["barnard"])
-    except Exception:
-        log("probe failed:\n" + traceback.format_exc())
+    if args.out is None:
+        try:
+            probe_header(SHOWCASE["barnard"])
+        except Exception:
+            log("probe failed:\n" + traceback.format_exc())
 
     for key in keys + ["__retry__"]:
         if key == "__retry__":
@@ -114,6 +121,14 @@ def main():
 def process(key, args, status):
     """Resolve one challenge object, run the pipeline and save its results."""
     log(f"=== {key} ===")
+    if key in EXTRAS:
+        try:
+            target = refine_with_gaia(EXTRAS[key])
+            log(f"   Gaia DR3: {json.dumps(target.to_dict())}")
+        except Exception as exc:
+            target = EXTRAS[key]
+            log(f"   Gaia DR3 refinement failed ({exc}); using starting values")
+        return run_and_save(key, target, args, status)
     target = SHOWCASE[key]
     try:
         target = resolve_simbad(SIMBAD_IDS[key], key=key)
@@ -135,6 +150,10 @@ def process(key, args, status):
             log("   Gaia DR3: no precise parallax at this position (kept catalogue value)")
     except Exception as exc:
         log(f"   Gaia DR3 query failed ({exc}); kept catalogue parallax")
+    return run_and_save(key, target, args, status)
+
+
+def run_and_save(key, target, args, status):
     try:
         result = pipeline.run(target, size_deg=args.size, max_frames=args.max_frames, workers=6,
                               progress=lambda s, f: None)
