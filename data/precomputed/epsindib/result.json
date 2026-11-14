@@ -6,9 +6,9 @@
     "dec_deg": -56.78284419511611,
     "pmra_masyr": 3981.977,
     "pmdec_masyr": -2466.832,
-    "parallax_mas": 270.658,
+    "parallax_mas": 270.6580324694526,
     "ref_epoch": 2000.0,
-    "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)",
+    "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G); parallax from Gaia DR3 6412596012146801152",
     "note": "Pair of T-type brown dwarfs orbiting the star Epsilon Indi."
   },
   "size_deg": 0.05,
@@ -126,9 +126,9 @@
     "spherex_qr3"
   ],
   "timings": {
-    "search_s": 23.1,
-    "download_s": 234.3,
-    "total_s": 259.2
+    "search_s": 7.6,
+    "download_s": 174.8,
+    "total_s": 184.1
   },
-  "generated_utc": "2026-11-14 21:10 UTC"
+  "generated_utc": "2026-11-14 21:44 UTC"
 }

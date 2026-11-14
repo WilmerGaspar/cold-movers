@@ -6,9 +6,9 @@
     "dec_deg": 4.69336496657667,
     "pmra_masyr": -801.551,
     "pmdec_masyr": 10362.394,
-    "parallax_mas": 546.9759,
+    "parallax_mas": 546.975939730948,
     "ref_epoch": 2000.0,
-    "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)",
+    "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G); parallax from Gaia DR3 4472832130942575872",
     "note": "Red dwarf with the largest proper motion of any star."
   },
   "size_deg": 0.05,
@@ -148,9 +148,9 @@
     "spherex_qr3"
   ],
   "timings": {
-    "search_s": 1.8,
-    "download_s": 161.6,
-    "total_s": 163.7
+    "search_s": 2.3,
+    "download_s": 211.3,
+    "total_s": 214.2
   },
-  "generated_utc": "2026-11-14 20:53 UTC"
+  "generated_utc": "2026-11-14 21:41 UTC"
 }

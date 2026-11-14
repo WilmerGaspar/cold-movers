@@ -1,11 +1,11 @@
-2026-11-14 21:36:19.565 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
-2026-11-14 21:36:20.805 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
-2026-11-14 21:36:22.154 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
-2026-11-14 21:36:22.826 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
-2026-11-14 21:36:23.508 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
-barnard: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real? Can the universe fool us?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
-epsindib: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real? Can the universe fool us?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
-wise0855: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real? Can the universe fool us?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
-rwaur: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real? Can the universe fool us?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
-rdra: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real? Can the universe fool us?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
+2026-11-14 21:55:41.040 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-14 21:55:44.862 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-14 21:55:46.249 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-14 21:55:46.962 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-14 21:55:47.691 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+barnard: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real, or a ghost in the detector?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
+epsindib: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real, or a ghost in the detector?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
+wise0855: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real, or a ghost in the detector?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
+rwaur: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real, or a ghost in the detector?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
+rdra: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real, or a ghost in the detector?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
 SMOKE PASSED

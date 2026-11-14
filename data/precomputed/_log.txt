@@ -1,80 +1,81 @@
-[21:04:50] probe failed:
-Traceback (most recent call last):
-  File "/home/runner/work/cold-movers/cold-movers/scripts/precompute.py", line 91, in main
-    probe_header(SHOWCASE["barnard"])
-  File "/home/runner/work/cold-movers/cold-movers/scripts/precompute.py", line 38, in probe_header
-    rows = spherex.search_images(float(ra), float(dec))
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/cold-movers/cold-movers/coldmovers/spherex.py", line 125, in search_images
-    raise last
-  File "/home/runner/work/cold-movers/cold-movers/coldmovers/spherex.py", line 121, in search_images
-    return _search_once(ra_deg, dec_deg, collections)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/cold-movers/cold-movers/coldmovers/spherex.py", line 152, in _search_once
-    raise RuntimeError("IRSA search failed: " + " | ".join(errors))
-RuntimeError: IRSA search failed: SIA: 502 Server Error: Proxy Error for url: https://irsa.ipac.caltech.edu/SIA?POS=CIRCLE+269.446+4.76794+0.0002777777777777778&COLLECTION=spherex_qr3 | TAP: 502 Server Error: Proxy Error for url: https://irsa.ipac.caltech.edu/TAP/sync
-
-[21:04:50] === barnard ===
-[21:04:52]    SIMBAD: {"key": "barnard", "name": "Barnard's Star", "ra_deg": 269.4520769586187, "dec_deg": 4.69336496657667, "pmra_masyr": -801.551, "pmdec_masyr": 10362.394, "parallax_mas": 546.9759, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)", "note": "Red dwarf with the largest proper motion of any star."}
-[21:06:25]    FAILED:
-Traceback (most recent call last):
-  File "/home/runner/work/cold-movers/cold-movers/scripts/precompute.py", line 108, in main
-    result = pipeline.run(target, size_deg=args.size, max_frames=args.max_frames, workers=6,
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/cold-movers/cold-movers/coldmovers/pipeline.py", line 93, in run
-    all_rows = spherex.search_images(float(ra0), float(dec0))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/cold-movers/cold-movers/coldmovers/spherex.py", line 125, in search_images
-    raise last
-  File "/home/runner/work/cold-movers/cold-movers/coldmovers/spherex.py", line 121, in search_images
-    return _search_once(ra_deg, dec_deg, collections)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/cold-movers/cold-movers/coldmovers/spherex.py", line 152, in _search_once
-    raise RuntimeError("IRSA search failed: " + " | ".join(errors))
-RuntimeError: IRSA search failed: SIA: 502 Server Error: Proxy Error for url: https://irsa.ipac.caltech.edu/SIA?POS=CIRCLE+269.446+4.76792+0.0002777777777777778&COLLECTION=spherex_dr1 | TAP: 502 Server Error: Proxy Error for url: https://irsa.ipac.caltech.edu/TAP/sync
-
-[21:06:25] === epsindib ===
-[21:06:27]    SIMBAD: {"key": "epsindib", "name": "Epsilon Indi B", "ra_deg": 331.04414658852124, "dec_deg": -56.78284419511611, "pmra_masyr": 3981.977, "pmdec_masyr": -2466.832, "parallax_mas": 270.658, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)", "note": "Pair of T-type brown dwarfs orbiting the star Epsilon Indi."}
-[21:10:46]    D1: 28 images, 20 clean, median S/N 30.4
-[21:10:46]    D2: 63 images, 44 clean, median S/N 111.8
-[21:10:46]    D3: 62 images, 51 clean, median S/N 114.7
-[21:10:46]    D4: 34 images, 23 clean, median S/N 100.5
-[21:10:46]    D5: 50 images, 37 clean, median S/N 122.4
-[21:10:46]    D6: 63 images, 48 clean, median S/N 55.3
-[21:10:46]    epochs: [(60790, 60836, 77), (60947, 60992, 96), (61149, 61164, 48), (61305, 61315, 79)]
-[21:10:46]    fit: {"temperature_k": 1867.7, "t_low_k": 1794.6, "t_high_k": 1937.0, "chi2_red": 47.377, "n_points": 223, "light": "yellow", "reasons": ["not_a_single_blackbody"]}
-[21:10:46]    timings: {'search_s': 23.1, 'download_s': 234.3, 'total_s': 259.2}; failures: 0; versions: ['7.0.5']
-[21:10:48] === wise0855 ===
-[21:10:50]    SIMBAD: {"key": "wise0855", "name": "WISE 0855-0714", "ra_deg": 133.81890825, "dec_deg": -7.247048, "pmra_masyr": -8123.7, "pmdec_masyr": 673.2, "parallax_mas": 439.0, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2021ApJS..253....7K)", "note": "The coldest known brown dwarf, near the temperature of the North Pole."}
-[21:20:19]    D1: 36 images, 30 clean, median S/N 12.3
-[21:20:19]    D2: 48 images, 36 clean, median S/N 11.7
-[21:20:19]    D3: 45 images, 40 clean, median S/N 9.2
-[21:20:19]    D4: 36 images, 29 clean, median S/N 5.1
-[21:20:19]    D5: 48 images, 31 clean, median S/N 3.2
-[21:20:19]    D6: 45 images, 35 clean, median S/N 2.2
-[21:20:19]    epochs: [(60801, 60802, 30), (60980, 60994, 110), (61021, 61022, 18), (61151, 61174, 100)]
-[21:20:19]    fit: {"temperature_k": 630.5, "t_low_k": 551.7, "t_high_k": 738.4, "chi2_red": 1.959, "n_points": 66, "light": "red", "reasons": ["narrow_coverage", "only_long_wavelengths", "neighbour_removed"]}
-[21:20:19]    timings: {'search_s': 418.7, 'download_s': 149.2, 'total_s': 568.9}; failures: 0; versions: ['7.0.5']
-[21:20:21] === rwaur ===
-[21:20:24]    SIMBAD: {"key": "rwaur", "name": "RW Aurigae", "ra_deg": 76.95652603458, "dec_deg": 30.40143817389, "pmra_masyr": 7.23, "pmdec_masyr": -20.33, "parallax_mas": 15.42, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2007A&A...474..653V)", "note": "Young star still surrounded by its dusty planet-forming disk."}
-[21:24:38]    D1: 50 images, 16 clean, median S/N 318.5
-[21:24:38]    D2: 49 images, 0 clean, median S/N nan
-[21:24:38]    D3: 49 images, 0 clean, median S/N nan
-[21:24:38]    D4: 51 images, 0 clean, median S/N nan
-[21:24:38]    D5: 51 images, 0 clean, median S/N nan
-[21:24:38]    D6: 50 images, 0 clean, median S/N nan
-[21:24:38]    epochs: [(60919, 60938, 100), (61092, 61111, 102), (61285, 61300, 98)]
-[21:24:38]    fit: {"temperature_k": 3461.1, "t_low_k": 3060.0, "t_high_k": 4025.1, "chi2_red": 14.407, "n_points": 16, "light": "red", "reasons": ["narrow_coverage", "too_bright"]}
-[21:24:38]    timings: {'search_s': 2.4, 'download_s': 251.1, 'total_s': 254.6}; failures: 0; versions: ['7.0.5']
-[21:24:39] === rdra ===
-[21:24:42]    SIMBAD: {"key": "rdra", "name": "R Draconis", "ra_deg": 248.16761083295, "dec_deg": 66.75497941722, "pmra_masyr": -20.643, "pmdec_masyr": 6.149, "parallax_mas": 1.2509, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)", "note": "Pulsating red giant (Mira variable) that brightens and fades over months."}
-[21:36:17]    D1: 53 images, 0 clean, median S/N nan
-[21:36:17]    D2: 43 images, 0 clean, median S/N nan
-[21:36:17]    D3: 47 images, 0 clean, median S/N nan
-[21:36:17]    D4: 46 images, 0 clean, median S/N nan
-[21:36:17]    D5: 55 images, 0 clean, median S/N nan
-[21:36:17]    D6: 56 images, 0 clean, median S/N nan
-[21:36:17]    epochs: [(60812, 60879, 85), (60966, 61053, 118), (61152, 61238, 97)]
-[21:36:17]    fit: {"temperature_k": NaN, "t_low_k": NaN, "t_high_k": NaN, "chi2_red": NaN, "n_points": 0, "light": "red", "reasons": ["too_bright"]}
-[21:36:17]    timings: {'search_s': 407.7, 'download_s': 287.2, 'total_s': 695.4}; failures: 0; versions: ['7.0.5']
-[21:36:18] finished
+[21:37:16] probe: 358 images; first url: https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/6/level2_2025W33_2C_0321_1D6_spx_l2b-v27-2026-228.fits
+[21:37:17] probe: HDU PRIMARY shape=None
+[21:37:17] probe: HDU IMAGE shape=(29, 29)
+[21:37:17] probe: HDU FLAGS shape=(29, 29)
+[21:37:17] probe: HDU VARIANCE shape=(29, 29)
+[21:37:17] probe: HDU ZODI shape=(29, 29)
+[21:37:17] probe: HDU EPSF shape=(441,)
+[21:37:17] probe: HDU WCS-WAVE shape=(1,)
+[21:37:17] probe: IMAGE header keys: XTENSION, BITPIX, NAXIS, NAXIS1, NAXIS2, PCOUNT, GCOUNT, EXTNAME, EXTTYPE, BUNIT, DETECTOR, OBSID, EXPIDN, DATE, TSAMP, KOVR_A, KOVR_R, KOVR_P, OVRDLY, SURLIM, SURDLY, TRANDLY, TCUT, KEN_A, KEN_R, KEN_P, KSN_A, KSN_R, KSN_P, NSKIP, NVISITROW, NVISITCOL, MPHAN, NCHANNEL, WCHANNEL, JREF, KREF, JACTIVE, KACTIVE, SPS_TARGET, SPS_FLAGS, OBS_IN_SBAND, NON_SURVEY, SGT_LAT_MIDPT, SGT_LON_MIDPT, SGT_MIN_GCD2SAA, SPS_ELON, SPS_ELAT, SPS_EPA, DETCOORD, L1DQAFLG, RADESYS, X_SC_START, Y_SC_START, Z_SC_START, VX_SC_START, VY_SC_START, VZ_SC_START, XYZ_SC_SYSTEM, VXYZ_SC_SYSTEM, X_SC, Y_SC, Z_SC, VX_SC, VY_SC, VZ_SC, X_SC_END, Y_SC_END, Z_SC_END, VX_SC_END, VY_SC_END, VZ_SC_END, SNWSTRK, NBLMSRCS, SNW7-5CT, SNW3-1CT, SNW2-5CT, SNW6-5CT, NSNOWSRC, NBLM5SCS, L2 N_NONLINEAR, PSTHRESH, L2 N_PERSIST, L2 N_HOT, L2 N_COLD, L2 N_TRAN_NB, L2 N_PERS_NB, OMEGA_MEDIAN, OMEGA_STDDEV, FINAST, DAXIS, CONTRAST, MATCH_NSTARS, QS_NMATCH_VAR, ASTRONETSOLVED, PXSRCMSK, L2 N_SOURCE, L2 N_XTALK, L2 N_GHOST, L2 N_GHOST_FPA, L2 N_GHOST_EXT, L2 N_BLOOM_NS, L2 N_SNOW_NS, L2 N_OUTLIER, L2 SATSTRKS_PXS, L2 SATSTRKS, PSF_FWHM, AURORA_CORR, SHUTTLE_GLOW_CORR, HE_AIRGLOW_CONT, SHUTTLE_GLOW_CONT, AURORA_CONT, L2DQAFLG, L2 N_TRANSIENT, L2 N_OVERFLOW, L2 N_SUR_ERROR, L2 N_NONFUNC, L2 N_DICHROIC, L2 N_MISSING, L2 N_FULLSAMPLE
+[21:37:17] probe: BUNIT = MJy / sr
+[21:37:17] probe: DATE = 2026-08-16T13:49:47.923
+[21:37:17] probe: MJD-AVG = 60902.865380738
+[21:37:17] probe: MJD-BEG = 60902.864714549
+[21:37:17] probe: MJD-END = 60902.866046927
+[21:37:17] probe: DETECTOR = 6
+[21:37:17] probe: CTYPE1 = RA---TAN-SIP
+[21:37:17] probe: CTYPE1W = WAVE-TAB
+[21:37:17] probe: primary VERSION = 7.0.5
+[21:37:18] probe: target pixel (14.5, 14.1) wavelength (4.928847110761348, 0.0369633730257621) pixel_sr 8.912e-10
+[21:37:18] === barnard ===
+[21:37:21]    SIMBAD: {"key": "barnard", "name": "Barnard's Star", "ra_deg": 269.4520769586187, "dec_deg": 4.69336496657667, "pmra_masyr": -801.551, "pmdec_masyr": 10362.394, "parallax_mas": 546.9759, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)", "note": "Red dwarf with the largest proper motion of any star."}
+The current archive release 3.15 contains two breaking changes. Please see https://www.cosmos.esa.int/web/gaia/news#GACSrelease315 for details. In case of questions or feedback, please consult the Gaia helpdesk at https://www.cosmos.esa.int/web/gaia/gaia-helpdesk.
+[21:37:25]    Gaia DR3 4472832130942575872: parallax 546.9759 ± 0.0401 mas (catalogue had 546.9759)
+[21:40:59]    D1: 46 images, 0 clean, median S/N nan
+[21:40:59]    D2: 50 images, 0 clean, median S/N nan
+[21:40:59]    D3: 47 images, 0 clean, median S/N nan
+[21:40:59]    D4: 53 images, 0 clean, median S/N nan
+[21:40:59]    D5: 55 images, 0 clean, median S/N nan
+[21:40:59]    D6: 49 images, 0 clean, median S/N nan
+[21:40:59]    epochs: [(60903, 60923, 91), (60949, 60949, 8), (61110, 61140, 95), (61164, 61165, 6), (61269, 61285, 98), (61306, 61306, 2)]
+[21:40:59]    fit: {"temperature_k": null, "t_low_k": null, "t_high_k": null, "chi2_red": null, "n_points": 0, "light": "red", "reasons": ["too_bright"]}
+[21:40:59]    timings: {'search_s': 2.3, 'download_s': 211.3, 'total_s': 214.2}; failures: 0; versions: ['7.0.5']
+[21:41:03] === epsindib ===
+[21:41:05]    SIMBAD: {"key": "epsindib", "name": "Epsilon Indi B", "ra_deg": 331.04414658852124, "dec_deg": -56.78284419511611, "pmra_masyr": 3981.977, "pmdec_masyr": -2466.832, "parallax_mas": 270.658, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)", "note": "Pair of T-type brown dwarfs orbiting the star Epsilon Indi."}
+[21:41:08]    Gaia DR3 6412596012146801152: parallax 270.6580 ± 0.6896 mas (catalogue had 270.658)
+[21:44:12]    D1: 28 images, 20 clean, median S/N 30.4
+[21:44:12]    D2: 63 images, 44 clean, median S/N 111.8
+[21:44:12]    D3: 62 images, 51 clean, median S/N 114.7
+[21:44:12]    D4: 34 images, 23 clean, median S/N 100.5
+[21:44:12]    D5: 50 images, 37 clean, median S/N 122.4
+[21:44:12]    D6: 63 images, 48 clean, median S/N 55.3
+[21:44:12]    epochs: [(60790, 60836, 77), (60947, 60992, 96), (61149, 61164, 48), (61305, 61315, 79)]
+[21:44:12]    fit: {"temperature_k": 1867.7, "t_low_k": 1794.6, "t_high_k": 1937.0, "chi2_red": 47.377, "n_points": 223, "light": "yellow", "reasons": ["not_a_single_blackbody"]}
+[21:44:12]    timings: {'search_s': 7.6, 'download_s': 174.8, 'total_s': 184.1}; failures: 0; versions: ['7.0.5']
+[21:44:14] === wise0855 ===
+[21:44:17]    SIMBAD: {"key": "wise0855", "name": "WISE 0855-0714", "ra_deg": 133.81890825, "dec_deg": -7.247048, "pmra_masyr": -8123.7, "pmdec_masyr": 673.2, "parallax_mas": 439.0, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2021ApJS..253....7K)", "note": "The coldest known brown dwarf, near the temperature of the North Pole."}
+[21:44:20]    Gaia DR3: no precise parallax at this position (kept catalogue value)
+[21:47:22]    D1: 36 images, 30 clean, median S/N 12.3
+[21:47:22]    D2: 48 images, 36 clean, median S/N 11.7
+[21:47:22]    D3: 45 images, 40 clean, median S/N 9.2
+[21:47:22]    D4: 36 images, 29 clean, median S/N 5.1
+[21:47:22]    D5: 48 images, 31 clean, median S/N 3.2
+[21:47:22]    D6: 45 images, 35 clean, median S/N 2.2
+[21:47:22]    epochs: [(60801, 60802, 30), (60980, 60994, 110), (61021, 61022, 18), (61151, 61174, 100)]
+[21:47:22]    fit: {"temperature_k": 630.5, "t_low_k": 551.7, "t_high_k": 738.4, "chi2_red": 1.959, "n_points": 66, "light": "red", "reasons": ["narrow_coverage", "only_long_wavelengths", "neighbour_removed"]}
+[21:47:22]    timings: {'search_s': 7.3, 'download_s': 174.0, 'total_s': 182.3}; failures: 0; versions: ['7.0.5']
+[21:47:23] === rwaur ===
+[21:47:27]    SIMBAD: {"key": "rwaur", "name": "RW Aurigae", "ra_deg": 76.95652603458, "dec_deg": 30.40143817389, "pmra_masyr": 7.23, "pmdec_masyr": -20.33, "parallax_mas": 15.42, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2007A&A...474..653V)", "note": "Young star still surrounded by its dusty planet-forming disk."}
+[21:47:29]    Gaia DR3 156430822114424576: parallax 6.4062 ± 0.0441 mas (catalogue had 15.42)
+[21:51:38]    D1: 50 images, 16 clean, median S/N 318.5
+[21:51:38]    D2: 49 images, 0 clean, median S/N nan
+[21:51:38]    D3: 49 images, 0 clean, median S/N nan
+[21:51:38]    D4: 51 images, 0 clean, median S/N nan
+[21:51:38]    D5: 51 images, 0 clean, median S/N nan
+[21:51:38]    D6: 50 images, 0 clean, median S/N nan
+[21:51:38]    epochs: [(60919, 60938, 100), (61092, 61111, 102), (61285, 61300, 98)]
+[21:51:38]    fit: {"temperature_k": 3461.1, "t_low_k": 3060.0, "t_high_k": 4025.1, "chi2_red": 14.407, "n_points": 16, "light": "red", "reasons": ["narrow_coverage", "too_bright"]}
+[21:51:38]    timings: {'search_s': 18.5, 'download_s': 229.9, 'total_s': 249.5}; failures: 0; versions: ['7.0.5']
+[21:51:39] === rdra ===
+[21:51:43]    SIMBAD: {"key": "rdra", "name": "R Draconis", "ra_deg": 248.16761083295, "dec_deg": 66.75497941722, "pmra_masyr": -20.643, "pmdec_masyr": 6.149, "parallax_mas": 1.2509, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)", "note": "Pulsating red giant (Mira variable) that brightens and fades over months."}
+[21:51:46]    Gaia DR3 1648328016354496384: parallax 1.2509 ± 0.0648 mas (catalogue had 1.2509)
+[21:55:39]    D1: 53 images, 0 clean, median S/N nan
+[21:55:39]    D2: 43 images, 0 clean, median S/N nan
+[21:55:39]    D3: 47 images, 0 clean, median S/N nan
+[21:55:39]    D4: 46 images, 0 clean, median S/N nan
+[21:55:39]    D5: 55 images, 0 clean, median S/N nan
+[21:55:39]    D6: 56 images, 0 clean, median S/N nan
+[21:55:39]    epochs: [(60812, 60879, 85), (60966, 61053, 118), (61152, 61238, 97)]
+[21:55:39]    fit: {"temperature_k": null, "t_low_k": null, "t_high_k": null, "chi2_red": null, "n_points": 0, "light": "red", "reasons": ["too_bright"]}
+[21:55:39]    timings: {'search_s': 1.9, 'download_s': 230.1, 'total_s': 232.5}; failures: 0; versions: ['7.0.5']
+[21:55:40] finished

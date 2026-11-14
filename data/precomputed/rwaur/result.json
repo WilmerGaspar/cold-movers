@@ -6,9 +6,9 @@
     "dec_deg": 30.40143817389,
     "pmra_masyr": 7.23,
     "pmdec_masyr": -20.33,
-    "parallax_mas": 15.42,
+    "parallax_mas": 6.406249329219477,
     "ref_epoch": 2000.0,
-    "source": "SIMBAD via Sesame (position: 2007A&A...474..653V)",
+    "source": "SIMBAD via Sesame (position: 2007A&A...474..653V); parallax from Gaia DR3 156430822114424576",
     "note": "Young star still surrounded by its dusty planet-forming disk."
   },
   "size_deg": 0.05,
@@ -113,9 +113,9 @@
     "spherex_qr3"
   ],
   "timings": {
-    "search_s": 2.4,
-    "download_s": 251.1,
-    "total_s": 254.6
+    "search_s": 18.5,
+    "download_s": 229.9,
+    "total_s": 249.5
   },
-  "generated_utc": "2026-11-14 21:24 UTC"
+  "generated_utc": "2026-11-14 21:51 UTC"
 }
