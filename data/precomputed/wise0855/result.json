@@ -14,17 +14,19 @@
   "size_deg": 0.05,
   "n_found": 258,
   "n_used": 258,
-  "n_clean": 201,
+  "n_clean": 66,
   "n_failures": 0,
   "fit": {
-    "temperature_k": 5715.3,
-    "t_low_k": 5568.5,
-    "t_high_k": 5886.4,
-    "chi2_red": 2.329,
-    "n_points": 201,
-    "light": "yellow",
+    "temperature_k": 630.5,
+    "t_low_k": 551.7,
+    "t_high_k": 738.4,
+    "chi2_red": 1.959,
+    "n_points": 66,
+    "light": "red",
     "reasons": [
-      "peak_below_0p75um"
+      "narrow_coverage",
+      "only_long_wavelengths",
+      "neighbour_removed"
     ]
   },
   "epochs": [
@@ -126,9 +128,9 @@
     "spherex_qr3"
   ],
   "timings": {
-    "search_s": 2.6,
-    "download_s": 250.8,
-    "total_s": 254.9
+    "search_s": 1.5,
+    "download_s": 114.0,
+    "total_s": 116.2
   },
-  "generated_utc": "2026-11-14 20:29 UTC"
+  "generated_utc": "2026-11-14 20:58 UTC"
 }

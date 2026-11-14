@@ -112,9 +112,9 @@
     "spherex_qr3"
   ],
   "timings": {
-    "search_s": 2.8,
-    "download_s": 282.7,
-    "total_s": 285.8
+    "search_s": 10.4,
+    "download_s": 99.8,
+    "total_s": 110.5
   },
-  "generated_utc": "2026-11-14 20:39 UTC"
+  "generated_utc": "2026-11-14 21:02 UTC"
 }

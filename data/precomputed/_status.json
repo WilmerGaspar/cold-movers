@@ -34,14 +34,16 @@
   "wise0855": {
     "ok": true,
     "fit": {
-      "temperature_k": 5715.3,
-      "t_low_k": 5568.5,
-      "t_high_k": 5886.4,
-      "chi2_red": 2.329,
-      "n_points": 201,
-      "light": "yellow",
+      "temperature_k": 630.5,
+      "t_low_k": 551.7,
+      "t_high_k": 738.4,
+      "chi2_red": 1.959,
+      "n_points": 66,
+      "light": "red",
       "reasons": [
-        "peak_below_0p75um"
+        "narrow_coverage",
+        "only_long_wavelengths",
+        "neighbour_removed"
       ]
     },
     "n_used": 258,
@@ -55,9 +57,10 @@
       "t_high_k": 4025.1,
       "chi2_red": 14.407,
       "n_points": 16,
-      "light": "yellow",
+      "light": "red",
       "reasons": [
-        "not_a_single_blackbody"
+        "narrow_coverage",
+        "too_bright"
       ]
     },
     "n_used": 300,

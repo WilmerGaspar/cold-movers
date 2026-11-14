@@ -22,9 +22,10 @@
     "t_high_k": 4025.1,
     "chi2_red": 14.407,
     "n_points": 16,
-    "light": "yellow",
+    "light": "red",
     "reasons": [
-      "not_a_single_blackbody"
+      "narrow_coverage",
+      "too_bright"
     ]
   },
   "epochs": [
@@ -112,9 +113,9 @@
     "spherex_qr3"
   ],
   "timings": {
-    "search_s": 1.9,
-    "download_s": 307.1,
-    "total_s": 309.7
+    "search_s": 1.8,
+    "download_s": 131.3,
+    "total_s": 133.9
   },
-  "generated_utc": "2026-11-14 20:34 UTC"
+  "generated_utc": "2026-11-14 21:00 UTC"
 }
