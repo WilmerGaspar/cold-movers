@@ -92,12 +92,14 @@ def measure(image, variance, flags, x, y, pixel_sr, r_ap=R_APERTURE, r_in=R_IN, 
         out["hard_flag"] = True
         return out
 
-    # Replace the few masked aperture pixels with the background (flux-neutral).
-    signal = np.sum(image[use] - bkg) * (ap.sum() / n_ap)
+    # A few masked aperture pixels: scale the sum of the good ones up to the full aperture.
+    # The same factor multiplies the noise of those pixels, so the variance gets it squared.
+    scale = ap.sum() / n_ap
+    signal = np.sum(image[use] - bkg) * scale
     var = np.nansum(np.asarray(variance)[use])
     if not np.isfinite(var) or var <= 0:
         var = n_ap * bkg_sd**2
-    var += ap.sum() ** 2 * bkg_sd**2 / max(ring_ok.sum(), 1)
+    var = var * scale**2 + ap.sum() ** 2 * bkg_sd**2 / max(ring_ok.sum(), 1)
     out["flux_ujy"] = float(signal * pixel_sr * UJY_PER_MJY)
     out["err_ujy"] = float(np.sqrt(var) * pixel_sr * UJY_PER_MJY)
     return out

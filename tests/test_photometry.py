@@ -48,3 +48,14 @@ def test_error_scales_with_noise():
     img = star_image(noise=2.0)
     res = photometry.measure(img, np.full(img.shape, 4.0), np.zeros(img.shape, int), 15.3, 14.6, pixel_sr=1e-12)
     assert 5 < res["err_ujy"] < 30
+
+
+def test_error_grows_when_aperture_pixels_are_masked():
+    img = star_image(noise=2.0)
+    var = np.full(img.shape, 4.0)
+    clean = photometry.measure(img, var, np.zeros(img.shape, dtype=np.int64), 15.3, 14.6, pixel_sr=1e-12)
+    flags = np.zeros(img.shape, dtype=np.int64)
+    flags[13, 13] = flags[13, 17] = flags[16, 13] = 1 << 10  # three HOT pixels at the aperture edge
+    masked = photometry.measure(img, var, flags, 15.3, 14.6, pixel_sr=1e-12)
+    assert masked["n_ap"] < clean["n_ap"]
+    assert masked["err_ujy"] > clean["err_ujy"]
