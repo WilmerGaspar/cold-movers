@@ -520,39 +520,52 @@ with left:
         st.download_button("Download this movie (GIF)", gif, file_name=f"coldmovers_{target.key}_d{det}.gif",
                            mime="image/gif")
 
-with st.expander("Explore this spot in an interactive sky atlas (Aladin Lite · AllWISE · Gaia DR3)"):
+if mjds:
+    ra_now, dec_now = target.position_at(float(np.median(mjds)))
+else:
+    ra_now, dec_now = target.ra_deg, target.dec_deg
+ra_2010, dec_2010 = target.position_at(55400.0)  # WISE survey, mid-2010
+atlas_fov = max(view["size_deg"] * 1.6, 0.06)
+atlas_link = (f"https://aladin.cds.unistra.fr/AladinLite/?target={float(ra_now):.6f}%20{float(dec_now):+.6f}"
+              f"&fov={atlas_fov:.3f}&survey=P%2FallWISE%2Fcolor")
+# Built only when switched on: an atlas created inside a hidden container gets zero width.
+if st.toggle("Show this spot in an interactive sky atlas (Aladin Lite · AllWISE · Gaia DR3)", value=False):
     import streamlit.components.v1 as components
 
-    if mjds:
-        ra_now, dec_now = target.position_at(float(np.median(mjds)))
-    else:
-        ra_now, dec_now = target.ra_deg, target.dec_deg
-    ra_2010, dec_2010 = target.position_at(55400.0)  # WISE survey, mid-2010
-    fov = max(view["size_deg"] * 1.6, 0.06)
     components.html(
         f"""
-        <div id="aladin" style="width:100%;height:420px;"></div>
+        <div id="aladin" style="width:100%;height:420px;background:#0b0f1a;"></div>
         <script src="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js" charset="utf-8"></script>
         <script>
-          A.init.then(() => {{
-            const a = A.aladin('#aladin', {{survey: 'P/allWISE/color', fov: {fov:.4f},
-                target: '{float(ra_now):.6f} {float(dec_now):+.6f}', cooFrame: 'ICRS', showReticle: false}});
-            a.addCatalog(A.catalogFromVizieR('I/355/gaiadr3', '{float(ra_now):.6f} {float(dec_now):+.6f}',
-                {fov / 2:.4f}, {{onClick: 'showTable', color: '#41b6c4', sourceSize: 8}}));
-            const pos = A.catalog({{name: 'Cold Movers', sourceSize: 18, color: '#ff5a36', shape: 'circle'}});
-            a.addCatalog(pos);
-            pos.addSources([
-              A.source({float(ra_now):.6f}, {float(dec_now):.6f}, {{name: 'SPHEREx (2025-26)'}}),
-              A.source({float(ra_2010):.6f}, {float(dec_2010):.6f}, {{name: 'WISE (2010)'}})
-            ]);
-          }});
+          function coldFail(err) {{
+            document.getElementById('aladin').innerHTML =
+              "<p style='color:#9aa4b8;font-family:sans-serif;padding:12px'>The sky atlas could not load here (" +
+              err + "). <a style='color:#ff5a36' href='{atlas_link}' target='_blank'>Open it at CDS</a>.</p>";
+          }}
+          if (typeof A === 'undefined') {{
+            coldFail('script blocked or offline');
+          }} else {{
+            A.init.then(() => {{
+              const a = A.aladin('#aladin', {{survey: 'P/allWISE/color', fov: {atlas_fov:.4f},
+                  target: '{float(ra_now):.6f} {float(dec_now):+.6f}', cooFrame: 'ICRS', showReticle: false}});
+              a.addCatalog(A.catalogFromVizieR('I/355/gaiadr3', '{float(ra_now):.6f} {float(dec_now):+.6f}',
+                  {atlas_fov / 2:.4f}, {{onClick: 'showTable', color: '#41b6c4', sourceSize: 8}}));
+              const pos = A.catalog({{name: 'Cold Movers', sourceSize: 18, color: '#ff5a36', shape: 'circle'}});
+              a.addCatalog(pos);
+              pos.addSources([
+                A.source({float(ra_now):.6f}, {float(dec_now):.6f}, {{name: 'SPHEREx (2025-26)'}}),
+                A.source({float(ra_2010):.6f}, {float(dec_2010):.6f}, {{name: 'WISE (2010)'}})
+              ]);
+            }}).catch(e => coldFail(e));
+          }}
         </script>
         """,
         height=430,
     )
     st.caption(
         "Background: AllWISE infrared image (2010). Blue squares: Gaia DR3 stars (click for details). Orange "
-        "circles: where the object was in 2010 and where SPHEREx sees it now. Aladin Lite by CDS, Strasbourg."
+        "circles: where the object was in 2010 and where SPHEREx sees it now. Aladin Lite by CDS, Strasbourg. "
+        f"[Open in a new tab]({atlas_link})."
     )
 
 # ------------------------------------------------------------------ spectrum + Madhava
