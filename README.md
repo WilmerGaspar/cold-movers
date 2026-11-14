@@ -33,6 +33,27 @@ In 1930 Clyde Tombaugh found Pluto at Lowell Observatory, during the search for 
 
 "Madhava" is a homage to Madhava of Sangamagrama (c. 1340–1425), a pioneer of infinite series. The series itself is standard physics (Widger & Woodall 1976), not a new result.
 
+## Who it helps
+
+- **Citizen scientists.** Volunteers already find nearby brown dwarfs by blinking WISE images (Backyard Worlds: Planet 9). Cold Movers gives them the same view of SPHEREx, a new and deeper dataset in 102 colours, from any phone or computer, with no installation or account.
+- **Students and teachers.** One page shows a star moving across the sky over a single year, its light split into colours, the temperature that light implies and how sure we can be. It turns a NASA archive into a lesson about motion, light and doubt.
+- **Astronomers.** A quick first look at any position: is the source there in every visit, does it move as the catalogue says, is a neighbour or a detector artifact contaminating it, and which wavelengths can be trusted. Every number can be downloaded and traced back to its SPHEREx image.
+
+## What we hope to achieve
+
+- Make SPHEREx data **easy to explore for anyone**, the day each release appears: the app searches NASA's archive live, so new data releases are used without changing the code.
+- Show that a tool can be **honest about its limits**: when SPHEREx saturates, when a neighbour blends in, when one blackbody does not describe the light, the app says so instead of inventing a number.
+- Next steps after the hackathon: point-spread-function photometry for crowded fields, a batch mode that checks a whole list of candidates, motion fitted directly from the images, and a Spanish version of the interface.
+
+## Tools we used
+
+- **Language:** Python 3.12.
+- **Libraries:** Astropy (WCS, FITS, time), Astroquery and PyVO (IRSA, Gaia and SIMBAD access), NumPy and SciPy (fits, resampling), Matplotlib and Pillow (movie frames, GIF), Plotly (interactive spectrum and light curve), Streamlit (web app), Aladin Lite (interactive sky atlas, CDS).
+- **Data:** SPHEREx DR1 and QR3 spectral images (NASA/IPAC IRSA), Gaia DR3 (ESA), SIMBAD and Sesame (CDS), AllWISE images through Aladin Lite.
+- **Infrastructure:** GitHub (code), GitHub Actions (tests, precomputing the five challenge objects, keeping the app awake), Streamlit Community Cloud (public hosting).
+- **Hardware:** none beyond an ordinary laptop; all heavy work runs in the cloud.
+- **AI assistance:** Claude (Anthropic) as a coding and research assistant (see "AI use").
+
 ## Honest limits
 
 - **Blackbody-equivalent is not effective temperature.** Brown dwarfs have deep water and methane bands; a single Planck curve does not describe them, and the traffic light turns yellow. We show the published temperature next to ours.
