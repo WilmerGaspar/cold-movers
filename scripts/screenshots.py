@@ -45,10 +45,21 @@ with sync_playwright() as p:
     fr = open_app(page, "?object=wise0855")
     page.screenshot(path=os.path.join(OUT, "desktop_top.png"))
     try:
-        fr.get_by_text("Show the sky around it").first.click()
-        page.wait_for_timeout(25_000)
-        img = fr.get_by_text("What you see.").first
-        img.scroll_into_view_if_needed()
+        toggle = fr.get_by_text("Show the sky around it").first
+        toggle.scroll_into_view_if_needed()
+        toggle.click()
+        outcome = "nothing appeared"
+        for _ in range(30):  # up to ~2.5 minutes
+            page.wait_for_timeout(5_000)
+            if fr.get_by_text("What you see.").count():
+                outcome = "atlas image shown"
+                break
+            if fr.get_by_text("did not answer").count():
+                outcome = "service did not answer (message shown)"
+                break
+        print("atlas:", outcome)
+        toggle.scroll_into_view_if_needed()
+        page.mouse.wheel(0, 250)
         page.wait_for_timeout(3_000)
         page.screenshot(path=os.path.join(OUT, "atlas.png"))
         print("atlas screenshot saved")
