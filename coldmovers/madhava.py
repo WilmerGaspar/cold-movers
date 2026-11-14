@@ -284,7 +284,18 @@ REASON_TEXT = {
         "Too bright for SPHEREx: the star saturates the detector, so its brightness cannot be measured "
         "from these images. SPHEREx was built to see faint objects; compare with the published value."
     ),
-    "colder_than_range": "Colder than the fit can measure: almost all its light is beyond 5 um.",
+    "narrow_coverage": (
+        "The usable measurements cover too narrow a range of wavelengths to pin down a temperature."
+    ),
+    "only_long_wavelengths": (
+        "It only shows up beyond 3 um. That alone says it is very cold: anything warmer than about "
+        "1000 K would also shine at shorter wavelengths."
+    ),
+    "partly_saturated":"Some wavelengths saturate the detector and were left out.",
+    "neighbour_removed": (
+        "A neighbouring source blended with the target in some images; those measurements were left out."
+    ),
+    "colder_than_range":"Colder than the fit can measure: almost all its light is beyond 5 um.",
     "hotter_than_range": "Hotter than the fit can measure with SPHEREx bands.",
     "uncertainty_too_large": "The uncertainty is larger than half the value.",
     "not_a_single_blackbody": (

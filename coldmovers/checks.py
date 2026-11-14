@@ -47,12 +47,54 @@ def centroid(image: np.ndarray, x0: float, y0: float, half: int = 3, iterations:
     return x, y, float(peak / noise) if np.isfinite(noise) and noise > 0 else np.nan
 
 
+def epoch_of(mjd: float, epochs) -> int:
+    for ep in epochs:
+        if ep["mjd_start"] - 0.5 <= mjd <= ep["mjd_end"] + 0.5:
+            return ep["index"]
+    return -1
+
+
+def find_blends(epochs, stacks, marker, max_offset_px: float = 1.2, min_snr: float = 5.0) -> dict:
+    """Visits and detectors where the light near the target is centred somewhere else.
+
+    A bright source whose centroid sits more than max_offset_px from where the target
+    should be is a neighbour (for example a background star that a fast-moving brown
+    dwarf is passing). Returns {(epoch_index, detector): offset_px}.
+    """
+    blends = {}
+    for ep in epochs:
+        px, py = marker(ep["mjd_mid"])
+        for det, img in stacks.get(ep["index"], {}).items():
+            if det == 0:
+                continue
+            x, y, snr = centroid(img, px, py)
+            if np.isfinite(snr) and snr >= min_snr and np.isfinite(x):
+                off = float(np.hypot(x - px, y - py))
+                if off > max_offset_px:
+                    blends[(ep["index"], int(det))] = off
+    return blends
+
+
+def mark_blends(rows, epochs, stacks, marker) -> dict:
+    """Set row['blend'] for every measurement of a detector where a neighbour was found.
+
+    The whole detector is excluded, not only the visits where the offset was large:
+    a moving target drifts towards and away from a fixed neighbour, so in the visits
+    where they overlap most the centroid looks fine but the light is still mixed.
+    """
+    blends = find_blends(epochs, stacks, marker)
+    dets = {d for _, d in blends}
+    for r in rows:
+        r["blend"] = int(r["detector"]) in dets
+    return blends
+
+
 def best_detector(rows) -> int:
     """Detector where the target has the highest median S/N."""
     best, best_snr = 0, -np.inf
     for d in range(1, 7):
         snr = [r["snr"] for r in rows if r["detector"] == d and r["inside"] and not r["hard_flag"]
-               and np.isfinite(r.get("snr", np.nan))]
+               and not r.get("blend") and np.isfinite(r.get("snr", np.nan))]
         if snr and np.median(snr) > best_snr:
             best, best_snr = d, float(np.median(snr))
     return best
@@ -126,4 +168,16 @@ def run_checks(rows, epochs, stacks, marker) -> dict:
     else:
         status, msg = "warn", "Not enough detections to test the motion."
     out["checks"].append({"name": "Moves as predicted", "status": status, "text": msg})
+
+    # 4. No neighbour ------------------------------------------------------------
+    blends = find_blends(epochs, stacks, marker)
+    if not blends:
+        status, msg = "pass", "No other source pulls the light away from the expected position."
+    else:
+        dets = sorted({d for _, d in blends})
+        status = "warn"
+        msg = (f"A neighbouring source is blended with the target in detector(s) {', '.join(map(str, dets))}. "
+               "All measurements from those detectors are left out of the temperature fit.")
+    out["checks"].append({"name": "No neighbour", "status": status, "text": msg})
+    out["blends"] = {f"{e}-{d}": off for (e, d), off in blends.items()}
     return out

@@ -238,8 +238,9 @@ def marker(mjd):
 # ------------------------------------------------------------------ header metrics
 
 st.subheader(target.name)
-clean = [r for r in rows if r["inside"] and not r["hard_flag"] and np.isfinite(r["wavelength_um"])
-         and np.isfinite(r["flux_ujy"])]
+if view.get("stacks"):
+    checks.mark_blends(rows, epochs, view["stacks"], marker)
+clean = pipeline.clean_rows(rows)
 mjds = [r["mjd"] for r in rows]
 m1, m2, m3, m4 = st.columns(4)
 m1.metric("SPHEREx images found", view["n_found"])
@@ -349,6 +350,13 @@ with c_plot:
         figp.add_trace(go.Scatter(
             x=[r["wavelength_um"] for r in flagged], y=[r["flux_ujy"] for r in flagged], mode="markers",
             name="flagged (not used)", marker=dict(size=6, color="#6b7280", symbol="x"),
+        ))
+    blended = [r for r in rows if r["inside"] and not r["hard_flag"] and r.get("blend")
+               and np.isfinite(r["wavelength_um"]) and np.isfinite(r["flux_ujy"])]
+    if blended:
+        figp.add_trace(go.Scatter(
+            x=[r["wavelength_um"] for r in blended], y=[r["flux_ujy"] for r in blended], mode="markers",
+            name="neighbour blended (not used)", marker=dict(size=6, color="#a78bfa", symbol="circle-open"),
         ))
     if np.isfinite(fit.temperature):
         grid = np.linspace(0.72, 5.05, 300)

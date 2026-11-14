@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from . import madhava, movie, photometry, spherex
+from . import checks, madhava, movie, photometry, spherex
 from .targets import Target, mjd_to_year, year_to_mjd
 
 DEFAULT_SIZE_DEG = 0.05  # 3 arcmin field of view
@@ -45,21 +45,39 @@ class RunResult:
 
 
 def clean_rows(rows):
-    return [r for r in rows if r["inside"] and not r["hard_flag"]
+    return [r for r in rows if r["inside"] and not r["hard_flag"] and not r.get("blend")
             and np.isfinite(r["wavelength_um"]) and np.isfinite(r["flux_ujy"])]
 
 
+MIN_WAVELENGTH_SPAN = 2.0  # longest / shortest usable wavelength needed for a temperature
+
+
 def fit_rows(rows) -> madhava.FitResult:
-    """Madhava fit on the clean measurements; explains saturation when it blocks the fit."""
+    """Madhava fit on the clean measurements, with the reasons when the data limit it."""
     good = clean_rows(rows)
     fit = madhava.fit_temperature(
         [r["wavelength_um"] for r in good], [r["bandwidth_um"] for r in good],
         [r["flux_ujy"] for r in good], [r["err_ujy"] for r in good],
     )
     inside = [r for r in rows if r["inside"]]
-    n_sat = sum(bool(r.get("saturated")) for r in inside)
-    if inside and n_sat > 0.5 * len(inside) and fit.light == "red":
-        fit.reasons = ["too_bright"]
+    sat_frac = sum(bool(r.get("saturated")) for r in inside) / len(inside) if inside else 0.0
+    if fit.light == "red":
+        if sat_frac > 0.5:
+            fit.reasons = ["too_bright"]
+        return fit
+    lam = np.array([r["wavelength_um"] for r in good])
+    if lam.size and lam.max() / lam.min() < MIN_WAVELENGTH_SPAN:
+        fit.light = "red"
+        fit.reasons = ["narrow_coverage"] + (["too_bright"] if sat_frac > 0.3 else [])
+        if lam.min() > 3.0:
+            fit.reasons.append("only_long_wavelengths")
+    elif sat_frac > 0.2:
+        fit.reasons = list(fit.reasons) + ["partly_saturated"]
+        if fit.light == "green":
+            fit.light = "yellow"
+            fit.reasons = [r for r in fit.reasons if r != "clean_blackbody_fit"]
+    if any(r.get("blend") for r in inside):
+        fit.reasons = list(fit.reasons) + ["neighbour_removed"]
     return fit
 
 
@@ -94,14 +112,22 @@ def run(target: Target, size_deg: float = DEFAULT_SIZE_DEG, max_frames: int = DE
         ra, dec = target.position_at(f.mjd)
         phot.append(photometry.measure_frame(f, float(ra), float(dec)))
 
-    say("Running the Madhava engine", 0.88)
-    fit = fit_rows(phot)
-
-    say("Aligning images and building the sky movie", 0.92)
+    say("Aligning images and building the sky movie", 0.86)
     mid = float(np.median([f.mjd for f in frames])) if frames else year_to_mjd(SEARCH_YEAR)
     ra_c, dec_c = target.position_at(mid)
     ref_wcs, shape = movie.make_reference_wcs(float(ra_c), float(dec_c), size_deg)
     epochs = movie.build_epoch_stacks(frames, ref_wcs, shape)
+
+    def marker(mjd):
+        ra, dec = target.position_at(mjd)
+        x, y = ref_wcs.wcs_world2pix(ra, dec, 0)
+        return float(x), float(y)
+
+    say("Checking for neighbouring sources", 0.93)
+    checks.mark_blends(phot, epochs, {ep["index"]: ep["stacks"] for ep in epochs}, marker)
+
+    say("Running the Madhava engine", 0.96)
+    fit = fit_rows(phot)
     say("Done", 1.0)
 
     return RunResult(
@@ -123,7 +149,7 @@ def epoch_title(ep, det, k, n):
 # ----------------------------------------------------------------- save / load
 
 PHOT_COLUMNS = ["mjd", "detector", "wavelength_um", "bandwidth_um", "flux_ujy", "err_ujy", "snr",
-                "x", "y", "background", "inside", "hard_flag", "soft_flag", "saturated", "flag_bits",
+                "x", "y", "background", "inside", "hard_flag", "soft_flag", "saturated", "blend", "flag_bits",
                 "ra", "dec", "url"]
 
 
@@ -200,7 +226,7 @@ def load(outdir: str) -> dict | None:
                         r[k] = float(r[k])
                     except (TypeError, ValueError):
                         r[k] = float("nan")
-                for k in ("inside", "hard_flag", "soft_flag", "saturated"):
+                for k in ("inside", "hard_flag", "soft_flag", "saturated", "blend"):
                     r[k] = str(r.get(k)) == "True"
                 r["detector"] = int(r["detector"])
                 r["flag_bits"] = int(float(r["flag_bits"] or 0))
