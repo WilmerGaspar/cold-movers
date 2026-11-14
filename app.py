@@ -528,45 +528,43 @@ ra_2010, dec_2010 = target.position_at(55400.0)  # WISE survey, mid-2010
 atlas_fov = max(view["size_deg"] * 1.6, 0.06)
 atlas_link = (f"https://aladin.cds.unistra.fr/AladinLite/?target={float(ra_now):.6f}%20{float(dec_now):+.6f}"
               f"&fov={atlas_fov:.3f}&survey=P%2FallWISE%2Fcolor")
-# Built only when switched on: an atlas created inside a hidden container gets zero width.
-if st.toggle("Show this spot in an interactive sky atlas (Aladin Lite · AllWISE · Gaia DR3)", value=False):
-    import streamlit.components.v1 as components
 
-    components.html(
-        f"""
-        <div id="aladin" style="width:100%;height:420px;background:#0b0f1a;"></div>
-        <script src="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js" charset="utf-8"></script>
-        <script>
-          function coldFail(err) {{
-            document.getElementById('aladin').innerHTML =
-              "<p style='color:#9aa4b8;font-family:sans-serif;padding:12px'>The sky atlas could not load here (" +
-              err + "). <a style='color:#ff5a36' href='{atlas_link}' target='_blank'>Open it at CDS</a>.</p>";
-          }}
-          if (typeof A === 'undefined') {{
-            coldFail('script blocked or offline');
-          }} else {{
-            A.init.then(() => {{
-              const a = A.aladin('#aladin', {{survey: 'P/allWISE/color', fov: {atlas_fov:.4f},
-                  target: '{float(ra_now):.6f} {float(dec_now):+.6f}', cooFrame: 'ICRS', showReticle: false}});
-              a.addCatalog(A.catalogFromVizieR('I/355/gaiadr3', '{float(ra_now):.6f} {float(dec_now):+.6f}',
-                  {atlas_fov / 2:.4f}, {{onClick: 'showTable', color: '#41b6c4', sourceSize: 8}}));
-              const pos = A.catalog({{name: 'Cold Movers', sourceSize: 18, color: '#ff5a36', shape: 'circle'}});
-              a.addCatalog(pos);
-              pos.addSources([
-                A.source({float(ra_now):.6f}, {float(dec_now):.6f}, {{name: 'SPHEREx (2025-26)'}}),
-                A.source({float(ra_2010):.6f}, {float(dec_2010):.6f}, {{name: 'WISE (2010)'}})
-              ]);
-            }}).catch(e => coldFail(e));
-          }}
-        </script>
-        """,
-        height=430,
-    )
-    st.caption(
-        "Background: AllWISE infrared image (2010). Blue squares: Gaia DR3 stars (click for details). Orange "
-        "circles: where the object was in 2010 and where SPHEREx sees it now. Aladin Lite by CDS, Strasbourg. "
-        f"[Open in a new tab]({atlas_link})."
-    )
+
+@st.cache_data(show_spinner=False, max_entries=16)
+def atlas_png(name, ra_c, dec_c, fov, now, then):
+    from coldmovers import atlas
+
+    image = atlas.fetch_allwise(ra_c, dec_c, fov)
+    try:
+        stars = atlas.gaia_field(ra_c, dec_c, fov * 0.72)
+        note = ""
+    except Exception:
+        stars, note = [], "Gaia DR3 did not answer, so its stars are not drawn this time."
+    return atlas.render(ra_c, dec_c, fov, image, stars, now, then, title=f"{name}: 2010 and now"), note
+
+
+if st.toggle("Show the sky around it: AllWISE image (2010) with Gaia DR3 stars and their motion", value=False):
+    mid_ra = (float(ra_now) + float(ra_2010)) / 2.0
+    mid_dec = (float(dec_now) + float(dec_2010)) / 2.0
+    sep_deg = float(np.hypot((float(ra_now) - float(ra_2010)) * np.cos(np.radians(mid_dec)),
+                             float(dec_now) - float(dec_2010)))
+    fov_atlas = max(view["size_deg"] * 2.0, sep_deg * 2.5, 0.08)
+    try:
+        with st.spinner("Fetching the AllWISE image and Gaia DR3 stars"):
+            png, note = atlas_png(target.name, mid_ra, mid_dec, fov_atlas,
+                                  (float(ra_now), float(dec_now)), (float(ra_2010), float(dec_2010)))
+        a1, a2 = st.columns([3, 2])
+        a1.image(png, use_container_width=True)
+        a2.markdown(
+            "**What you see.** The background is the AllWISE infrared image, taken around 2010. Blue squares are "
+            "Gaia DR3 stars placed where they were in 2010; arrows show where their own motion carries them in "
+            "20 years. The orange circles mark where our object was in 2010 and where SPHEREx sees it now."
+        )
+        if note:
+            a2.caption(note)
+        a2.markdown(f"[Explore it interactively in Aladin Lite (CDS)]({atlas_link})")
+    except Exception:
+        st.info(f"The AllWISE image service (CDS) did not answer. [Open the interactive atlas at CDS]({atlas_link}).")
 
 # ------------------------------------------------------------------ spectrum + Madhava
 

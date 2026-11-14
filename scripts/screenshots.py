@@ -45,12 +45,12 @@ with sync_playwright() as p:
     fr = open_app(page, "?object=wise0855")
     page.screenshot(path=os.path.join(OUT, "desktop_top.png"))
     try:
-        fr.get_by_text("Show this spot in an interactive sky atlas").first.click()
-        page.wait_for_timeout(20_000)
-        atlas = fr.locator("iframe").last
-        atlas.scroll_into_view_if_needed()
-        page.wait_for_timeout(5_000)
-        atlas.screenshot(path=os.path.join(OUT, "atlas.png"))
+        fr.get_by_text("Show the sky around it").first.click()
+        page.wait_for_timeout(25_000)
+        img = fr.get_by_text("What you see.").first
+        img.scroll_into_view_if_needed()
+        page.wait_for_timeout(3_000)
+        page.screenshot(path=os.path.join(OUT, "atlas.png"))
         print("atlas screenshot saved")
     except Exception as exc:
         print("atlas screenshot failed:", exc)
