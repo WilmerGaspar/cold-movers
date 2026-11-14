@@ -379,7 +379,7 @@ if np.isfinite(fit.temperature) and fit.light != "red":
 else:
     big_t = "Too bright to measure" if "too_bright" in fit.reasons else "Not reliable"
     small_t = madhava.REASON_TEXT.get(fit.reasons[0], "") if fit.reasons else ""
-s2.markdown(summary_card(f"How cold? · {LIGHT_WORDS[fit.light]}", big_t, small_t.split(". ")[0] + ".",
+s2.markdown(summary_card(f"How cold? · {LIGHT_WORDS[fit.light]}", big_t, small_t.split(". ")[0].rstrip(".") + ".",
                          LIGHT_COLORS[fit.light]), unsafe_allow_html=True)
 
 if real:
@@ -461,7 +461,12 @@ with right:
         unsafe_allow_html=True,
     )
     available = sorted({d for ep in view["stacks"].values() for d in ep}) if view.get("stacks") else []
-    det = st.radio("Detector", available or [0], index=0, format_func=movie.detector_label)
+    # Start on the detector where the target is brightest and not blended (WISE 0855: the
+    # long-wavelength one); "All detectors" for saturated stars.
+    best = checks.best_detector(rows)
+    options = available or [0]
+    det = st.radio("Detector", options, index=options.index(best) if best in options else 0,
+                   format_func=movie.detector_label)
     show_diff = st.toggle("Show difference (last visit minus first)", value=False,
                           help="Things that did not change cancel out; moving or varying things remain.")
     st.markdown(
