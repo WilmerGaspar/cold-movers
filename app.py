@@ -542,7 +542,7 @@ st.markdown("### 3 · Does it change? Brightness visit by visit")
 v_plot, v_text = st.columns([3, 2])
 with v_text:
     st.markdown(f"<div class='cm-card'>{lc['verdict']['text']}</div>", unsafe_allow_html=True)
-    if "wings" in lc["methods"].values():
+    if any("wings" in m for m in lc["methods"].values()):
         st.caption("Its core saturates SPHEREx, so we follow the light in the wings of the star (3-6 pixels "
                    "from the centre), which rises and falls with the total brightness.")
     st.caption("For each detector we remove the smooth change of brightness with wavelength, so what remains "

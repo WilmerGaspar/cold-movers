@@ -109,7 +109,7 @@ def _table_to_rows(table, url_col, time_col, band_col, obs_col=None, collection=
     return rows
 
 
-def search_images(ra_deg: float, dec_deg: float, collections=COLLECTIONS, attempts: int = 4):
+def search_images(ra_deg: float, dec_deg: float, collections=COLLECTIONS, attempts: int = 6):
     """List SPHEREx spectral images covering a sky position, sorted by time.
 
     Returns a list of dicts: url, mjd, detector (1-6), obs_id, collection.
@@ -121,7 +121,8 @@ def search_images(ra_deg: float, dec_deg: float, collections=COLLECTIONS, attemp
             return _search_once(ra_deg, dec_deg, collections)
         except RuntimeError as exc:
             last = exc
-            time.sleep(5 * (attempt + 1))
+            if attempt < attempts - 1:
+                time.sleep(min(10 * (attempt + 1), 45))
     raise last
 
 

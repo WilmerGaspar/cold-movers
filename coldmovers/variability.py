@@ -40,10 +40,16 @@ def light_curve(rows, epochs) -> dict:
         if not drows:
             continue
         sat = np.mean([bool(r.get("saturated")) for r in drows])
-        key = "wing_ujy" if sat > 0.5 else "flux_ujy"
+        if sat > 0.5:
+            # Inner wing ring unless saturation spoils it; then the outer ring.
+            def n_ok(k):
+                return sum(np.isfinite(r.get(k, np.nan)) and r.get(k, 0) > 0 for r in drows)
+            key = "wing_ujy" if n_ok("wing_ujy") >= 0.8 * n_ok("wing2_ujy") else "wing2_ujy"
+        else:
+            key = "flux_ujy"
         use = [r for r in drows
                if np.isfinite(r.get(key, np.nan)) and r.get(key, 0) > 0
-               and (key == "wing_ujy" or (not r["hard_flag"] and not r.get("blend")))]
+               and (key != "flux_ujy" or (not r["hard_flag"] and not r.get("blend")))]
         if len(use) < MIN_POINTS_PER_DETECTOR:
             continue
         lam = np.array([r["wavelength_um"] for r in use])
@@ -52,7 +58,7 @@ def light_curve(rows, epochs) -> dict:
         if coef is None:
             continue
         res = mag - np.polyval(coef, lam)
-        methods[det] = "wings" if key == "wing_ujy" else "aperture"
+        methods[det] = {"wing_ujy": "wings", "wing2_ujy": "outer wings"}.get(key, "aperture")
         for r, d in zip(use, res):
             points.append({"mjd": float(r["mjd"]), "detector": det, "dmag": float(d)})
 

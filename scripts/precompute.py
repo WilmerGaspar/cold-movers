@@ -92,44 +92,60 @@ def main():
     except Exception:
         log("probe failed:\n" + traceback.format_exc())
 
-    for key in keys:
-        log(f"=== {key} ===")
-        target = SHOWCASE[key]
-        try:
-            target = resolve_simbad(SIMBAD_IDS[key], key=key)
-            fb = SHOWCASE[key]
-            if key == "wise0855" and abs(target.pmra_masyr) < 1:
-                log("   SIMBAD has no proper motion for WISE 0855; using literature values")
-                target.pmra_masyr, target.pmdec_masyr = fb.pmra_masyr, fb.pmdec_masyr
-            log(f"   SIMBAD: {json.dumps(target.to_dict())}")
-        except Exception as exc:
-            log(f"   SIMBAD failed ({exc}); using fallback values")
-        try:
-            g = gaia_parallax(target)
-            if g:
-                plx, err, sid = g
-                log(f"   Gaia DR3 {sid}: parallax {plx:.4f} ± {err:.4f} mas (catalogue had {target.parallax_mas})")
-                target.parallax_mas = plx
-                target.source += f"; parallax from Gaia DR3 {sid}"
-            else:
-                log("   Gaia DR3: no precise parallax at this position (kept catalogue value)")
-        except Exception as exc:
-            log(f"   Gaia DR3 query failed ({exc}); kept catalogue parallax")
-        try:
-            result = pipeline.run(target, size_deg=args.size, max_frames=args.max_frames, workers=6,
-                                  progress=lambda s, f: None)
-            summarize(result)
-            pipeline.save(result, os.path.join(OUT, key))
-            status[key] = {"ok": True, "fit": result.fit.as_dict(), "n_used": result.n_used,
-                           "n_found": result.n_found}
-        except Exception:
-            tb = traceback.format_exc()
-            log("   FAILED:\n" + tb)
-            status[key] = {"ok": False, "error": tb[-1500:]}
+    for key in keys + ["__retry__"]:
+        if key == "__retry__":
+            # IRSA sometimes answers 502 for minutes: give failed objects one more chance.
+            failed = [k for k in keys if not status.get(k, {}).get("ok")]
+            if not failed:
+                break
+            log(f"=== retrying {failed} ===")
+            time.sleep(60)
+            keys_now = failed
+        else:
+            keys_now = [key]
+        for key in keys_now:
+            process(key, args, status)
 
     with open(os.path.join(OUT, "_status.json"), "w") as fh:
         json.dump(pipeline.json_safe(status), fh, indent=2, allow_nan=False)
     log("finished")
+
+
+def process(key, args, status):
+    """Resolve one challenge object, run the pipeline and save its results."""
+    log(f"=== {key} ===")
+    target = SHOWCASE[key]
+    try:
+        target = resolve_simbad(SIMBAD_IDS[key], key=key)
+        fb = SHOWCASE[key]
+        if key == "wise0855" and abs(target.pmra_masyr) < 1:
+            log("   SIMBAD has no proper motion for WISE 0855; using literature values")
+            target.pmra_masyr, target.pmdec_masyr = fb.pmra_masyr, fb.pmdec_masyr
+        log(f"   SIMBAD: {json.dumps(target.to_dict())}")
+    except Exception as exc:
+        log(f"   SIMBAD failed ({exc}); using fallback values")
+    try:
+        g = gaia_parallax(target)
+        if g:
+            plx, err, sid = g
+            log(f"   Gaia DR3 {sid}: parallax {plx:.4f} ± {err:.4f} mas (catalogue had {target.parallax_mas})")
+            target.parallax_mas = plx
+            target.source += f"; parallax from Gaia DR3 {sid}"
+        else:
+            log("   Gaia DR3: no precise parallax at this position (kept catalogue value)")
+    except Exception as exc:
+        log(f"   Gaia DR3 query failed ({exc}); kept catalogue parallax")
+    try:
+        result = pipeline.run(target, size_deg=args.size, max_frames=args.max_frames, workers=6,
+                              progress=lambda s, f: None)
+        summarize(result)
+        pipeline.save(result, os.path.join(OUT, key))
+        status[key] = {"ok": True, "fit": result.fit.as_dict(), "n_used": result.n_used,
+                       "n_found": result.n_found}
+    except Exception:
+        tb = traceback.format_exc()
+        log("   FAILED:\n" + tb)
+        status[key] = {"ok": False, "error": tb[-1500:]}
 
 
 if __name__ == "__main__":
