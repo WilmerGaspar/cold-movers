@@ -1,0 +1,180 @@
+"""Targets: the five challenge objects, name lookup and proper-motion propagation.
+
+AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
+
+Positions move: Barnard's Star travels about 10.4 arcsec per year, so a position
+from the year 2000 is ~270 arcsec (44 SPHEREx pixels) off by 2026. Every frame is
+therefore measured at the position propagated to that frame's own date.
+"""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass
+
+import numpy as np
+
+MJD_J2000 = 51544.5  # MJD of epoch J2000.0
+DAYS_PER_JULIAN_YEAR = 365.25
+MAS_PER_DEG = 3.6e6
+
+
+def mjd_to_year(mjd):
+    return 2000.0 + (np.asarray(mjd, dtype=float) - MJD_J2000) / DAYS_PER_JULIAN_YEAR
+
+
+def year_to_mjd(year):
+    return MJD_J2000 + (np.asarray(year, dtype=float) - 2000.0) * DAYS_PER_JULIAN_YEAR
+
+
+@dataclass
+class Target:
+    key: str
+    name: str
+    ra_deg: float
+    dec_deg: float
+    pmra_masyr: float = 0.0  # mu_alpha * cos(delta)
+    pmdec_masyr: float = 0.0
+    parallax_mas: float | None = None
+    ref_epoch: float = 2000.0  # Julian year at which ra/dec are valid
+    source: str = "user input"
+    note: str = ""
+
+    def position_at(self, mjd):
+        """(ra, dec) in degrees at the given MJD, linear proper-motion propagation.
+
+        Over a few decades this is accurate to far better than one SPHEREx pixel
+        (6.15 arcsec) for every object in the challenge.
+        """
+        dt = mjd_to_year(mjd) - self.ref_epoch
+        dec = self.dec_deg + self.pmdec_masyr * dt / MAS_PER_DEG
+        ra = self.ra_deg + self.pmra_masyr * dt / MAS_PER_DEG / np.cos(np.radians(self.dec_deg))
+        return np.mod(ra, 360.0), dec
+
+    @property
+    def total_pm_arcsec_per_year(self) -> float:
+        return float(np.hypot(self.pmra_masyr, self.pmdec_masyr) / 1000.0)
+
+    @property
+    def distance_pc(self) -> float | None:
+        if self.parallax_mas and self.parallax_mas > 0:
+            return 1000.0 / self.parallax_mas
+        return None
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Target":
+        return cls(**{k: data[k] for k in cls.__dataclass_fields__ if k in data})
+
+
+# The five objects named in the challenge brief. These starting values are used
+# only if SIMBAD cannot be reached; precomputed results record the values used.
+SHOWCASE = {
+    "barnard": Target(
+        key="barnard", name="Barnard's Star", ra_deg=269.4520833, dec_deg=4.6933889,
+        pmra_masyr=-801.551, pmdec_masyr=10362.394, parallax_mas=546.976,
+        source="fallback (Gaia DR3 values)",
+        note="Red dwarf with the largest proper motion of any star.",
+    ),
+    "epsindib": Target(
+        key="epsindib", name="Epsilon Indi B", ra_deg=331.0438, dec_deg=-56.7827,
+        pmra_masyr=3966.7, pmdec_masyr=-2536.2, parallax_mas=274.8,
+        source="fallback (motion of Epsilon Indi A, Gaia DR3)",
+        note="Pair of T-type brown dwarfs orbiting the star Epsilon Indi.",
+    ),
+    "wise0855": Target(
+        key="wise0855", name="WISE 0855-0714", ra_deg=133.7951292, dec_deg=-7.2451472,
+        pmra_masyr=-8123.7, pmdec_masyr=673.9, parallax_mas=439.0, ref_epoch=2010.5,
+        source="fallback (challenge brief position; literature motion)",
+        note="The coldest known brown dwarf, near the temperature of the North Pole.",
+    ),
+    "rwaur": Target(
+        key="rwaur", name="RW Aurigae", ra_deg=76.9565, dec_deg=30.4014,
+        source="fallback",
+        note="Young star still surrounded by its dusty planet-forming disk.",
+    ),
+    "rdra": Target(
+        key="rdra", name="R Draconis", ra_deg=248.1675, dec_deg=66.7550,
+        source="fallback",
+        note="Pulsating red giant (Mira variable) that brightens and fades over months.",
+    ),
+}
+
+SIMBAD_IDS = {
+    "barnard": "Barnard's star",
+    "epsindib": "eps Ind B",
+    "wise0855": "WISE J085510.83-071442.5",
+    "rwaur": "RW Aur",
+    "rdra": "R Dra",
+}
+
+
+def _col(table, *names):
+    lower = {c.lower(): c for c in table.colnames}
+    for n in names:
+        if n.lower() in lower:
+            return table[lower[n.lower()]]
+    return None
+
+
+def _num(value):
+    try:
+        v = float(value)
+        return v if np.isfinite(v) else None
+    except (TypeError, ValueError):
+        return None
+
+
+def resolve_simbad(name: str, key: str | None = None) -> Target:
+    """Look up a name in SIMBAD (position at J2000, proper motion, parallax)."""
+    from astroquery.simbad import Simbad
+
+    simbad = Simbad()
+    simbad.add_votable_fields("pmra", "pmdec", "plx_value")
+    table = simbad.query_object(name)
+    if table is None or len(table) == 0:
+        raise LookupError(f"SIMBAD does not know '{name}'.")
+    row = table[0]
+    ra = _num(_col(table, "ra", "RA_d")[0])
+    dec = _num(_col(table, "dec", "DEC_d")[0])
+    if ra is None or dec is None:
+        from astropy.coordinates import SkyCoord
+        import astropy.units as u
+
+        c = SkyCoord(str(_col(table, "RA")[0]), str(_col(table, "DEC")[0]), unit=(u.hourangle, u.deg))
+        ra, dec = c.ra.deg, c.dec.deg
+    pmra = _num(_col(table, "pmra", "PMRA")[0]) or 0.0
+    pmdec = _num(_col(table, "pmdec", "PMDEC")[0]) or 0.0
+    plx_col = _col(table, "plx_value", "PLX_VALUE")
+    plx = _num(plx_col[0]) if plx_col is not None else None
+    main_id = _col(table, "main_id", "MAIN_ID")
+    coo_bib = _col(table, "coo_bibcode", "COO_BIBCODE")
+    label = str(main_id[0]) if main_id is not None else name
+    src = "SIMBAD"
+    if coo_bib is not None and str(coo_bib[0]).strip():
+        src += f" (position: {str(coo_bib[0]).strip()})"
+    base = SHOWCASE.get(key or "")
+    return Target(
+        key=key or label.replace(" ", "_").lower(),
+        name=base.name if base else label,
+        ra_deg=float(ra), dec_deg=float(dec), pmra_masyr=float(pmra), pmdec_masyr=float(pmdec),
+        parallax_mas=plx, ref_epoch=2000.0, source=src,
+        note=base.note if base else "",
+    )
+
+
+def parse_coordinates(text: str):
+    """Parse 'RA Dec' in degrees or sexagesimal. Returns (ra_deg, dec_deg)."""
+    text = text.strip().replace(",", " ")
+    parts = text.split()
+    if len(parts) == 2:
+        try:
+            return float(parts[0]) % 360.0, float(parts[1])
+        except ValueError:
+            pass
+    from astropy.coordinates import SkyCoord
+    import astropy.units as u
+
+    c = SkyCoord(text, unit=(u.hourangle, u.deg), frame="icrs")
+    return float(c.ra.deg), float(c.dec.deg)

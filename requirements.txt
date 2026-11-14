@@ -1,0 +1,11 @@
+streamlit>=1.39
+numpy>=1.26
+scipy>=1.11
+pandas>=2.1
+astropy>=6.1
+astroquery>=0.4.9
+pyvo>=1.5
+requests>=2.31
+matplotlib>=3.8
+pillow>=10.0
+plotly>=5.20
