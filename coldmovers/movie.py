@@ -23,6 +23,10 @@ from .spherex import DETECTOR_RANGE_UM, MOVIE_MASK, PIXEL_ARCSEC, SAT_MASK
 
 EPOCH_GAP_DAYS = 20.0
 BG = "#0b0f1a"  # matches the app theme
+# Visible mark required by the NASA Space Apps rules on AI ("SI") use.
+WATERMARK = "Cold Movers · AI-assisted code (Claude)"
+GIF_COMMENT = (b"Cold Movers, NASA Space Apps 2026. Rendered from SPHEREx DR1/QR3 data (NASA/IPAC IRSA) "
+               b"by code written with AI assistance (Claude, Anthropic) under the team's direction.")
 FG = "#e8ecf4"
 
 
@@ -172,6 +176,7 @@ def render_frames(epochs, det: int, marker_pixels=None, title_fn=None, dpi: int 
         for spine in ax.spines.values():
             spine.set_color("#232b40")
         fig.tight_layout()
+        fig.text(0.99, 0.005, WATERMARK, ha="right", va="bottom", fontsize=6, color="#8a93a6")
         buf = io.BytesIO()
         fig.savefig(buf, format="png", facecolor=BG)
         plt.close(fig)
@@ -186,7 +191,8 @@ def frames_to_gif(pngs, ms_per_frame: int = 700) -> bytes:
         return b""
     images = [Image.open(io.BytesIO(p)).convert("P", palette=Image.ADAPTIVE) for p in pngs]
     buf = io.BytesIO()
-    images[0].save(buf, format="GIF", save_all=True, append_images=images[1:], duration=ms_per_frame, loop=0)
+    images[0].save(buf, format="GIF", save_all=True, append_images=images[1:], duration=ms_per_frame, loop=0,
+                   comment=GIF_COMMENT)
     return buf.getvalue()
 
 

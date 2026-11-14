@@ -69,6 +69,8 @@ st.markdown(
     "archive, play them as a movie so anything that moves stands out, and fit its infrared spectrum "
     "to estimate its temperature."
 )
+st.caption("Team Cold Movers (Honduras) · NASA Space Apps 2026 · built with AI-assisted code (Claude, Anthropic); "
+           "see the AI note at the bottom. Not an official NASA product.")
 
 tab_obj, tab_coords, tab_name = st.tabs(["Challenge objects", "Coordinates", "Name"])
 request = None
@@ -374,6 +376,7 @@ with left:
             ax.set_yticks([])
             ax.set_title("Last visit minus first: red = brighter now, blue = was there before", fontsize=8)
             fig.tight_layout()
+            fig.text(0.99, 0.005, movie.WATERMARK, ha="right", va="bottom", fontsize=6, color="#8a93a6")
             st.pyplot(fig, use_container_width=True)
     else:
         key = f"{target.key}-{target.ra_deg:.5f}-{target.dec_deg:.5f}-{view.get('dir')}-{view['size_deg']}-{len(epochs)}"
