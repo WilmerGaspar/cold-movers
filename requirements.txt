@@ -1,11 +1,15 @@
+# Exact versions verified on 2026-11-14 (Python 3.12, see docs/pip_freeze.txt).
+# Pinned so a new library release cannot change the app during judging.
 streamlit==1.45.1
-numpy>=1.26
-scipy>=1.11
-pandas>=2.1
-astropy>=6.1
-astroquery>=0.4.9
-pyvo>=1.5
-requests>=2.31
-matplotlib>=3.8
-pillow>=10.0
-plotly>=5.20
+numpy==2.5.4
+scipy==1.18.1
+pandas==2.3.3
+astropy==7.2.3
+astropy-iers-data==0.2026.11.9.0.35.9
+pyerfa==2.0.1.5
+astroquery==0.4.11
+pyvo==1.10.0
+requests==2.34.2
+matplotlib==3.11.2
+pillow==11.3.0
+plotly==7.1.0
