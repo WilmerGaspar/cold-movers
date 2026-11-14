@@ -58,6 +58,10 @@ HARD_BITS = (1, 2, 6, 9, 10, 11, 15, 17, 19, 25, 26, 27, 28)
 SOFT_BITS = (0, 7, 14, 20, 22, 23, 24)
 HARD_MASK = int(sum(1 << b for b in HARD_BITS))
 SOFT_MASK = int(sum(1 << b for b in SOFT_BITS))
+# Saturation: the detector overflowed (very bright sources such as Barnard's Star).
+SAT_MASK = int((1 << 1) | (1 << 2))
+# For the movie only dead or missing pixels are hidden; saturated cores are drawn white.
+MOVIE_MASK = int((1 << 6) | (1 << 9))
 
 
 def _quiet():
@@ -207,7 +211,7 @@ def _cache_path(key: str) -> str:
     return os.path.join(CACHE_DIR, h[:2], h + ".fits")
 
 
-def fetch_bytes(url: str, retries: int = 3, timeout: float = 90.0) -> bytes:
+def fetch_bytes(url: str, retries: int = 6, timeout: float = 90.0) -> bytes:
     import requests
 
     path = _cache_path(url)
@@ -217,7 +221,12 @@ def fetch_bytes(url: str, retries: int = 3, timeout: float = 90.0) -> bytes:
     last = None
     for attempt in range(retries):
         try:
-            resp = requests.get(url, timeout=timeout)
+            resp = requests.get(url, timeout=timeout, headers={"User-Agent": "ColdMovers/0.1 (NASA Space Apps 2026)"})
+            if resp.status_code in (429, 502, 503, 504):
+                # IRSA is busy: wait longer each time before trying again.
+                last = RuntimeError(f"HTTP {resp.status_code}")
+                time.sleep(4 * (attempt + 1) + np.random.uniform(0, 2))
+                continue
             resp.raise_for_status()
             data = resp.content
             if not data.startswith(b"SIMPLE"):
@@ -266,7 +275,7 @@ def parse_cutout(data: bytes, row: dict) -> Frame:
     )
 
 
-def download_frames(rows, center_for_row, size_deg: float, workers: int = 12, progress=None):
+def download_frames(rows, center_for_row, size_deg: float, workers: int = 6, progress=None):
     """Download and parse cutouts in parallel.
 
     center_for_row(row) -> (ra, dec) gives the cutout centre for each image.

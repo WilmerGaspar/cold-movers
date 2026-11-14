@@ -105,7 +105,7 @@ def main():
         except Exception as exc:
             log(f"   SIMBAD failed ({exc}); using fallback values")
         try:
-            result = pipeline.run(target, size_deg=args.size, max_frames=args.max_frames, workers=16,
+            result = pipeline.run(target, size_deg=args.size, max_frames=args.max_frames, workers=6,
                                   progress=lambda s, f: None)
             summarize(result)
             pipeline.save(result, os.path.join(OUT, key))

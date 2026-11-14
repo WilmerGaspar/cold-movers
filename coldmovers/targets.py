@@ -127,7 +127,53 @@ def _num(value):
 
 
 def resolve_simbad(name: str, key: str | None = None) -> Target:
-    """Look up a name in SIMBAD (position at J2000, proper motion, parallax)."""
+    """Look up a name in SIMBAD; if its TAP service fails, ask the CDS Sesame resolver."""
+    try:
+        return _resolve_simbad_tap(name, key)
+    except LookupError:
+        raise
+    except Exception as first_error:
+        try:
+            return resolve_sesame(name, key)
+        except Exception as second_error:
+            raise RuntimeError(f"SIMBAD: {first_error}; Sesame: {second_error}") from second_error
+
+
+def resolve_sesame(name: str, key: str | None = None) -> Target:
+    """CDS Sesame name resolver (SIMBAD data): position, proper motion and parallax."""
+    import urllib.parse
+    import xml.etree.ElementTree as ET
+
+    import requests
+
+    url = "https://cds.unistra.fr/cgi-bin/nph-sesame/-ox/S?" + urllib.parse.quote(name)
+    resp = requests.get(url, timeout=30)
+    resp.raise_for_status()
+    root = ET.fromstring(resp.content)
+    res = next((r for r in root.iter("Resolver") if r.find("jradeg") is not None), None)
+    if res is None:
+        raise LookupError(f"SIMBAD does not know '{name}'.")
+
+    def val(path):
+        el = res.find(path)
+        return _num(el.text) if el is not None and el.text else None
+
+    base = SHOWCASE.get(key or "")
+    oname = res.find("oname")
+    label = oname.text.strip() if oname is not None and oname.text else name
+    ref = res.find("refPos")
+    src = "SIMBAD via Sesame" + (f" (position: {ref.text.strip()})" if ref is not None and ref.text else "")
+    return Target(
+        key=key or label.replace(" ", "_").lower(),
+        name=base.name if base else label,
+        ra_deg=float(val("jradeg")), dec_deg=float(val("jdedeg")),
+        pmra_masyr=val("pm/pmRA") or 0.0, pmdec_masyr=val("pm/pmDE") or 0.0,
+        parallax_mas=val("plx/v"), ref_epoch=2000.0, source=src,
+        note=base.note if base else "",
+    )
+
+
+def _resolve_simbad_tap(name: str, key: str | None = None) -> Target:
     from astroquery.simbad import Simbad
 
     simbad = Simbad()

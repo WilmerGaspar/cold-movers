@@ -280,6 +280,10 @@ def traffic_light(result: FitResult, t_min: float = DEFAULT_T_MIN, t_max: float 
 
 REASON_TEXT = {
     "not_enough_signal": "Not enough clean SPHEREx measurements to fit a temperature.",
+    "too_bright": (
+        "Too bright for SPHEREx: the star saturates the detector, so its brightness cannot be measured "
+        "from these images. SPHEREx was built to see faint objects; compare with the published value."
+    ),
     "colder_than_range": "Colder than the fit can measure: almost all its light is beyond 5 um.",
     "hotter_than_range": "Hotter than the fit can measure with SPHEREx bands.",
     "uncertainty_too_large": "The uncertainty is larger than half the value.",

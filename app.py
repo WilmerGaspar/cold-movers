@@ -326,10 +326,7 @@ with left:
 # ------------------------------------------------------------------ spectrum + Madhava
 
 st.markdown("### 2 · Its light, and how cold it is")
-fit = madhava.fit_temperature(
-    [r["wavelength_um"] for r in clean], [r["bandwidth_um"] for r in clean],
-    [r["flux_ujy"] for r in clean], [r["err_ujy"] for r in clean],
-)
+fit = pipeline.fit_rows(rows)
 
 c_plot, c_card = st.columns([3, 2])
 with c_plot:

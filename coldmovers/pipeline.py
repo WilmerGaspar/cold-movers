@@ -41,8 +41,26 @@ class RunResult:
         return float(x), float(y)
 
     def clean_rows(self):
-        return [r for r in self.rows if r["inside"] and not r["hard_flag"]
-                and np.isfinite(r["wavelength_um"]) and np.isfinite(r["flux_ujy"])]
+        return clean_rows(self.rows)
+
+
+def clean_rows(rows):
+    return [r for r in rows if r["inside"] and not r["hard_flag"]
+            and np.isfinite(r["wavelength_um"]) and np.isfinite(r["flux_ujy"])]
+
+
+def fit_rows(rows) -> madhava.FitResult:
+    """Madhava fit on the clean measurements; explains saturation when it blocks the fit."""
+    good = clean_rows(rows)
+    fit = madhava.fit_temperature(
+        [r["wavelength_um"] for r in good], [r["bandwidth_um"] for r in good],
+        [r["flux_ujy"] for r in good], [r["err_ujy"] for r in good],
+    )
+    inside = [r for r in rows if r["inside"]]
+    n_sat = sum(bool(r.get("saturated")) for r in inside)
+    if inside and n_sat > 0.5 * len(inside) and fit.light == "red":
+        fit.reasons = ["too_bright"]
+    return fit
 
 
 def run(target: Target, size_deg: float = DEFAULT_SIZE_DEG, max_frames: int = DEFAULT_MAX_FRAMES,
@@ -66,7 +84,8 @@ def run(target: Target, size_deg: float = DEFAULT_SIZE_DEG, max_frames: int = DE
         say(f"Downloading SPHEREx cutouts ({done}/{total})", 0.05 + 0.75 * done / max(total, 1))
 
     t1 = time.time()
-    frames, failures = spherex.download_frames(rows, centre, size_deg, workers=workers, progress=dl_progress)
+    # Download a margin around the field so the aligned (rotated) frames fill it completely.
+    frames, failures = spherex.download_frames(rows, centre, size_deg * 1.45, workers=workers, progress=dl_progress)
     t_download = time.time() - t1
 
     say("Measuring the target in every image", 0.82)
@@ -75,13 +94,8 @@ def run(target: Target, size_deg: float = DEFAULT_SIZE_DEG, max_frames: int = DE
         ra, dec = target.position_at(f.mjd)
         phot.append(photometry.measure_frame(f, float(ra), float(dec)))
 
-    good = [r for r in phot if r["inside"] and not r["hard_flag"] and np.isfinite(r["wavelength_um"])
-            and np.isfinite(r["flux_ujy"])]
     say("Running the Madhava engine", 0.88)
-    fit = madhava.fit_temperature(
-        [r["wavelength_um"] for r in good], [r["bandwidth_um"] for r in good],
-        [r["flux_ujy"] for r in good], [r["err_ujy"] for r in good],
-    )
+    fit = fit_rows(phot)
 
     say("Aligning images and building the sky movie", 0.92)
     mid = float(np.median([f.mjd for f in frames])) if frames else year_to_mjd(SEARCH_YEAR)
@@ -109,7 +123,8 @@ def epoch_title(ep, det, k, n):
 # ----------------------------------------------------------------- save / load
 
 PHOT_COLUMNS = ["mjd", "detector", "wavelength_um", "bandwidth_um", "flux_ujy", "err_ujy", "snr",
-                "x", "y", "background", "inside", "hard_flag", "soft_flag", "flag_bits", "ra", "dec", "url"]
+                "x", "y", "background", "inside", "hard_flag", "soft_flag", "saturated", "flag_bits",
+                "ra", "dec", "url"]
 
 
 def save(result: RunResult, outdir: str) -> dict:
@@ -185,8 +200,8 @@ def load(outdir: str) -> dict | None:
                         r[k] = float(r[k])
                     except (TypeError, ValueError):
                         r[k] = float("nan")
-                for k in ("inside", "hard_flag", "soft_flag"):
-                    r[k] = str(r[k]) == "True"
+                for k in ("inside", "hard_flag", "soft_flag", "saturated"):
+                    r[k] = str(r.get(k)) == "True"
                 r["detector"] = int(r["detector"])
                 r["flag_bits"] = int(float(r["flag_bits"] or 0))
                 rows.append(r)

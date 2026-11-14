@@ -14,11 +14,12 @@ the same sky grid, makes real motion visible, in the spirit of WiseView.
 from __future__ import annotations
 
 import io
+import warnings
 
 import numpy as np
 from scipy.ndimage import map_coordinates
 
-from .spherex import DETECTOR_RANGE_UM, HARD_MASK, PIXEL_ARCSEC
+from .spherex import DETECTOR_RANGE_UM, MOVIE_MASK, PIXEL_ARCSEC, SAT_MASK
 
 EPOCH_GAP_DAYS = 20.0
 
@@ -36,15 +37,20 @@ def make_reference_wcs(ra_deg: float, dec_deg: float, size_deg: float, pixel_arc
     return w, (n, n)
 
 
-def reproject_frame(frame, ref_wcs, shape) -> np.ndarray:
-    """Resample a frame onto the reference grid (bilinear); bad pixels become NaN."""
+def reproject_frame(frame, ref_wcs, shape, with_saturation: bool = False):
+    """Resample a frame onto the reference grid (bilinear).
+
+    Dead, missing and saturated pixels become NaN. With with_saturation=True a second
+    map gives, for each output pixel, whether it came from saturated pixels.
+    """
     ny, nx = shape
     yy, xx = np.mgrid[0:ny, 0:nx]
     ra, dec = ref_wcs.wcs_pix2world(xx.ravel(), yy.ravel(), 0)
     x_in, y_in = frame.wcs.world_to_pixel_values(ra, dec)
     img = np.array(frame.image, dtype=float)
-    bad = (np.asarray(frame.flags, dtype=np.int64) & HARD_MASK) != 0
-    img[bad] = np.nan
+    flags = np.asarray(frame.flags, dtype=np.int64)
+    sat = (flags & SAT_MASK) != 0
+    img[((flags & MOVIE_MASK) != 0) | sat] = np.nan
     finite = np.isfinite(img)
     med = np.nanmedian(img) if finite.any() else 0.0
     filled = np.where(finite, img - med, 0.0)
@@ -53,8 +59,11 @@ def reproject_frame(frame, ref_wcs, shape) -> np.ndarray:
     val = map_coordinates(filled, coords, order=1, mode="constant", cval=0.0)
     wgt = map_coordinates(weight, coords, order=1, mode="constant", cval=0.0)
     with np.errstate(invalid="ignore", divide="ignore"):
-        out = np.where(wgt > 0.5, val / wgt, np.nan)
-    return out.reshape(shape)
+        out = np.where(wgt > 0.5, val / wgt, np.nan).reshape(shape)
+    if not with_saturation:
+        return out
+    sat_map = map_coordinates(sat.astype(float), coords, order=0, mode="constant", cval=0.0).reshape(shape)
+    return out, sat_map
 
 
 def group_epochs(mjds, gap_days: float = EPOCH_GAP_DAYS):
@@ -80,11 +89,19 @@ def build_epoch_stacks(frames, ref_wcs, shape, gap_days: float = EPOCH_GAP_DAYS)
         members = [f for f, lab in zip(frames, labels) if lab == e]
         stacks, counts = {}, {}
         for det in range(1, 7):
-            imgs = [reproject_frame(f, ref_wcs, shape) for f in members if f.detector == det]
-            if imgs:
-                with np.errstate(all="ignore"):
-                    stacks[det] = np.nanmean(np.array(imgs), axis=0)
-                counts[det] = len(imgs)
+            pairs = [reproject_frame(f, ref_wcs, shape, with_saturation=True) for f in members if f.detector == det]
+            if pairs:
+                imgs = np.array([p[0] for p in pairs])
+                sats = np.array([p[1] for p in pairs])
+                with np.errstate(all="ignore"), warnings.catch_warnings():
+                    warnings.simplefilter("ignore", RuntimeWarning)
+                    stack = np.nanmean(imgs, axis=0)
+                    # Saturated cores: paint them at the brightest level instead of a black hole.
+                    core = np.isnan(stack) & (sats.mean(axis=0) > 0.3)
+                    if core.any() and np.isfinite(stack).any():
+                        stack[core] = np.nanmax(stack)
+                stacks[det] = stack
+                counts[det] = len(pairs)
         if stacks:
             # "All detectors": each detector scaled by its own noise, then averaged.
             normed = []
@@ -92,7 +109,8 @@ def build_epoch_stacks(frames, ref_wcs, shape, gap_days: float = EPOCH_GAP_DAYS)
                 v = img[np.isfinite(img)]
                 sd = 1.4826 * np.median(np.abs(v - np.median(v))) if v.size else 1.0
                 normed.append(img / (sd if sd > 0 else 1.0))
-            with np.errstate(all="ignore"):
+            with np.errstate(all="ignore"), warnings.catch_warnings():
+                warnings.simplefilter("ignore", RuntimeWarning)
                 stacks[0] = np.nanmean(np.array(normed), axis=0)
             counts[0] = sum(counts.values())
         mj = np.array([f.mjd for f in members])

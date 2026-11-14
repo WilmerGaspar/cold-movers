@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .spherex import HARD_MASK, SOFT_MASK, FLAG_NAMES
+from .spherex import FLAG_NAMES, HARD_MASK, SAT_MASK, SOFT_MASK
 
 R_APERTURE = 2.5
 R_IN = 5.0
@@ -53,7 +53,7 @@ def measure(image, variance, flags, x, y, pixel_sr, r_ap=R_APERTURE, r_in=R_IN, 
     ny, nx = image.shape
     out = {
         "x": float(x), "y": float(y), "flux_ujy": np.nan, "err_ujy": np.nan,
-        "background": np.nan, "hard_flag": True, "soft_flag": False, "flag_bits": 0,
+        "background": np.nan, "hard_flag": True, "soft_flag": False, "saturated": False, "flag_bits": 0,
         "inside": False, "n_ap": 0,
     }
     if not (np.isfinite(x) and np.isfinite(y)):
@@ -74,6 +74,7 @@ def measure(image, variance, flags, x, y, pixel_sr, r_ap=R_APERTURE, r_in=R_IN, 
     out["flag_bits"] = ap_bits
     out["hard_flag"] = bool(np.any(hard & ap))
     out["soft_flag"] = bool(ap_bits & SOFT_MASK)
+    out["saturated"] = bool(ap_bits & SAT_MASK)
 
     ring_ok = ring & ~hard & ((flags & SOFT_MASK) == 0)
     if ring_ok.sum() < 8:
