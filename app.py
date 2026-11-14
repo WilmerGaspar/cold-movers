@@ -150,9 +150,12 @@ request = None
 
 with tab_obj:
     keys = list(SHOWCASE)
-    default_idx = keys.index(initial["key"]) if initial["mode"] == "object" else 0
+    # The choice lives in session state with a fixed key: if its default followed the URL, Streamlit would
+    # treat the selector as a new widget after every change and drop every other click.
+    if "object_choice" not in st.session_state:
+        st.session_state["object_choice"] = initial["key"] if initial["mode"] == "object" else keys[0]
     choice = st.radio(
-        "Object", keys, index=default_idx, horizontal=True,
+        "Object", keys, key="object_choice", horizontal=True,
         format_func=lambda k: f"{SHOWCASE[k].name} · {DEMO[k][0]}", label_visibility="collapsed",
     )
     st.caption(f"{SHOWCASE[choice].note} **What it demonstrates:** {DEMO[choice][1]}")
@@ -166,17 +169,25 @@ with tab_obj:
 
 with tab_coords:
     c1, c2 = st.columns(2)
-    default_ra = f"{initial['ra']:.6f}" if initial["mode"] == "coords" else ""
-    default_dec = f"{initial['dec']:.6f}" if initial["mode"] == "coords" else ""
-    ra_txt = c1.text_input("RA (degrees or 08h55m10.8s)", value=default_ra, placeholder="133.79513")
-    dec_txt = c2.text_input("Dec (degrees or -07d14m42.5s)", value=default_dec, placeholder="-7.24515")
+    # Defaults from the shared link are set once; fixed keys keep the widgets stable afterwards.
+    if "ra_txt" not in st.session_state:
+        coords_link = initial["mode"] == "coords"
+        st.session_state.update({
+            "ra_txt": f"{initial['ra']:.6f}" if coords_link else "",
+            "dec_txt": f"{initial['dec']:.6f}" if coords_link else "",
+            "pmra_in": float(initial.get("pmra", 0.0)),
+            "pmdec_in": float(initial.get("pmdec", 0.0)),
+            "epoch_in": float(initial.get("epoch", 2000.0)),
+            "size_in": float(np.clip(initial.get("size", 3.0), 2.0, 8.0)),
+        })
+    ra_txt = c1.text_input("RA (degrees or 08h55m10.8s)", key="ra_txt", placeholder="133.79513")
+    dec_txt = c2.text_input("Dec (degrees or -07d14m42.5s)", key="dec_txt", placeholder="-7.24515")
     with st.expander("Motion and field of view"):
         d1, d2, d3, d4 = st.columns(4)
-        pmra = d1.number_input("pmRA* (mas/yr)", value=float(initial.get("pmra", 0.0)))
-        pmdec = d2.number_input("pmDec (mas/yr)", value=float(initial.get("pmdec", 0.0)))
-        epoch = d3.number_input("Epoch of RA/Dec (year)", value=float(initial.get("epoch", 2000.0)))
-        size_arcmin = d4.slider("Field of view (arcmin)", 2.0, 8.0,
-                                float(np.clip(initial.get("size", 3.0), 2.0, 8.0)), 0.5)
+        pmra = d1.number_input("pmRA* (mas/yr)", key="pmra_in")
+        pmdec = d2.number_input("pmDec (mas/yr)", key="pmdec_in")
+        epoch = d3.number_input("Epoch of RA/Dec (year)", key="epoch_in")
+        size_arcmin = d4.slider("Field of view (arcmin)", 2.0, 8.0, step=0.5, key="size_in")
         max_frames = st.slider("Maximum images to download", 40, 400, 150, 10,
                                help="More images give a better spectrum but take longer.")
     if st.button("Search SPHEREx", key="go_coords", type="primary") or (
