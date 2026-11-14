@@ -45,7 +45,7 @@ with sync_playwright() as p:
     fr = open_app(page, "?object=wise0855")
     page.screenshot(path=os.path.join(OUT, "desktop_top.png"))
     # Click test: switch objects several times in a row; each click must load the new object.
-    for name in ("R Draconis", "Epsilon Indi B", "RW Aurigae", "Barnard's Star"):
+    for name in ("R Draconis", "TRAPPIST-1", "Epsilon Indi B", "RW Aurigae", "Barnard's Star"):
         try:
             fr.get_by_text(f"{name} ·", exact=False).first.click()
             ok = False

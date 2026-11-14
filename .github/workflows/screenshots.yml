@@ -34,10 +34,10 @@ jobs:
           pip install requests astroquery
           python scripts/diag_services.py 2>&1 | tee docs_services_log.txt
       - name: Wait for Streamlit Cloud to redeploy
-        run: sleep 150
+        run: sleep 240
       - name: Screenshots of the public app
         continue-on-error: true
-        run: python scripts/screenshots.py 2>&1 | tee docs_screens_log.txt
+        run: python -u scripts/screenshots.py 2>&1 | tee docs_screens_log.txt
       - name: Commit screenshots
         if: always()
         run: |
