@@ -1,5 +1,7 @@
-atlas screenshot failed: Locator.scroll_into_view_if_needed: Timeout 30000ms exceeded.
-Call log:
-  - waiting for get_by_text("What you see.").first
-
+atlas: service did not answer (message shown)
+atlas screenshot saved
+click test R Draconis: OK
+click test Epsilon Indi B: DID NOT LOAD
+click test RW Aurigae: OK
+click test Barnard's Star: DID NOT LOAD
 done
