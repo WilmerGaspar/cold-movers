@@ -1,7 +1,19 @@
 {
   "barnard": {
-    "ok": false,
-    "error": "Traceback (most recent call last):\n  File \"/home/runner/work/cold-movers/cold-movers/scripts/precompute.py\", line 108, in main\n    result = pipeline.run(target, size_deg=args.size, max_frames=args.max_frames, workers=6,\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/cold-movers/cold-movers/coldmovers/pipeline.py\", line 93, in run\n    all_rows = spherex.search_images(float(ra0), float(dec0))\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/cold-movers/cold-movers/coldmovers/spherex.py\", line 125, in search_images\n    raise last\n  File \"/home/runner/work/cold-movers/cold-movers/coldmovers/spherex.py\", line 121, in search_images\n    return _search_once(ra_deg, dec_deg, collections)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/cold-movers/cold-movers/coldmovers/spherex.py\", line 152, in _search_once\n    raise RuntimeError(\"IRSA search failed: \" + \" | \".join(errors))\nRuntimeError: IRSA search failed: SIA: 502 Server Error: Proxy Error for url: https://irsa.ipac.caltech.edu/SIA?POS=CIRCLE+269.446+4.76792+0.0002777777777777778&COLLECTION=spherex_dr1 | TAP: 502 Server Error: Proxy Error for url: https://irsa.ipac.caltech.edu/TAP/sync\n"
+    "ok": true,
+    "fit": {
+      "temperature_k": null,
+      "t_low_k": null,
+      "t_high_k": null,
+      "chi2_red": null,
+      "n_points": 0,
+      "light": "red",
+      "reasons": [
+        "too_bright"
+      ]
+    },
+    "n_used": 300,
+    "n_found": 358
   },
   "epsindib": {
     "ok": true,
