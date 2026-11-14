@@ -1,0 +1,121 @@
+{
+  "target": {
+    "key": "trappist1",
+    "name": "TRAPPIST-1",
+    "ra_deg": 346.62652162764437,
+    "dec_deg": -5.043528319429532,
+    "pmra_masyr": 930.7875225817781,
+    "pmdec_masyr": -479.0375409528857,
+    "parallax_mas": 80.21231612635748,
+    "ref_epoch": 2016.0,
+    "source": "Gaia DR3 2635476908753563008",
+    "note": "Ultracool red dwarf with seven Earth-sized planets."
+  },
+  "size_deg": 0.05,
+  "n_found": 366,
+  "n_used": 295,
+  "n_clean": 237,
+  "n_failures": 5,
+  "fit": {
+    "temperature_k": 2464.2,
+    "t_low_k": 2442.9,
+    "t_high_k": 2485.7,
+    "chi2_red": 12.868,
+    "n_points": 237,
+    "light": "yellow",
+    "reasons": [
+      "not_a_single_blackbody"
+    ]
+  },
+  "epochs": [
+    {
+      "index": 0,
+      "mjd_start": 60825.394442,
+      "mjd_end": 60838.437625,
+      "mjd_mid": 60829.880689,
+      "n_frames": 87,
+      "counts": {
+        "1": 16,
+        "2": 15,
+        "3": 15,
+        "4": 14,
+        "5": 12,
+        "6": 15,
+        "0": 87
+      }
+    },
+    {
+      "index": 1,
+      "mjd_start": 60998.700589,
+      "mjd_end": 61017.650679,
+      "mjd_mid": 61011.471732,
+      "n_frames": 91,
+      "counts": {
+        "1": 14,
+        "2": 16,
+        "3": 16,
+        "4": 15,
+        "5": 15,
+        "6": 15,
+        "0": 91
+      }
+    },
+    {
+      "index": 2,
+      "mjd_start": 61187.886954,
+      "mjd_end": 61229.503158,
+      "mjd_mid": 61194.880265,
+      "n_frames": 117,
+      "counts": {
+        "1": 28,
+        "2": 17,
+        "3": 12,
+        "4": 28,
+        "5": 16,
+        "6": 16,
+        "0": 117
+      }
+    }
+  ],
+  "ref_wcs": {
+    "crval": [
+      346.62909741866633,
+      -5.044848839040815
+    ],
+    "crpix": [
+      16.0,
+      16.0
+    ],
+    "cdelt": [
+      -0.0017083333333333334,
+      0.0017083333333333334
+    ],
+    "shape": [
+      31,
+      31
+    ]
+  },
+  "gifs": {
+    "0": "movie_d0.gif",
+    "1": "movie_d1.gif",
+    "2": "movie_d2.gif",
+    "3": "movie_d3.gif",
+    "4": "movie_d4.gif",
+    "5": "movie_d5.gif",
+    "6": "movie_d6.gif"
+  },
+  "versions": [
+    "7.0.5"
+  ],
+  "collections": [
+    "spherex_dr1",
+    "spherex_qr3"
+  ],
+  "timings": {
+    "search_s": 2.1,
+    "download_s": 720.1,
+    "total_s": 724.1
+  },
+  "generated_utc": "2026-11-14 23:52 UTC",
+  "credits": "Cold Movers, NASA Space Apps 2026. SPHEREx DR1/QR3 data from NASA/IPAC IRSA. Code written with AI assistance (Claude, Anthropic) under the team's direction."
+}

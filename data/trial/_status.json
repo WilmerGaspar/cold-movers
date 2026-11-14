@@ -1,0 +1,18 @@
+{
+  "trappist1": {
+    "ok": true,
+    "fit": {
+      "temperature_k": 2464.2,
+      "t_low_k": 2442.9,
+      "t_high_k": 2485.7,
+      "chi2_red": 12.868,
+      "n_points": 237,
+      "light": "yellow",
+      "reasons": [
+        "not_a_single_blackbody"
+      ]
+    },
+    "n_used": 295,
+    "n_found": 366
+  }
+}
