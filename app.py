@@ -585,6 +585,9 @@ if st.toggle("Overlay Gaia DR3 stars and their motion on the SPHEREx image", val
     try:
         with st.spinner("Asking the ESA Gaia archive for the stars in this field"):
             stars = gaia_stars(round(float(ra_ep), 5), round(float(dec_ep), 5), round(view["size_deg"] * 0.75, 4))
+            # Crowded Milky Way fields hold hundreds of faint Gaia stars that one SPHEREx visit cannot see;
+            # keep the brighter ones (G <= 18) so the picture stays readable.
+            stars = [s_ for s_ in stars if 0 < s_["g"] <= 18.0]
         png, n_shown = atlas.render_on_spherex(
             stack, lambda r, d: tuple(float(v) for v in ref_wcs.wcs_world2pix(r, d, 0)), stars, year_ep,
             marker(best_ep["mjd_mid"]),
@@ -594,7 +597,7 @@ if st.toggle("Overlay Gaia DR3 stars and their motion on the SPHEREx image", val
         a1.image(png, use_container_width=True)
         a2.markdown(
             f"**What you see.** The SPHEREx image of one visit (all detectors). Blue squares are the {n_shown} "
-            "Gaia DR3 stars in this field, moved to the date of the visit with their own proper motion; arrows show "
+            "Gaia DR3 stars brighter than G = 18 in this field, moved to the date of the visit with their own proper motion; arrows show "
             "where that motion takes them in 20 years. The orange circle is our object. A star whose square sits "
             "on a SPHEREx dot confirms the alignment; a dot with no Gaia square is either too red or too faint for "
             "Gaia (like a cold brown dwarf) or not a star."
