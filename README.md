@@ -10,7 +10,7 @@ Enter sky coordinates, a star name, or pick one of the five challenge objects. C
 2. downloads small cutouts, **aligns them on the same patch of sky** and plays them as a **movie, visit by visit**, one per detector, so anything that moves or varies stands out,
 3. **follows the object's proper motion** and measures it in every image to build its **0.75–5 µm spectrum**,
 4. runs the **Madhava engine**, a band-integrated Planck fit that gives a *blackbody-equivalent temperature* with an uncertainty and a **traffic light** that says how far to trust it,
-5. runs three **"Is it real?"** checks: seen again in another visit, clean pixels, and moves as the catalogue predicts.
+5. runs four **"Is it real?"** consistency checks (indicators, not confirmation of a discovery): seen again in another visit, clean pixels, positions consistent with the catalogue motion, and no blended neighbour.
 
 **Live app: https://cold-movers.streamlit.app**
 
@@ -24,7 +24,7 @@ In 1930 Clyde Tombaugh found Pluto at Lowell Observatory, during the search for 
 
 | Step | What we do | Why |
 |---|---|---|
-| Search | IRSA Simple Image Access (collections `spherex_dr1`, `spherex_qr3`); TAP on `spherex.plane` as fallback | Uses NASA's archive directly, so new releases appear automatically |
+| Search | IRSA Simple Image Access (collections `spherex_dr1`, `spherex_qr3`); TAP on `spherex.plane` as fallback | Queries the configured collections live, so observations added to them appear without code changes; a new release name is one line (`COLLECTIONS` in `coldmovers/spherex.py`) |
 | Cutouts | IRSA cutout service (`?center=RA,DEC&size=DEG`) around the position **propagated to each image's date** | Barnard's Star moves 10.4″/yr: a year-2000 position is 44 SPHEREx pixels off by 2026 |
 | Movie | Each cutout is resampled onto one tangent-plane grid with its own WCS; images of the same detector taken during one visit (gap > 20 days) are averaged | SPHEREx's linear variable filters change wavelength across each detector, so raw frames flicker in colour; per-detector visit stacks are stable and make motion visible, in the spirit of WiseView |
 | Photometry | 2.5-pixel aperture, background from a 5–9 pixel ring, FLAGS-based pixel rejection, MJy/sr × pixel solid angle → µJy | The wavelength of each measurement comes from the image's own spectral WCS (`WCS-WAVE`) at the target's pixel |
@@ -36,14 +36,14 @@ In 1930 Clyde Tombaugh found Pluto at Lowell Observatory, during the search for 
 ## Who it helps
 
 - **Citizen scientists.** Volunteers already find nearby brown dwarfs by blinking WISE images (Backyard Worlds: Planet 9). Cold Movers gives them the same view of SPHEREx, a new and deeper dataset in 102 colours, from any phone or computer, with no installation or account.
-- **Students and teachers.** One page shows a star moving across the sky over a single year, its light split into colours, the temperature that light implies and how sure we can be. It turns a NASA archive into a lesson about motion, light and doubt.
+- **Students and teachers.** One page shows a star moving across the sky over a single year, its light split into colours, the blackbody-equivalent temperature that light implies and how sure we can be. It turns a NASA archive into a lesson about motion, light and doubt.
 - **Astronomers.** A quick first look at any position: is the source there in every visit, does it move as the catalogue says, is a neighbour or a detector artifact contaminating it, and which wavelengths can be trusted. Every number can be downloaded and traced back to its SPHEREx image.
 
 ## What we hope to achieve
 
-- Make SPHEREx data **easy to explore for anyone**, the day each release appears: the app searches NASA's archive live, so new data releases are used without changing the code.
+- Make SPHEREx data **easy to explore for anyone**: the app queries the configured SPHEREx collections live and retrieves whatever observations they hold today; adding a future release is a one-line change.
 - Show that a tool can be **honest about its limits**: when SPHEREx saturates, when a neighbour blends in, when one blackbody does not describe the light, the app says so instead of inventing a number.
-- Next steps after the hackathon: point-spread-function photometry for crowded fields, a batch mode that checks a whole list of candidates, motion fitted directly from the images, and a Spanish version of the interface.
+- Next steps after the hackathon: point-spread-function photometry for crowded fields, a batch mode that checks a whole list of candidates, motion fitted freely from the images without using the catalogue (today positions are measured by centroiding near the catalogue prediction), and a Spanish version of the interface.
 
 ## Tools we used
 

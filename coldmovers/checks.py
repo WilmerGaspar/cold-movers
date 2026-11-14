@@ -2,13 +2,15 @@
 
 AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
 
-Three independent checks, each reported as pass / warn / fail with the evidence:
+Four consistency checks, each reported as pass / warn / fail with the evidence:
   1. Seen again: the source is detected in more than one visit.
   2. Clean pixels: few measurements carry SPHEREx contamination flags
      (ghosts, crosstalk, persistence, ...).
-  3. Moves as predicted: the measured position in every visit follows the
-     catalogue proper motion (positions measured by centroiding the epoch stacks).
-These are signals, not proof.
+  3. Consistent with catalogue motion: the position measured in every visit follows the
+     catalogue proper motion. Positions are centroids in the epoch stacks, searched
+     near the predicted track, so this tests agreement; it is not a free motion fit.
+  4. No neighbour: no other source pulls the light away from the expected position.
+These are indicators of consistency, not confirmation of a discovery.
 """
 
 from __future__ import annotations
@@ -147,7 +149,7 @@ def run_checks(rows, epochs, stacks, marker) -> dict:
         status, msg = "fail", "The target never fell inside a usable image."
     out["checks"].append({"name": "Clean pixels", "status": status, "text": msg})
 
-    # 3. Moves as predicted ---------------------------------------------------
+    # 3. Consistent with catalogue motion ---------------------------------------------------
     det_pos = [p for p in positions if p["detected"]]
     if len(det_pos) >= 2:
         resid = np.array([np.hypot(p["x"] - p["pred_x"], p["y"] - p["pred_y"]) for p in det_pos])
@@ -158,7 +160,8 @@ def run_checks(rows, epochs, stacks, marker) -> dict:
         out["motion"] = {"predicted_px": float(pred_shift), "measured_px": float(meas_shift), "rms_px": rms}
         if rms < 1.0:
             status = "pass"
-            msg = (f"Measured positions follow the catalogue motion within {rms * PIXEL_ARCSEC:.1f} arcsec. "
+            msg = (f"Positions measured in the images agree with the catalogue motion within "
+                   f"{rms * PIXEL_ARCSEC:.1f} arcsec. "
                    f"Between the first and last visit it moved {meas_shift * PIXEL_ARCSEC:.1f} arcsec "
                    f"(predicted {pred_shift * PIXEL_ARCSEC:.1f}).")
         else:
@@ -167,7 +170,7 @@ def run_checks(rows, epochs, stacks, marker) -> dict:
                    "check for a neighbour, a wrong catalogue motion, or a different object.")
     else:
         status, msg = "warn", "Not enough detections to test the motion."
-    out["checks"].append({"name": "Moves as predicted", "status": status, "text": msg})
+    out["checks"].append({"name": "Consistent with catalogue motion", "status": status, "text": msg})
 
     # 4. No neighbour ------------------------------------------------------------
     blends = find_blends(epochs, stacks, marker)

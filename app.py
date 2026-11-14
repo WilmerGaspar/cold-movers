@@ -103,7 +103,8 @@ st.markdown(
     "**Cold Movers lets anyone explore SPHEREx observations, follow changes between visits, and see explicitly "
     "when the data do not support a reliable conclusion.** Pick an object or type sky coordinates: we fetch every "
     "SPHEREx image of that spot from NASA's archive, play the visits as a movie so anything that moves stands out, "
-    "and fit its infrared light to estimate how cold it is."
+    "and fit its infrared light with a blackbody to estimate how cold it is (a blackbody-equivalent "
+    "temperature, with an uncertainty and a warning when it should not be trusted)."
 )
 st.caption("Team Cold Movers (Honduras) · NASA Space Apps 2026 · built with AI-assisted code (Claude, Anthropic); "
            "see the AI note at the bottom. Not an official NASA product.")
@@ -127,7 +128,7 @@ def validation_summary(vt) -> str:
     images = sum(v["images"] for v in vt)
     return (f"<b>{images:,} SPHEREx images, {len(vt)} objects.</b> Motion recovered for <b>{len(good)} of "
             f"{len(movers)}</b> fast-moving objects, within {worst:.1f}″ of the catalogue prediction. "
-            f"A temperature could be measured for <b>{len(temp_ok)} of {len(vt)}</b>; <b>{len(bright)}</b> are too "
+            f"A blackbody-equivalent temperature could be measured for <b>{len(temp_ok)} of {len(vt)}</b>; <b>{len(bright)}</b> are too "
             "bright for SPHEREx, and the app says so instead of inventing a number.")
 
 
@@ -391,7 +392,8 @@ motion = real.get("motion") if real else None
 if motion and target.total_pm_arcsec_per_year >= 0.5:
     s1.markdown(summary_card(
         "Does it move?", f"Yes · {motion['measured_px'] * checks.PIXEL_ARCSEC:.1f}″",
-        f"measured between the first and last SPHEREx visit; the catalogue predicts "
+        f"measured in the SPHEREx images (centroids near the predicted track) between the first and last "
+        f"visit; the catalogue predicts "
         f"{motion['predicted_px'] * checks.PIXEL_ARCSEC:.1f}″", "#2fbf71"), unsafe_allow_html=True)
 elif target.total_pm_arcsec_per_year < 0.5:
     s1.markdown(summary_card(
@@ -407,7 +409,7 @@ if np.isfinite(fit.temperature) and fit.light != "red":
 else:
     big_t = "Too bright to measure" if "too_bright" in fit.reasons else "Not reliable"
     small_t = madhava.REASON_TEXT.get(fit.reasons[0], "") if fit.reasons else ""
-s2.markdown(summary_card(f"How cold? · {LIGHT_WORDS[fit.light]}", big_t, small_t.split(". ")[0].rstrip(".") + ".",
+s2.markdown(summary_card(f"How cold? (blackbody-equivalent) · {LIGHT_WORDS[fit.light]}", big_t, small_t.split(". ")[0].rstrip(".") + ".",
                          LIGHT_COLORS[fit.light]), unsafe_allow_html=True)
 
 if real:
@@ -453,7 +455,7 @@ with st.expander("How were these three answers calculated? (audit trail)"):
             f"neighbour, {n_out} with the target outside the cutout\n"
             f"- **Model:** one blackbody integrated exactly over each band; free temperature and scale; errors = "
             f"measurement error plus an 8 % systematic floor\n"
-            + (f"- **Result:** {fit.temperature:,.0f} K, interval {fit.t_low:,.0f}–{fit.t_high:,.0f} K "
+            + (f"- **Result (blackbody-equivalent):** {fit.temperature:,.0f} K, interval {fit.t_low:,.0f}–{fit.t_high:,.0f} K "
                f"(where χ² rises by max(1, χ²/dof) = {max(1.0, fit.chi2_red):.1f}); reduced χ² {fit.chi2_red:.2f}\n"
                if np.isfinite(fit.temperature) else "- **Result:** no temperature\n")
             + f"- **Traffic light:** {LIGHT_WORDS[fit.light]}: "
@@ -763,6 +765,8 @@ with v_plot:
 
 st.markdown("<div id='is-it-real'></div>", unsafe_allow_html=True)
 st.markdown("### 4 · Is it real, or a ghost in the detector?")
+st.caption("Consistency checks: they tell you whether the data hang together, not whether a discovery is "
+           "confirmed.")
 if real:
     cols = st.columns(len(real["checks"]))
     for col, chk in zip(cols, real["checks"]):
@@ -771,7 +775,9 @@ if real:
             f"<div style='margin-top:6px'>{chk['text']}</div></div>",
             unsafe_allow_html=True,
         )
-    st.caption("These are signals, not proof. A real discovery needs follow-up by astronomers.")
+    st.caption("Indicators of consistency, not confirmation. Positions are measured by centroiding near the "
+               "catalogue prediction, so the motion check tests agreement with the catalogue; fitting the motion "
+               "freely from the images is a next step. A real discovery needs follow-up by astronomers.")
 else:
     st.caption("No aligned images, so the checks cannot run.")
 

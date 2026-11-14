@@ -33,7 +33,7 @@ def test_moving_star_passes_all_checks():
     rows = [{"detector": 3, "inside": True, "hard_flag": False, "soft_flag": False, "snr": 30.0}] * 20
     out = checks.run_checks(rows, epochs, stacks, marker)
     status = {c["name"]: c["status"] for c in out["checks"]}
-    assert status == {"Seen again": "pass", "Clean pixels": "pass", "Moves as predicted": "pass", "No neighbour": "pass"}
+    assert status == {"Seen again": "pass", "Clean pixels": "pass", "Consistent with catalogue motion": "pass", "No neighbour": "pass"}
 
 
 def test_single_detection_warns():
