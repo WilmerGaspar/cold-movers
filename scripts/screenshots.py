@@ -59,7 +59,7 @@ with sync_playwright() as p:
             print(f"click test {name}: error {exc}")
     fr = open_app(page, "?object=wise0855")
     try:
-        toggle = fr.get_by_text("Show the sky around it").first
+        toggle = fr.get_by_text("Overlay Gaia DR3 stars").first
         toggle.scroll_into_view_if_needed()
         toggle.click()
         outcome = "nothing appeared"

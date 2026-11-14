@@ -81,6 +81,23 @@ def read_query_params():
 
 initial = read_query_params()
 
+# Automatic browser translation rewrites the page under Streamlit and breaks it (removeChild errors).
+# Mark the page "do not translate"; the text is in English as Space Apps requires.
+import streamlit.components.v1 as _components  # noqa: E402
+
+_components.html(
+    """<script>
+    try {
+      const d = window.parent.document;
+      d.documentElement.setAttribute('translate', 'no');
+      d.documentElement.classList.add('notranslate');
+      if (!d.querySelector('meta[name="google"]')) {
+        const m = d.createElement('meta'); m.name = 'google'; m.content = 'notranslate'; d.head.appendChild(m);
+      }
+    } catch (e) {}
+    </script>""",
+    height=0,
+)
 st.title("Cold Movers")
 st.markdown(
     "**Cold Movers lets anyone explore SPHEREx observations, follow changes between visits, and see explicitly "
@@ -546,42 +563,45 @@ atlas_link = (f"https://aladin.cds.unistra.fr/AladinLite/?target={float(ra_now):
               f"&fov={atlas_fov:.3f}&survey=P%2FallWISE%2Fcolor")
 
 
-@st.cache_data(show_spinner=False, max_entries=16)
-def atlas_png(name, ra_c, dec_c, fov, now, then):
+@st.cache_data(show_spinner=False, max_entries=32)
+def gaia_stars(ra, dec, radius):
     from coldmovers import atlas
 
-    image = atlas.fetch_allwise(ra_c, dec_c, fov)
-    try:
-        stars = atlas.gaia_field(ra_c, dec_c, fov * 0.72)
-        note = ""
-    except Exception:
-        stars, note = [], "Gaia DR3 did not answer, so its stars are not drawn this time."
-    return atlas.render(ra_c, dec_c, fov, image, stars, now, then, title=f"{name}: 2010 and now"), note
+    return atlas.gaia_field(ra, dec, radius)
 
 
-if st.toggle("Show the sky around it: AllWISE image (2010) with Gaia DR3 stars and their motion", value=False):
-    mid_ra = (float(ra_now) + float(ra_2010)) / 2.0
-    mid_dec = (float(dec_now) + float(dec_2010)) / 2.0
-    sep_deg = float(np.hypot((float(ra_now) - float(ra_2010)) * np.cos(np.radians(mid_dec)),
-                             float(dec_now) - float(dec_2010)))
-    fov_atlas = max(view["size_deg"] * 2.0, sep_deg * 2.5, 0.08)
+if st.toggle("Overlay Gaia DR3 stars and their motion on the SPHEREx image", value=False) and view.get("stacks"):
+    from astropy.time import Time
+
+    from coldmovers import atlas
+
+    # The visit with the most images gives the cleanest picture.
+    best_ep = max(epochs, key=lambda ep: ep["n_frames"])
+    stack = view["stacks"].get(best_ep["index"], {}).get(0)
+    if stack is None:
+        stack = next(iter(view["stacks"].get(best_ep["index"], {}).values()), None)
+    year_ep = 2000.0 + (best_ep["mjd_mid"] - 51544.5) / 365.25
+    ra_ep, dec_ep = target.position_at(best_ep["mjd_mid"])
     try:
-        with st.spinner("Fetching the AllWISE image and Gaia DR3 stars"):
-            png, note = atlas_png(target.name, mid_ra, mid_dec, fov_atlas,
-                                  (float(ra_now), float(dec_now)), (float(ra_2010), float(dec_2010)))
+        with st.spinner("Asking the ESA Gaia archive for the stars in this field"):
+            stars = gaia_stars(round(float(ra_ep), 5), round(float(dec_ep), 5), round(view["size_deg"] * 0.75, 4))
+        png, n_shown = atlas.render_on_spherex(
+            stack, lambda r, d: tuple(float(v) for v in ref_wcs.wcs_world2pix(r, d, 0)), stars, year_ep,
+            marker(best_ep["mjd_mid"]),
+            title=f"{target.name} · SPHEREx visit of {Time(best_ep['mjd_mid'], format='mjd').iso[:10]} + Gaia DR3",
+        )
         a1, a2 = st.columns([3, 2])
         a1.image(png, use_container_width=True)
         a2.markdown(
-            "**What you see.** The background is the AllWISE infrared image, taken around 2010. Blue squares are "
-            "Gaia DR3 stars placed where they were in 2010; arrows show where their own motion carries them in "
-            "20 years. The orange circles mark where our object was in 2010 and where SPHEREx sees it now."
+            f"**What you see.** The SPHEREx image of one visit (all detectors). Blue squares are the {n_shown} "
+            "Gaia DR3 stars in this field, moved to the date of the visit with their own proper motion; arrows show "
+            "where that motion takes them in 20 years. The orange circle is our object. A star whose square sits "
+            "on a SPHEREx dot confirms the alignment; a dot with no Gaia square is either too red or too faint for "
+            "Gaia (like a cold brown dwarf) or not a star."
         )
-        if note:
-            a2.caption(note)
-        a2.markdown(f"[Explore it interactively in Aladin Lite (CDS)]({atlas_link})")
+        a2.markdown(f"[Explore the wider sky in Aladin Lite (CDS)]({atlas_link})")
     except Exception as exc:
-        st.info(f"The AllWISE image service (CDS) did not answer ({type(exc).__name__}: {str(exc)[:120]}). "
-                f"[Open the interactive atlas at CDS]({atlas_link}).")
+        st.info(f"The ESA Gaia archive did not answer ({type(exc).__name__}). Please try again in a minute.")
 
 # ------------------------------------------------------------------ spectrum + Madhava
 

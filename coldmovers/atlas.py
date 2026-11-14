@@ -1,4 +1,5 @@
-"""Sky atlas image: AllWISE background, Gaia DR3 stars with motion arrows, our object.
+"""Sky atlas images: Gaia DR3 stars with motion arrows over a SPHEREx stack (primary,
+no external image service needed) or over an AllWISE image from CDS (when CDS is up).
 
 AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
 
@@ -111,3 +112,61 @@ def render(ra_c, dec_c, fov_deg, image, stars, obj_now, obj_2010, title="", size
     fig.savefig(buf, format="png", facecolor="#0b0f1a")
     plt.close(fig)
     return buf.getvalue()
+
+
+def stars_at_year(stars, year: float):
+    """Gaia DR3 positions (epoch 2016.0) moved to another year with their proper motion."""
+    out = []
+    for s in stars:
+        cosd = np.cos(np.radians(s["dec"]))
+        dt = year - GAIA_EPOCH
+        out.append(dict(s, ra=s["ra"] + s["pmra"] * dt / 3.6e6 / cosd, dec=s["dec"] + s["pmdec"] * dt / 3.6e6))
+    return out
+
+
+def render_on_spherex(image, to_px, stars, year: float, target_xy, title="", size_in=6.0):
+    """Gaia DR3 stars (moved to `year`) with 20-year motion arrows, drawn on a SPHEREx stack.
+
+    image: 2D stack on the movie grid; to_px(ra, dec) -> (x, y) on that grid.
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    finite = image[np.isfinite(image)]
+    lo, hi = (np.percentile(finite, [5, 99.7]) if finite.size else (0.0, 1.0))
+    norm = np.arcsinh(np.clip((image - lo) / max(hi - lo, 1e-9), 0, None) * 10) / np.arcsinh(10)
+    ny, nx = image.shape
+    fig, ax = plt.subplots(figsize=(size_in, size_in + 0.5), dpi=100, facecolor="#0b0f1a")
+    ax.imshow(np.nan_to_num(norm), origin="lower", cmap="gray", vmin=0, vmax=1, interpolation="nearest")
+    shown = 0
+    for s in stars_at_year(stars, year):
+        x, y = to_px(s["ra"], s["dec"])
+        if not (-0.5 <= x < nx - 0.5 and -0.5 <= y < ny - 0.5):
+            continue
+        shown += 1
+        ax.plot(x, y, marker="s", ms=6, mfc="none", mec="#41b6c4", mew=0.9)
+        if np.hypot(s["pmra"], s["pmdec"]) > 30:  # mas/yr
+            cosd = np.cos(np.radians(s["dec"]))
+            x2, y2 = to_px(s["ra"] + s["pmra"] * ARROW_YEARS / 3.6e6 / cosd,
+                           s["dec"] + s["pmdec"] * ARROW_YEARS / 3.6e6)
+            ax.annotate("", xy=(x2, y2), xytext=(x, y), arrowprops=dict(arrowstyle="-|>", color="#41b6c4", lw=1.1))
+    if target_xy is not None:
+        ax.add_patch(plt.Circle(target_xy, 3.0, fill=False, color="#ff5a36", lw=1.8))
+    ax.set_xlim(-0.5, nx - 0.5)
+    ax.set_ylim(-0.5, ny - 0.5)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for sp in ax.spines.values():
+        sp.set_color("#232b40")
+    ax.set_title(title, color="#e8ecf4", fontsize=9)
+    fig.text(0.01, 0.005, f"SPHEREx stack · Gaia DR3 (ESA) stars moved to {year:.1f} · arrows: 20 years of motion",
+             ha="left", va="bottom", fontsize=6, color="#8a93a6")
+    fig.text(0.99, 0.005, "Cold Movers · AI-assisted code (Claude)", ha="right", va="bottom", fontsize=6,
+             color="#8a93a6")
+    fig.tight_layout(rect=(0, 0.02, 1, 1))
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", facecolor="#0b0f1a")
+    plt.close(fig)
+    return buf.getvalue(), shown
