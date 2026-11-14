@@ -28,6 +28,11 @@ PUBLISHED = {
         "text": "K-type young star; its dusty disk adds extra infrared light",
         "ref": "SIMBAD spectral classification; disk: Rodriguez et al. 2013, arXiv:1308.2017",
     },
+    "trappist1": {
+        "teff_k": 2566, "low_k": 2540, "high_k": 2592,
+        "text": "2566 ± 26 K (M8 dwarf with seven planets)",
+        "ref": "Agol et al. 2021, Planetary Science Journal (via the NASA Exoplanet Archive)",
+    },
     "rdra": {
         "teff_k": None, "low_k": None, "high_k": None,
         "text": "Mira variable (M-type giant): brightness and temperature change over its cycle",

@@ -15,7 +15,7 @@ import streamlit as st
 
 from coldmovers import checks, madhava, movie, pipeline, variability
 from coldmovers.references import PUBLISHED
-from coldmovers.targets import SHOWCASE, ServiceDown, Target, parse_coordinates, resolve_simbad
+from coldmovers.targets import ALL_EXAMPLES, SHOWCASE, ServiceDown, Target, parse_coordinates, resolve_simbad
 
 st.set_page_config(page_title="Cold Movers", page_icon="🛰️", layout="wide")
 
@@ -41,6 +41,10 @@ DEMO = {
     "rwaur": ("young star, disk",
               "a young star with a dusty disk; it saturates SPHEREx beyond 1.1 µm, so it tests the brightness "
               "check between visits (measured from the star's wings) and the limits of the temperature fit."),
+    "trappist1": ("extra: temperature check",
+                  "not one of the challenge objects. A faint, unsaturated cool star (host of seven Earth-sized "
+                  "planets) that tests the temperature engine against a published value; its motion, about 1″ a "
+                  "year, is too small to see in one year of SPHEREx."),
     "rdra": ("pulsating giant",
              "a pulsating red giant (Mira variable); it saturates SPHEREx, so it tests the brightness check "
              "between visits from the star's wings."),
@@ -71,7 +75,7 @@ def section_failed(name, exc):
 
 def read_query_params():
     qp = st.query_params
-    if "object" in qp and qp["object"] in SHOWCASE:
+    if "object" in qp and qp["object"] in ALL_EXAMPLES:
         return {"mode": "object", "key": qp["object"]}
     if "ra" in qp and "dec" in qp:
         try:
@@ -123,8 +127,15 @@ def validation_table():
     return validation.validate(PRECOMPUTED)
 
 
-def validation_summary(vt) -> str:
-    """One sentence computed from the validation table (never typed by hand)."""
+def validation_summary(vt_all) -> str:
+    """Sentences computed from the validation table (never typed by hand)."""
+    vt = [v for v in vt_all if not v.get("extra")]
+    extra = ""
+    for v in vt_all:
+        if v.get("extra") and v["temperature"] and v.get("published_k"):
+            diff = 100.0 * (v["temperature"] - v["published_k"]) / v["published_k"]
+            extra += (f" <br><b>Extra check, {v['name']}</b> (unsaturated, not in the brief): blackbody-equivalent "
+                      f"{v['temperature']:,.0f} K vs {v['published_k']:,} K published ({diff:+.0f} %).")
     movers = [v for v in vt if v["pm_arcsec_yr"] >= 0.5]
     good = [v for v in movers if v["moved_measured"] is not None
             and abs(v["moved_measured"] - v["moved_predicted"]) < 2.0]
@@ -135,7 +146,7 @@ def validation_summary(vt) -> str:
     return (f"<b>{images:,} SPHEREx images, {len(vt)} objects.</b> Motion recovered for <b>{len(good)} of "
             f"{len(movers)}</b> fast-moving objects, within {worst:.1f}″ of the catalogue prediction. "
             f"A blackbody-equivalent temperature could be measured for <b>{len(temp_ok)} of {len(vt)}</b>; <b>{len(bright)}</b> are too "
-            "bright for SPHEREx, and the app says so instead of inventing a number.")
+            "bright for SPHEREx, and the app says so instead of inventing a number." + extra)
 
 
 g1, g2 = st.columns([1, 1])
@@ -173,16 +184,18 @@ tab_obj, tab_coords, tab_name = st.tabs(["Challenge objects", "Coordinates", "Na
 request = None
 
 with tab_obj:
-    keys = list(SHOWCASE)
+    # Challenge objects, then extras that have reviewed, precomputed results.
+    keys = list(SHOWCASE) + [k for k in ALL_EXAMPLES if k not in SHOWCASE
+                             and os.path.exists(os.path.join(PRECOMPUTED, k, "result.json"))]
     # The choice lives in session state with a fixed key: if its default followed the URL, Streamlit would
     # treat the selector as a new widget after every change and drop every other click.
     if "object_choice" not in st.session_state:
         st.session_state["object_choice"] = initial["key"] if initial["mode"] == "object" else keys[0]
     choice = st.radio(
         "Object", keys, key="object_choice", horizontal=True,
-        format_func=lambda k: f"{SHOWCASE[k].name} · {DEMO[k][0]}", label_visibility="collapsed",
+        format_func=lambda k: f"{ALL_EXAMPLES[k].name} · {DEMO[k][0]}", label_visibility="collapsed",
     )
-    st.caption(f"{SHOWCASE[choice].note} **What it demonstrates:** {DEMO[choice][1]}")
+    st.caption(f"{ALL_EXAMPLES[choice].note} **What it demonstrates:** {DEMO[choice][1]}")
     prev = st.session_state.get("request")
     if (
         st.button("Show", key="show_obj", type="primary")
@@ -303,7 +316,7 @@ if request["mode"] == "object":
     view = load_precomputed(request["key"])
     if view is None:
         st.info("Results for this object are still being computed on our server. Showing a live search instead.")
-        tgt = SHOWCASE[request["key"]]
+        tgt = ALL_EXAMPLES[request["key"]]
         with st.status(f"Searching SPHEREx for {tgt.name}", expanded=True):
             view = view_from_result(live_run(json.dumps(tgt.to_dict()), pipeline.DEFAULT_SIZE_DEG, 150))
     st.query_params.clear()
@@ -876,7 +889,7 @@ try:
 
             light_word = {"green": "🟢", "yellow": "🟡", "red": "🔴"}
             st.dataframe(pd.DataFrame([{
-                "Object": v["name"],
+                "Object": v["name"] + (" (extra)" if v.get("extra") else ""),
                 "SPHEREx images": v["images"],
                 "Visits": v["visits"],
                 "Moved (measured)": f"{v['moved_measured']:.1f}\"" if v["moved_measured"] is not None else "—",

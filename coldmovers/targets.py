@@ -112,6 +112,9 @@ EXTRAS = {
     ),
 }
 
+# Every example the app offers: the challenge objects first, then the extras.
+ALL_EXAMPLES = {**SHOWCASE, **EXTRAS}
+
 SIMBAD_IDS = {
     "barnard": "Barnard's star",
     "epsindib": "eps Ind B",

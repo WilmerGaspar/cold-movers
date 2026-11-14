@@ -12,11 +12,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
-from coldmovers.targets import SHOWCASE  # noqa: E402
+from coldmovers.targets import ALL_EXAMPLES  # noqa: E402
 
 APP = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py")
 failed = 0
-for key in SHOWCASE:
+for key in ALL_EXAMPLES:
     try:
         at = AppTest.from_file(APP, default_timeout=300)
         try:

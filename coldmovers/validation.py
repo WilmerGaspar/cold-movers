@@ -14,7 +14,7 @@ import numpy as np
 
 from . import checks, pipeline
 from .references import PUBLISHED
-from .targets import SHOWCASE, Target
+from .targets import ALL_EXAMPLES, EXTRAS, Target
 
 
 def load_stacks(outdir: str) -> dict:
@@ -45,7 +45,7 @@ def marker_for(target: Target, ref: dict):
 
 def validate(precomputed_dir: str) -> list:
     table = []
-    for key in SHOWCASE:
+    for key in ALL_EXAMPLES:
         outdir = os.path.join(precomputed_dir, key)
         view = pipeline.load(outdir)
         if view is None:
@@ -71,5 +71,7 @@ def validate(precomputed_dir: str) -> list:
             "light": fit.light,
             "reasons": fit.reasons,
             "published": PUBLISHED.get(key, {}).get("text", ""),
+            "published_k": PUBLISHED.get(key, {}).get("teff_k"),
+            "extra": key in EXTRAS,
         })
     return table

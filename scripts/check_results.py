@@ -11,7 +11,9 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from coldmovers import pipeline  # noqa: E402
-from coldmovers.targets import SHOWCASE  # noqa: E402
+from coldmovers.targets import ALL_EXAMPLES, SHOWCASE  # noqa: E402
+
+SHOWCASE_KEYS = set(SHOWCASE)
 
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "precomputed")
 
@@ -21,8 +23,10 @@ def reject_nan(value):
 
 
 problems = []
-for key in SHOWCASE:
+for key in ALL_EXAMPLES:
     d = os.path.join(OUT, key)
+    if key not in SHOWCASE_KEYS and not os.path.exists(d):
+        continue  # extras are optional until reviewed
     try:
         with open(os.path.join(d, "result.json")) as fh:
             summary = json.load(fh, parse_constant=reject_nan)
