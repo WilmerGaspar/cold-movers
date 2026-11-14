@@ -1,0 +1,148 @@
+{
+  "target": {
+    "key": "epsindib",
+    "name": "Epsilon Indi B",
+    "ra_deg": 331.0438,
+    "dec_deg": -56.7827,
+    "pmra_masyr": 3966.7,
+    "pmdec_masyr": -2536.2,
+    "parallax_mas": 274.8,
+    "ref_epoch": 2000.0,
+    "source": "fallback (motion of Epsilon Indi A, Gaia DR3)",
+    "note": "Pair of T-type brown dwarfs orbiting the star Epsilon Indi."
+  },
+  "size_deg": 0.05,
+  "n_found": 458,
+  "n_used": 278,
+  "n_clean": 208,
+  "n_failures": 22,
+  "fit": {
+    "temperature_k": 1816.2,
+    "t_low_k": 1739.1,
+    "t_high_k": 1890.1,
+    "chi2_red": 46.29,
+    "n_points": 208,
+    "light": "yellow",
+    "reasons": [
+      "not_a_single_blackbody"
+    ]
+  },
+  "epochs": [
+    {
+      "index": 0,
+      "mjd_start": 60789.855522,
+      "mjd_end": 60802.219728,
+      "mjd_mid": 60794.067051000005,
+      "n_frames": 50,
+      "counts": {
+        "1": 2,
+        "2": 12,
+        "3": 12,
+        "4": 2,
+        "5": 9,
+        "6": 13,
+        "0": 50
+      }
+    },
+    {
+      "index": 1,
+      "mjd_start": 60832.651412,
+      "mjd_end": 60836.189812,
+      "mjd_mid": 60832.8569525,
+      "n_frames": 18,
+      "counts": {
+        "2": 6,
+        "3": 3,
+        "5": 8,
+        "6": 1,
+        "0": 18
+      }
+    },
+    {
+      "index": 2,
+      "mjd_start": 60946.964111,
+      "mjd_end": 60991.85757,
+      "mjd_mid": 60954.433246,
+      "n_frames": 86,
+      "counts": {
+        "1": 12,
+        "2": 17,
+        "3": 13,
+        "4": 16,
+        "5": 14,
+        "6": 14,
+        "0": 86
+      }
+    },
+    {
+      "index": 3,
+      "mjd_start": 61148.84479,
+      "mjd_end": 61164.11695,
+      "mjd_mid": 61155.09135,
+      "n_frames": 47,
+      "counts": {
+        "1": 12,
+        "2": 4,
+        "3": 7,
+        "4": 13,
+        "5": 3,
+        "6": 8,
+        "0": 47
+      }
+    },
+    {
+      "index": 4,
+      "mjd_start": 61305.226906,
+      "mjd_end": 61315.478076,
+      "mjd_mid": 61310.658696,
+      "n_frames": 77,
+      "counts": {
+        "2": 16,
+        "3": 22,
+        "5": 14,
+        "6": 25,
+        "0": 77
+      }
+    }
+  ],
+  "ref_wcs": {
+    "crval": [
+      331.09576218636516,
+      -56.80090019973081
+    ],
+    "crpix": [
+      16.0,
+      16.0
+    ],
+    "cdelt": [
+      -0.0017083333333333334,
+      0.0017083333333333334
+    ],
+    "shape": [
+      31,
+      31
+    ]
+  },
+  "gifs": {
+    "0": "movie_d0.gif",
+    "1": "movie_d1.gif",
+    "2": "movie_d2.gif",
+    "3": "movie_d3.gif",
+    "4": "movie_d4.gif",
+    "5": "movie_d5.gif",
+    "6": "movie_d6.gif"
+  },
+  "versions": [
+    "7.0.5"
+  ],
+  "collections": [
+    "spherex_dr1",
+    "spherex_qr3"
+  ],
+  "timings": {
+    "search_s": 1.5,
+    "download_s": 156.4,
+    "total_s": 159.0
+  },
+  "generated_utc": "2026-11-14 20:07 UTC"
+}

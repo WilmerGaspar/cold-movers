@@ -1,0 +1,156 @@
+{
+  "target": {
+    "key": "barnard",
+    "name": "Barnard's Star",
+    "ra_deg": 269.4520833,
+    "dec_deg": 4.6933889,
+    "pmra_masyr": -801.551,
+    "pmdec_masyr": 10362.394,
+    "parallax_mas": 546.976,
+    "ref_epoch": 2000.0,
+    "source": "fallback (Gaia DR3 values)",
+    "note": "Red dwarf with the largest proper motion of any star."
+  },
+  "size_deg": 0.05,
+  "n_found": 358,
+  "n_used": 268,
+  "n_clean": 0,
+  "n_failures": 32,
+  "fit": {
+    "temperature_k": NaN,
+    "t_low_k": NaN,
+    "t_high_k": NaN,
+    "chi2_red": NaN,
+    "n_points": 0,
+    "light": "red",
+    "reasons": [
+      "not_enough_signal"
+    ]
+  },
+  "epochs": [
+    {
+      "index": 0,
+      "mjd_start": 60902.864715,
+      "mjd_end": 60923.107203,
+      "mjd_mid": 60914.277763,
+      "n_frames": 65,
+      "counts": {
+        "1": 10,
+        "2": 10,
+        "3": 10,
+        "4": 13,
+        "5": 12,
+        "6": 10,
+        "0": 65
+      }
+    },
+    {
+      "index": 1,
+      "mjd_start": 60948.58534,
+      "mjd_end": 60949.265914,
+      "mjd_mid": 60948.823726999995,
+      "n_frames": 6,
+      "counts": {
+        "1": 2,
+        "4": 4,
+        "0": 6
+      }
+    },
+    {
+      "index": 2,
+      "mjd_start": 61110.091403,
+      "mjd_end": 61140.030061,
+      "mjd_mid": 61116.680897,
+      "n_frames": 92,
+      "counts": {
+        "1": 13,
+        "2": 15,
+        "3": 15,
+        "4": 15,
+        "5": 17,
+        "6": 17,
+        "0": 92
+      }
+    },
+    {
+      "index": 3,
+      "mjd_start": 61164.133134,
+      "mjd_end": 61165.082972,
+      "mjd_mid": 61164.743119499995,
+      "n_frames": 6,
+      "counts": {
+        "3": 3,
+        "6": 3,
+        "0": 6
+      }
+    },
+    {
+      "index": 4,
+      "mjd_start": 61268.630812,
+      "mjd_end": 61285.257036,
+      "mjd_mid": 61273.649318,
+      "n_frames": 97,
+      "counts": {
+        "1": 15,
+        "2": 20,
+        "3": 12,
+        "4": 14,
+        "5": 21,
+        "6": 15,
+        "0": 97
+      }
+    },
+    {
+      "index": 5,
+      "mjd_start": 61305.628021,
+      "mjd_end": 61305.628021,
+      "mjd_mid": 61305.628021,
+      "n_frames": 2,
+      "counts": {
+        "2": 1,
+        "5": 1,
+        "0": 2
+      }
+    }
+  ],
+  "ref_wcs": {
+    "crval": [
+      269.4462275145295,
+      4.768838230487585
+    ],
+    "crpix": [
+      16.0,
+      16.0
+    ],
+    "cdelt": [
+      -0.0017083333333333334,
+      0.0017083333333333334
+    ],
+    "shape": [
+      31,
+      31
+    ]
+  },
+  "gifs": {
+    "0": "movie_d0.gif",
+    "1": "movie_d1.gif",
+    "2": "movie_d2.gif",
+    "3": "movie_d3.gif",
+    "4": "movie_d4.gif",
+    "5": "movie_d5.gif",
+    "6": "movie_d6.gif"
+  },
+  "versions": [
+    "7.0.5"
+  ],
+  "collections": [
+    "spherex_dr1",
+    "spherex_qr3"
+  ],
+  "timings": {
+    "search_s": 1.7,
+    "download_s": 98.4,
+    "total_s": 100.3
+  },
+  "generated_utc": "2026-11-14 20:05 UTC"
+}
