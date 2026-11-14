@@ -1,78 +1,21 @@
-[20:08:51] probe: 358 images; first url: https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/6/level2_2025W33_2C_0321_1D6_spx_l2b-v27-2026-228.fits
-[20:08:54] probe: HDU PRIMARY shape=None
-[20:08:54] probe: HDU IMAGE shape=(29, 29)
-[20:08:54] probe: HDU FLAGS shape=(29, 29)
-[20:08:54] probe: HDU VARIANCE shape=(29, 29)
-[20:08:54] probe: HDU ZODI shape=(29, 29)
-[20:08:54] probe: HDU EPSF shape=(441,)
-[20:08:54] probe: HDU WCS-WAVE shape=(1,)
-[20:08:54] probe: IMAGE header keys: XTENSION, BITPIX, NAXIS, NAXIS1, NAXIS2, PCOUNT, GCOUNT, EXTNAME, EXTTYPE, BUNIT, DETECTOR, OBSID, EXPIDN, DATE, TSAMP, KOVR_A, KOVR_R, KOVR_P, OVRDLY, SURLIM, SURDLY, TRANDLY, TCUT, KEN_A, KEN_R, KEN_P, KSN_A, KSN_R, KSN_P, NSKIP, NVISITROW, NVISITCOL, MPHAN, NCHANNEL, WCHANNEL, JREF, KREF, JACTIVE, KACTIVE, SPS_TARGET, SPS_FLAGS, OBS_IN_SBAND, NON_SURVEY, SGT_LAT_MIDPT, SGT_LON_MIDPT, SGT_MIN_GCD2SAA, SPS_ELON, SPS_ELAT, SPS_EPA, DETCOORD, L1DQAFLG, RADESYS, X_SC_START, Y_SC_START, Z_SC_START, VX_SC_START, VY_SC_START, VZ_SC_START, XYZ_SC_SYSTEM, VXYZ_SC_SYSTEM, X_SC, Y_SC, Z_SC, VX_SC, VY_SC, VZ_SC, X_SC_END, Y_SC_END, Z_SC_END, VX_SC_END, VY_SC_END, VZ_SC_END, SNWSTRK, NBLMSRCS, SNW7-5CT, SNW3-1CT, SNW2-5CT, SNW6-5CT, NSNOWSRC, NBLM5SCS, L2 N_NONLINEAR, PSTHRESH, L2 N_PERSIST, L2 N_HOT, L2 N_COLD, L2 N_TRAN_NB, L2 N_PERS_NB, OMEGA_MEDIAN, OMEGA_STDDEV, FINAST, DAXIS, CONTRAST, MATCH_NSTARS, QS_NMATCH_VAR, ASTRONETSOLVED, PXSRCMSK, L2 N_SOURCE, L2 N_XTALK, L2 N_GHOST, L2 N_GHOST_FPA, L2 N_GHOST_EXT, L2 N_BLOOM_NS, L2 N_SNOW_NS, L2 N_OUTLIER, L2 SATSTRKS_PXS, L2 SATSTRKS, PSF_FWHM, AURORA_CORR, SHUTTLE_GLOW_CORR, HE_AIRGLOW_CONT, SHUTTLE_GLOW_CONT, AURORA_CONT, L2DQAFLG, L2 N_TRANSIENT, L2 N_OVERFLOW, L2 N_SUR_ERROR, L2 N_NONFUNC, L2 N_DICHROIC, L2 N_MISSING, L2 N_FULLSAMPLE
-[20:08:54] probe: BUNIT = MJy / sr
-[20:08:54] probe: DATE = 2026-08-16T13:49:47.923
-[20:08:54] probe: MJD-AVG = 60902.865380738
-[20:08:54] probe: MJD-BEG = 60902.864714549
-[20:08:54] probe: MJD-END = 60902.866046927
-[20:08:54] probe: DETECTOR = 6
-[20:08:54] probe: CTYPE1 = RA---TAN-SIP
-[20:08:54] probe: CTYPE1W = WAVE-TAB
-[20:08:54] probe: primary VERSION = 7.0.5
-[20:08:54] probe: target pixel (14.5, 14.1) wavelength (4.928847110761348, 0.0369633730257621) pixel_sr 8.912e-10
-[20:08:54] === barnard ===
-[20:08:56]    SIMBAD failed (Unable to access the capabilities endpoint at:
-- https://simbad.cds.unistra.fr/simbad/sim-tap/capabilities: 404 Not Found
-- https://simbad.cds.unistra.fr/simbad/capabilities: 404 Not Found
-
-This could mean:
-1. The service URL is incorrect
-2. The service is temporarily unavailable
-3. The service doesn't support this protocol
-4. If a 503 was encountered, retry after the suggested delay.
-); using fallback values
-[20:08:57]    FAILED:
-Traceback (most recent call last):
-  File "/home/runner/work/cold-movers/cold-movers/scripts/precompute.py", line 108, in main
-    result = pipeline.run(target, size_deg=args.size, max_frames=args.max_frames, workers=16,
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/cold-movers/cold-movers/coldmovers/pipeline.py", line 57, in run
-    all_rows = spherex.search_images(float(ra0), float(dec0))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/cold-movers/cold-movers/coldmovers/spherex.py", line 136, in search_images
-    raise RuntimeError("IRSA search failed: " + " | ".join(errors))
-RuntimeError: IRSA search failed: SIA: 502 Server Error: Proxy Error for url: https://irsa.ipac.caltech.edu/SIA?POS=CIRCLE+269.446+4.76794+0.0002777777777777778&COLLECTION=spherex_qr3 | TAP: 502 Server Error: Proxy Error for url: https://irsa.ipac.caltech.edu/TAP/sync
-
-[20:08:57] === epsindib ===
-[20:08:58]    SIMBAD failed (Unable to access the capabilities endpoint at:
-- https://simbad.cds.unistra.fr/simbad/sim-tap/capabilities: 404 Not Found
-- https://simbad.cds.unistra.fr/simbad/capabilities: 404 Not Found
-
-This could mean:
-1. The service URL is incorrect
-2. The service is temporarily unavailable
-3. The service doesn't support this protocol
-4. If a 503 was encountered, retry after the suggested delay.
-); using fallback values
-/home/runner/work/cold-movers/cold-movers/coldmovers/movie.py:86: RuntimeWarning: Mean of empty slice
-  stacks[det] = np.nanmean(np.array(imgs), axis=0)
-/home/runner/work/cold-movers/cold-movers/coldmovers/movie.py:96: RuntimeWarning: Mean of empty slice
-  stacks[0] = np.nanmean(np.array(normed), axis=0)
-[20:10:33]    D1: 27 images, 19 clean, median S/N 27.9
-[20:10:33]    D2: 60 images, 42 clean, median S/N 122.2
-[20:10:33]    D3: 58 images, 50 clean, median S/N 116.3
-[20:10:33]    D4: 33 images, 22 clean, median S/N 101.1
-[20:10:33]    D5: 47 images, 35 clean, median S/N 121.9
-[20:10:33]    D6: 61 images, 47 clean, median S/N 55.2
-[20:10:33]    epochs: [(60790, 60836, 76), (60947, 60992, 91), (61149, 61164, 45), (61305, 61315, 74)]
-[20:10:33]    fit: {"temperature_k": 1875.4, "t_low_k": 1802.0, "t_high_k": 1945.0, "chi2_red": 47.521, "n_points": 215, "light": "yellow", "reasons": ["not_a_single_blackbody"]}
-[20:10:33]    timings: {'search_s': 2.3, 'download_s': 90.6, 'total_s': 94.4}; failures: 14; versions: ['7.0.5']
-[20:10:33]    first failure: {'url': 'https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W17_4B/l2b-v27-2026-196/4/level2_2025W17_4B_0468_1D4_spx_l2b-v27-2026-196.fits', 'error': 'download failed: 503 Server Error: Service Unavailable for url: https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W17_4B/l2b-v27-2026-196/4/level2_2025W17_4B_0468_1D4_spx_l2b-v27-2026-196.'}
-[20:10:35] === wise0855 ===
-[20:10:36]    SIMBAD failed (Unable to access the capabilities endpoint at:
-- https://simbad.cds.unistra.fr/simbad/sim-tap/capabilities: 404 Not Found
-- https://simbad.cds.unistra.fr/simbad/capabilities: 404 Not Found
-
-This could mean:
-1. The service URL is incorrect
-2. The service is temporarily unavailable
-3. The service doesn't support this protocol
-4. If a 503 was encountered, retry after the suggested delay.
-); using fallback values
+[20:11:58] probe: 358 images; first url: https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/6/level2_2025W33_2C_0321_1D6_spx_l2b-v27-2026-228.fits
+[20:12:02] probe: HDU PRIMARY shape=None
+[20:12:02] probe: HDU IMAGE shape=(29, 29)
+[20:12:02] probe: HDU FLAGS shape=(29, 29)
+[20:12:02] probe: HDU VARIANCE shape=(29, 29)
+[20:12:02] probe: HDU ZODI shape=(29, 29)
+[20:12:02] probe: HDU EPSF shape=(441,)
+[20:12:02] probe: HDU WCS-WAVE shape=(1,)
+[20:12:02] probe: IMAGE header keys: XTENSION, BITPIX, NAXIS, NAXIS1, NAXIS2, PCOUNT, GCOUNT, EXTNAME, EXTTYPE, BUNIT, DETECTOR, OBSID, EXPIDN, DATE, TSAMP, KOVR_A, KOVR_R, KOVR_P, OVRDLY, SURLIM, SURDLY, TRANDLY, TCUT, KEN_A, KEN_R, KEN_P, KSN_A, KSN_R, KSN_P, NSKIP, NVISITROW, NVISITCOL, MPHAN, NCHANNEL, WCHANNEL, JREF, KREF, JACTIVE, KACTIVE, SPS_TARGET, SPS_FLAGS, OBS_IN_SBAND, NON_SURVEY, SGT_LAT_MIDPT, SGT_LON_MIDPT, SGT_MIN_GCD2SAA, SPS_ELON, SPS_ELAT, SPS_EPA, DETCOORD, L1DQAFLG, RADESYS, X_SC_START, Y_SC_START, Z_SC_START, VX_SC_START, VY_SC_START, VZ_SC_START, XYZ_SC_SYSTEM, VXYZ_SC_SYSTEM, X_SC, Y_SC, Z_SC, VX_SC, VY_SC, VZ_SC, X_SC_END, Y_SC_END, Z_SC_END, VX_SC_END, VY_SC_END, VZ_SC_END, SNWSTRK, NBLMSRCS, SNW7-5CT, SNW3-1CT, SNW2-5CT, SNW6-5CT, NSNOWSRC, NBLM5SCS, L2 N_NONLINEAR, PSTHRESH, L2 N_PERSIST, L2 N_HOT, L2 N_COLD, L2 N_TRAN_NB, L2 N_PERS_NB, OMEGA_MEDIAN, OMEGA_STDDEV, FINAST, DAXIS, CONTRAST, MATCH_NSTARS, QS_NMATCH_VAR, ASTRONETSOLVED, PXSRCMSK, L2 N_SOURCE, L2 N_XTALK, L2 N_GHOST, L2 N_GHOST_FPA, L2 N_GHOST_EXT, L2 N_BLOOM_NS, L2 N_SNOW_NS, L2 N_OUTLIER, L2 SATSTRKS_PXS, L2 SATSTRKS, PSF_FWHM, AURORA_CORR, SHUTTLE_GLOW_CORR, HE_AIRGLOW_CONT, SHUTTLE_GLOW_CONT, AURORA_CONT, L2DQAFLG, L2 N_TRANSIENT, L2 N_OVERFLOW, L2 N_SUR_ERROR, L2 N_NONFUNC, L2 N_DICHROIC, L2 N_MISSING, L2 N_FULLSAMPLE
+[20:12:02] probe: BUNIT = MJy / sr
+[20:12:02] probe: DATE = 2026-08-16T13:49:47.923
+[20:12:02] probe: MJD-AVG = 60902.865380738
+[20:12:02] probe: MJD-BEG = 60902.864714549
+[20:12:02] probe: MJD-END = 60902.866046927
+[20:12:02] probe: DETECTOR = 6
+[20:12:02] probe: CTYPE1 = RA---TAN-SIP
+[20:12:02] probe: CTYPE1W = WAVE-TAB
+[20:12:02] probe: primary VERSION = 7.0.5
+[20:12:02] probe: target pixel (14.5, 14.1) wavelength (4.928847110761348, 0.0369633730257621) pixel_sr 8.912e-10
+[20:12:02] === barnard ===
+[20:12:06]    SIMBAD: {"key": "barnard", "name": "Barnard's Star", "ra_deg": 269.4520769586187, "dec_deg": 4.69336496657667, "pmra_masyr": -801.551, "pmdec_masyr": 10362.394, "parallax_mas": 546.9759, "ref_epoch": 2000.0, "source": "SIMBAD via Sesame (position: 2020yCat.1350....0G)", "note": "Red dwarf with the largest proper motion of any star."}
