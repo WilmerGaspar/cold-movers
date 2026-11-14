@@ -579,8 +579,9 @@ if st.toggle("Show the sky around it: AllWISE image (2010) with Gaia DR3 stars a
         if note:
             a2.caption(note)
         a2.markdown(f"[Explore it interactively in Aladin Lite (CDS)]({atlas_link})")
-    except Exception:
-        st.info(f"The AllWISE image service (CDS) did not answer. [Open the interactive atlas at CDS]({atlas_link}).")
+    except Exception as exc:
+        st.info(f"The AllWISE image service (CDS) did not answer ({type(exc).__name__}: {str(exc)[:120]}). "
+                f"[Open the interactive atlas at CDS]({atlas_link}).")
 
 # ------------------------------------------------------------------ spectrum + Madhava
 

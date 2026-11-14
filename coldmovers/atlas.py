@@ -29,7 +29,7 @@ def fetch_allwise(ra_deg: float, dec_deg: float, fov_deg: float, size: int = 480
         "hips": "CDS/P/allWISE/color", "width": size, "height": size, "fov": fov_deg,
         "projection": "TAN", "coordsys": "icrs", "ra": ra_deg, "dec": dec_deg, "format": "jpg",
     }
-    resp = requests.get(HIPS2FITS, params=params, timeout=40)
+    resp = requests.get(HIPS2FITS, params=params, timeout=15)
     resp.raise_for_status()
     img = np.array(Image.open(io.BytesIO(resp.content)).convert("RGB"))
     return img[::-1]  # first row at the bottom, like the sky coordinates
