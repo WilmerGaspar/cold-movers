@@ -687,7 +687,11 @@ st.markdown(
     "This publication makes use of data products from the Spectro-Photometer for the History of the Universe, "
     "Epoch of Reionization and Ices Explorer (SPHEREx), which is a joint project of the Jet Propulsion Laboratory "
     "and the California Institute of Technology, and is funded by the National Aeronautics and Space Administration. "
-    "Data accessed through the NASA/IPAC Infrared Science Archive. Positions and motions from SIMBAD (CDS).<br>"
+    "This research has made use of the NASA/IPAC Infrared Science Archive; of data from the ESA mission Gaia, "
+    "processed by the Gaia DPAC; of the SIMBAD database, VizieR and Aladin Lite (CDS, Strasbourg); and of WISE images "
+    "(UCLA, JPL/Caltech, NASA). Full list with licences: "
+    "<a href='https://github.com/WilmerGaspar/cold-movers/blob/main/DATA_AND_RESOURCES.md' target='_blank'>"
+    "DATA_AND_RESOURCES.md</a>.<br>"
     "Built with AI assistance (Claude, Anthropic) under the team's direction. Not an official NASA product.</div>",
     unsafe_allow_html=True,
 )

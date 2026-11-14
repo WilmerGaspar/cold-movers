@@ -81,6 +81,9 @@ Tests check the series against numerical integration of Planck's law (to 1e-8), 
 
 ## Data and references
 
+The complete inventory of data, references, software, services and their licences and required acknowledgements is in **[DATA_AND_RESOURCES.md](DATA_AND_RESOURCES.md)**. Summary:
+
+
 - SPHEREx Data Release 1 spectral images, NASA/IPAC Infrared Science Archive, doi:10.26131/IRSA678; SPHEREx Quick Release 3.
 - *The SPHEREx image and spectrophotometry processing pipeline*, ApJS 285, 67 (2026), doi:10.3847/1538-4365/ae8843, arXiv:2511.15823.
 - IRSA tutorials (BSD-3): "Introduction to SPHEREx Spectral Images", "Download a collection of SPHEREx Spectral Image cutouts".
