@@ -13,9 +13,9 @@
   },
   "size_deg": 0.05,
   "n_found": 358,
-  "n_used": 300,
+  "n_used": 299,
   "n_clean": 0,
-  "n_failures": 0,
+  "n_failures": 1,
   "fit": {
     "temperature_k": null,
     "t_low_k": null,
@@ -33,15 +33,15 @@
       "mjd_start": 60902.864715,
       "mjd_end": 60923.107203,
       "mjd_mid": 60914.277763,
-      "n_frames": 91,
+      "n_frames": 90,
       "counts": {
         "1": 14,
         "2": 14,
         "3": 16,
-        "4": 18,
+        "4": 17,
         "5": 16,
         "6": 13,
-        "0": 91
+        "0": 90
       }
     },
     {
@@ -148,10 +148,10 @@
     "spherex_qr3"
   ],
   "timings": {
-    "search_s": 2.1,
-    "download_s": 176.4,
-    "total_s": 179.1
+    "search_s": 2.2,
+    "download_s": 437.9,
+    "total_s": 440.7
   },
-  "generated_utc": "2026-11-14 21:59 UTC",
+  "generated_utc": "2026-11-14 22:26 UTC",
   "credits": "Cold Movers, NASA Space Apps 2026. SPHEREx DR1/QR3 data from NASA/IPAC IRSA. Code written with AI assistance (Claude, Anthropic) under the team's direction."
 }

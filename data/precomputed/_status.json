@@ -12,16 +12,16 @@
         "too_bright"
       ]
     },
-    "n_used": 300,
+    "n_used": 299,
     "n_found": 358
   },
   "epsindib": {
     "ok": true,
     "fit": {
-      "temperature_k": 1867.7,
-      "t_low_k": 1794.6,
-      "t_high_k": 1937.0,
-      "chi2_red": 47.377,
+      "temperature_k": 1877.0,
+      "t_low_k": 1803.6,
+      "t_high_k": 1946.7,
+      "chi2_red": 46.284,
       "n_points": 223,
       "light": "yellow",
       "reasons": [
@@ -34,10 +34,10 @@
   "wise0855": {
     "ok": true,
     "fit": {
-      "temperature_k": 630.5,
-      "t_low_k": 551.7,
-      "t_high_k": 738.4,
-      "chi2_red": 1.959,
+      "temperature_k": 629.4,
+      "t_low_k": 550.7,
+      "t_high_k": 737.1,
+      "chi2_red": 1.949,
       "n_points": 66,
       "light": "red",
       "reasons": [
@@ -52,10 +52,10 @@
   "rwaur": {
     "ok": true,
     "fit": {
-      "temperature_k": 3461.1,
-      "t_low_k": 3060.0,
-      "t_high_k": 4025.1,
-      "chi2_red": 14.407,
+      "temperature_k": 3842.4,
+      "t_low_k": 3432.6,
+      "t_high_k": 4391.6,
+      "chi2_red": 8.893,
       "n_points": 16,
       "light": "red",
       "reasons": [
