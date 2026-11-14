@@ -13,7 +13,8 @@ import os
 import numpy as np
 import streamlit as st
 
-from coldmovers import madhava, movie, pipeline
+from coldmovers import checks, madhava, movie, pipeline
+from coldmovers.references import PUBLISHED
 from coldmovers.targets import SHOWCASE, Target, parse_coordinates, resolve_simbad
 
 st.set_page_config(page_title="Cold Movers", page_icon="🛰️", layout="wide")
@@ -382,6 +383,13 @@ with c_card:
         f"reduced chi² {fit.chi2_red:.2f}</div></div>",
         unsafe_allow_html=True,
     )
+    pub = PUBLISHED.get(target.key)
+    if pub:
+        st.markdown(
+            f"<div class='cm-card' style='margin-top:10px'><div class='cm-muted'>Published value, for comparison</div>"
+            f"{pub['text']}<div class='cm-muted' style='margin-top:4px'>{pub['ref']}</div></div>",
+            unsafe_allow_html=True,
+        )
     with st.expander("How the Madhava engine works"):
         st.markdown(
             "SPHEREx splits light into 102 colour bands. A hot object shines mostly at short wavelengths, a cold "
@@ -398,9 +406,26 @@ with c_card:
             "when one curve does not describe the light."
         )
 
+# ------------------------------------------------------------------ is it real?
+
+st.markdown("### 3 · Is it real? Can the universe fool us?")
+STATUS_ICON = {"pass": "🟢", "warn": "🟡", "fail": "🔴"}
+if view.get("stacks"):
+    real = checks.run_checks(rows, epochs, view["stacks"], marker)
+    cols = st.columns(len(real["checks"]))
+    for col, chk in zip(cols, real["checks"]):
+        col.markdown(
+            f"<div class='cm-card'><b>{STATUS_ICON[chk['status']]} {chk['name']}</b>"
+            f"<div style='margin-top:6px'>{chk['text']}</div></div>",
+            unsafe_allow_html=True,
+        )
+    st.caption("These are signals, not proof. A real discovery needs follow-up by astronomers.")
+else:
+    st.caption("No aligned images, so the checks cannot run.")
+
 # ------------------------------------------------------------------ human scale
 
-st.markdown("### 3 · On a human scale")
+st.markdown("### 4 · On a human scale")
 h1, h2 = st.columns(2)
 with h1:
     if target.distance_pc:
@@ -428,7 +453,7 @@ with h2:
 
 # ------------------------------------------------------------------ data
 
-st.markdown("### 4 · The data")
+st.markdown("### 5 · The data")
 if rows:
     import pandas as pd
 

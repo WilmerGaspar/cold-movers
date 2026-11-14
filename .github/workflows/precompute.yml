@@ -14,6 +14,8 @@ on:
     paths:
       - "coldmovers/**"
       - "scripts/precompute.py"
+      - "scripts/smoke_app.py"
+      - "app.py"
       - ".github/workflows/precompute.yml"
 
 permissions:
@@ -45,6 +47,9 @@ jobs:
         run: |
           python scripts/precompute.py --objects "${{ github.event.inputs.objects || 'all' }}" \
             --max-frames "${{ github.event.inputs.max_frames || '300' }}" 2>&1 | tee data/precomputed/_log.txt
+      - name: Smoke-test the app
+        continue-on-error: true
+        run: python scripts/smoke_app.py 2>&1 | tee data/precomputed/_smoke.txt
       - name: Commit results
         if: always()
         run: |
