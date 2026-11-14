@@ -20,7 +20,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from coldmovers import pipeline, spherex  # noqa: E402
-from coldmovers.targets import SHOWCASE, SIMBAD_IDS, resolve_simbad  # noqa: E402
+from coldmovers.targets import SHOWCASE, SIMBAD_IDS, gaia_parallax, resolve_simbad  # noqa: E402
 
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "precomputed")
 
@@ -104,6 +104,17 @@ def main():
             log(f"   SIMBAD: {json.dumps(target.to_dict())}")
         except Exception as exc:
             log(f"   SIMBAD failed ({exc}); using fallback values")
+        try:
+            g = gaia_parallax(target)
+            if g:
+                plx, err, sid = g
+                log(f"   Gaia DR3 {sid}: parallax {plx:.4f} ± {err:.4f} mas (catalogue had {target.parallax_mas})")
+                target.parallax_mas = plx
+                target.source += f"; parallax from Gaia DR3 {sid}"
+            else:
+                log("   Gaia DR3: no precise parallax at this position (kept catalogue value)")
+        except Exception as exc:
+            log(f"   Gaia DR3 query failed ({exc}); kept catalogue parallax")
         try:
             result = pipeline.run(target, size_deg=args.size, max_frames=args.max_frames, workers=6,
                                   progress=lambda s, f: None)

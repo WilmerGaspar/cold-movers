@@ -16,6 +16,10 @@ Enter sky coordinates, a star name, or pick one of the five challenge objects. C
 
 Every result can be shared as a link (`?object=wise0855` or `?ra=..&dec=..`) and downloaded as CSV or GIF.
 
+## Why a blink comparator?
+
+In 1930 Clyde Tombaugh found Pluto at Lowell Observatory, during the search for "Planet X", by blinking two photographs of the same sky taken days apart: whatever jumps between them is moving. Cold Movers is a digital blink comparator for SPHEREx. Cold brown dwarfs such as WISE 0855 are invisible to the eye; only infrared light and their motion give them away.
+
 ## How it works
 
 | Step | What we do | Why |

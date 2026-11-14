@@ -265,6 +265,51 @@ st.caption(
     + (f", pipeline version {', '.join(view['versions'])}" if view.get("versions") else "") + "."
 )
 
+# ------------------------------------------------------------------ verdict at a glance
+
+fit = pipeline.fit_rows(rows)
+real = checks.run_checks(rows, epochs, view["stacks"], marker) if view.get("stacks") else None
+lc = variability.light_curve(rows, epochs)
+STATUS_ICON = {"pass": "🟢", "warn": "🟡", "fail": "🔴"}
+
+
+def summary_card(title, big, small, color="#232b40"):
+    return (f"<div class='cm-card' style='border-left:5px solid {color}; min-height:128px'>"
+            f"<div class='cm-muted'>{title}</div><div class='cm-big' style='font-size:1.7rem'>{big}</div>"
+            f"<div class='cm-muted' style='margin-top:4px'>{small}</div></div>")
+
+
+s1, s2, s3 = st.columns(3)
+motion = real.get("motion") if real else None
+if motion and target.total_pm_arcsec_per_year >= 0.5:
+    s1.markdown(summary_card(
+        "Does it move?", f"Yes · {motion['measured_px'] * checks.PIXEL_ARCSEC:.1f}″",
+        f"measured between the first and last SPHEREx visit; the catalogue predicts "
+        f"{motion['predicted_px'] * checks.PIXEL_ARCSEC:.1f}″", "#2fbf71"), unsafe_allow_html=True)
+elif target.total_pm_arcsec_per_year < 0.5:
+    s1.markdown(summary_card(
+        "Does it move?", "Too slowly to see",
+        f"{target.total_pm_arcsec_per_year * 1000:.0f} milliarcsec per year: far below one SPHEREx pixel "
+        "over these visits"), unsafe_allow_html=True)
+else:
+    s1.markdown(summary_card("Does it move?", "Not measured", "not enough clear detections to follow it"),
+                unsafe_allow_html=True)
+
+if np.isfinite(fit.temperature) and fit.light != "red":
+    big_t, small_t = f"{fit.temperature:,.0f} K", madhava.REASON_TEXT.get(fit.reasons[0], "") if fit.reasons else ""
+else:
+    big_t = "Too bright to measure" if "too_bright" in fit.reasons else "Not reliable"
+    small_t = madhava.REASON_TEXT.get(fit.reasons[0], "") if fit.reasons else ""
+s2.markdown(summary_card(f"How cold? · {LIGHT_WORDS[fit.light]}", big_t, small_t.split(". ")[0] + ".",
+                         LIGHT_COLORS[fit.light]), unsafe_allow_html=True)
+
+if real:
+    n_pass = sum(c["status"] == "pass" for c in real["checks"])
+    icons = " ".join(f"{STATUS_ICON[c['status']]} {c['name']}" for c in real["checks"])
+    color = "#2fbf71" if n_pass == len(real["checks"]) else ("#f2c94c" if n_pass >= 2 else "#eb5757")
+    s3.markdown(summary_card("Is it real?", f"{n_pass} of {len(real['checks'])} checks pass", icons, color),
+                unsafe_allow_html=True)
+
 # ------------------------------------------------------------------ sky movie
 
 st.markdown("### 1 · The sky, visit by visit")
@@ -272,9 +317,16 @@ left, right = st.columns([3, 2])
 with right:
     st.markdown(
         "Each frame stacks every SPHEREx image of one detector taken during one visit, all aligned on the "
-        "same patch of sky. The orange circle is where the object should be on that date. "
-        "**If the circle moves and a dot follows it while the background stays still, you are watching "
-        "real motion across the sky.**"
+        "same patch of sky. The orange circle is where the object should be on that date and the dashed line "
+        "is its predicted path. **If a dot follows the circle while the background stays still, you are "
+        "watching real motion across the sky.**"
+    )
+    st.markdown(
+        "<span class='cm-muted'>In 1930 Clyde Tombaugh found Pluto at Lowell Observatory, during the search "
+        "for \"Planet X\", by blinking two photographs of the same sky taken days apart. Cold Movers is a "
+        "digital blink comparator for SPHEREx. Cold brown dwarfs like WISE 0855 are invisible to the eye: only "
+        "infrared light and their motion give them away.</span>",
+        unsafe_allow_html=True,
     )
     available = sorted({d for ep in view["stacks"].values() for d in ep}) if view.get("stacks") else []
     det = st.radio("Detector", available or [0], index=0, format_func=movie.detector_label)
@@ -294,7 +346,7 @@ with right:
 def gif_for(cache_key: str, det: int, _epochs, _stacks):
     eps = [dict(ep, stacks=_stacks.get(ep["index"], {}),
                 counts={int(k): v for k, v in ep["counts"].items()}) for ep in _epochs]
-    pngs = movie.render_frames(eps, det, marker, pipeline.epoch_title)
+    pngs = movie.render_frames(eps, det, marker, pipeline.epoch_title, track=pipeline.track_points(marker, _epochs))
     return movie.frames_to_gif(pngs, 800)
 
 
@@ -312,6 +364,9 @@ with left:
             v = np.nanpercentile(np.abs(diff), 99) or 1.0
             fig, ax = plt.subplots(figsize=(4.2, 4.4), dpi=110)
             ax.imshow(np.nan_to_num(diff), origin="lower", cmap="RdBu_r", vmin=-v, vmax=v, interpolation="nearest")
+            path = pipeline.track_points(marker, epochs)
+            if path:
+                ax.plot(*zip(*path), ls="--", color="#555555", lw=1.0)
             for ep, col in ((usable[0], "#5b8def"), (usable[-1], "#eb5757")):
                 px, py = marker(ep["mjd_mid"])
                 ax.add_patch(plt.Circle((px, py), 3.0, fill=False, color=col, lw=1.5))
@@ -370,7 +425,6 @@ with st.expander("Explore this spot in an interactive sky atlas (Aladin Lite · 
 # ------------------------------------------------------------------ spectrum + Madhava
 
 st.markdown("### 2 · Its light, and how cold it is")
-fit = pipeline.fit_rows(rows)
 
 c_plot, c_card = st.columns([3, 2])
 with c_plot:
@@ -413,6 +467,29 @@ with c_plot:
         legend=dict(orientation="h", y=1.08), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
     )
     st.plotly_chart(figp, use_container_width=True)
+    if np.isfinite(fit.temperature) and clean:
+        lam_c = np.array([r["wavelength_um"] for r in clean])
+        f_c = np.array([r["flux_ujy"] for r in clean])
+        e_c = np.array([r["err_ujy"] for r in clean])
+        model_c = fit.scale * madhava.band_model_fnu(lam_c, [r["bandwidth_um"] for r in clean], fit.temperature)
+        resid = (f_c - model_c) / np.sqrt(e_c**2 + (madhava.DEFAULT_ERROR_FLOOR * np.abs(f_c)) ** 2)
+        figr = go.Figure()
+        for d in range(1, 7):
+            sel = np.array([r["detector"] == d for r in clean])
+            if sel.any():
+                figr.add_trace(go.Scatter(x=lam_c[sel], y=resid[sel], mode="markers", showlegend=False,
+                                          marker=dict(size=5, color=DET_COLORS[d], opacity=0.85)))
+        for yv, dash in ((0, "solid"), (3, "dot"), (-3, "dot")):
+            figr.add_hline(y=yv, line=dict(color="#6b7280", width=1, dash=dash))
+        figr.update_layout(
+            template="plotly_dark", height=200, margin=dict(l=10, r=10, t=10, b=10),
+            xaxis_title="Wavelength (micrometres)", yaxis_title="(data − fit) / error",
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        )
+        st.plotly_chart(figr, use_container_width=True)
+        st.caption("Residuals: points beyond the dotted lines (±3) show where one blackbody fails. In cool "
+                   "atmospheres that happens at water bands (1.4, 1.9, 2.7 µm), methane bands (1.6, 2.2, 3.3 µm) "
+                   "and carbon monoxide or dioxide (4.3–4.7 µm).")
 
 with c_card:
     light = fit.light
@@ -452,8 +529,9 @@ with c_card:
         st.latex(r"F(0\to\lambda)=\frac{15}{\pi^4}\sum_{n=1}^{\infty} e^{-nx}\left(\frac{x^3}{n}+\frac{3x^2}{n^2}"
                  r"+\frac{6x}{n^3}+\frac{6}{n^4}\right),\quad x=\frac{hc}{\lambda k T}")
         st.markdown(
-            "The engine is named after Madhava of Sangamagrama (14th century), a pioneer of infinite series; the "
-            "series itself is standard physics (Widger & Woodall 1976). The result is a *blackbody-equivalent* "
+            "Infinite series, pioneered by Madhava of Sangamagrama in India about 600 years ago, let us integrate "
+            "Planck's law exactly over each band; the engine is named in his honour. This particular series is "
+            "standard physics (Widger & Woodall 1976), not our invention. The result is a *blackbody-equivalent* "
             "temperature: brown dwarfs and young stars are not perfect blackbodies, so the traffic light tells you "
             "when one curve does not describe the light."
         )
@@ -461,7 +539,6 @@ with c_card:
 # ------------------------------------------------------------------ does it change?
 
 st.markdown("### 3 · Does it change? Brightness visit by visit")
-lc = variability.light_curve(rows, epochs)
 v_plot, v_text = st.columns([3, 2])
 with v_text:
     st.markdown(f"<div class='cm-card'>{lc['verdict']['text']}</div>", unsafe_allow_html=True)
@@ -500,10 +577,8 @@ with v_plot:
 
 # ------------------------------------------------------------------ is it real?
 
-st.markdown("### 4 · Is it real? Can the universe fool us?")
-STATUS_ICON = {"pass": "🟢", "warn": "🟡", "fail": "🔴"}
-if view.get("stacks"):
-    real = checks.run_checks(rows, epochs, view["stacks"], marker)
+st.markdown("### 4 · Is it real, or a ghost in the detector?")
+if real:
     cols = st.columns(len(real["checks"]))
     for col, chk in zip(cols, real["checks"]):
         col.markdown(
@@ -522,11 +597,16 @@ h1, h2 = st.columns(2)
 with h1:
     if target.distance_pc:
         ly = target.distance_pc * LIGHT_YEARS_PER_PC
+        obs_year = float(np.median([2000.0 + (m - 51544.5) / 365.25 for m in mjds])) if mjds else 2026.0
+        left = obs_year - ly
+        when = f"around {left:.0f}" if left >= 1 else f"around {abs(left) + 1:.0f} BC"
         st.markdown(
             f"<div class='cm-card'><div class='cm-muted'>Light from the past</div>"
-            f"<div class='cm-big'>{ly:,.1f} years</div>"
-            f"The light SPHEREx caught left {target.name} about {ly:,.1f} years before it arrived. "
-            f"Looking at the sky is looking at the past.</div>",
+            f"<div class='cm-big'>It left {when}</div>"
+            f"The light SPHEREx caught had been travelling for about {ly:,.1f} years "
+            f"({target.distance_pc:,.1f} parsecs). Looking at the sky is looking at the past."
+            f"<div class='cm-muted' style='margin-top:4px'>Distance from the parallax "
+            f"({target.parallax_mas:.2f} mas).</div></div>",
             unsafe_allow_html=True,
         )
     else:

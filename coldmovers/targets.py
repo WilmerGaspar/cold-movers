@@ -227,6 +227,32 @@ def _resolve_simbad_tap(name: str, key: str | None = None) -> Target:
     )
 
 
+def gaia_parallax(target: Target, radius_arcsec: float = 4.0):
+    """Gaia DR3 parallax of the brightest source at the target's 2016.0 position.
+
+    Returns (parallax_mas, parallax_error_mas, source_id) or None. Used to replace
+    old catalogue parallaxes (for example Hipparcos values for variable binaries).
+    """
+    from astroquery.gaia import Gaia
+
+    ra, dec = target.position_at(year_to_mjd(2016.0))
+    query = f"""
+    SELECT TOP 3 source_id, parallax, parallax_error, phot_g_mean_mag
+    FROM gaiadr3.gaia_source
+    WHERE 1 = CONTAINS(POINT('ICRS', ra, dec), CIRCLE('ICRS', {float(ra)}, {float(dec)}, {radius_arcsec / 3600.0}))
+      AND parallax IS NOT NULL
+    ORDER BY phot_g_mean_mag ASC
+    """
+    table = Gaia.launch_job(query).get_results()
+    if len(table) == 0:
+        return None
+    row = table[0]
+    plx, err = float(row["parallax"]), float(row["parallax_error"])
+    if not (np.isfinite(plx) and plx > 0 and err > 0 and plx / err > 10):
+        return None
+    return plx, err, int(row["source_id"])
+
+
 def parse_coordinates(text: str):
     """Parse 'RA Dec' in degrees or sexagesimal. Returns (ra_deg, dec_deg)."""
     text = text.strip().replace(",", " ")

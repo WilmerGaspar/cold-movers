@@ -139,6 +139,18 @@ def run(target: Target, size_deg: float = DEFAULT_SIZE_DEG, max_frames: int = DE
     )
 
 
+def track_points(marker, epochs, n: int = 25):
+    """Predicted path across the visits (pixels), or None if it moves less than a pixel."""
+    if not epochs:
+        return None
+    t0 = min(ep["mjd_start"] for ep in epochs) - 30
+    t1 = max(ep["mjd_end"] for ep in epochs) + 30
+    pts = [marker(t) for t in np.linspace(t0, t1, n)]
+    if np.hypot(pts[-1][0] - pts[0][0], pts[-1][1] - pts[0][1]) < 1.0:
+        return None
+    return pts
+
+
 def epoch_title(ep, det, k, n):
     from astropy.time import Time
 
@@ -187,7 +199,8 @@ def save(result: RunResult, outdir: str) -> dict:
 
     gifs = {}
     for det in range(0, 7):
-        pngs = movie.render_frames(result.epochs, det, result.marker_pixels, epoch_title)
+        pngs = movie.render_frames(result.epochs, det, result.marker_pixels, epoch_title,
+                                   track=track_points(result.marker_pixels, result.epochs))
         if pngs:
             name = f"movie_d{det}.gif"
             with open(os.path.join(outdir, name), "wb") as fh:

@@ -139,8 +139,11 @@ def _stretch(images):
     return float(lo), float(hi if hi > lo else lo + 1)
 
 
-def render_frames(epochs, det: int, marker_pixels=None, title_fn=None, dpi: int = 100):
-    """Render one PNG (bytes) per epoch for a detector, with a common stretch."""
+def render_frames(epochs, det: int, marker_pixels=None, title_fn=None, dpi: int = 100, track=None):
+    """Render one PNG (bytes) per epoch for a detector, with a common stretch.
+
+    track: optional list of (x, y) pixels, the predicted path, drawn as a dashed line.
+    """
     import matplotlib
 
     matplotlib.use("Agg")
@@ -156,6 +159,9 @@ def render_frames(epochs, det: int, marker_pixels=None, title_fn=None, dpi: int 
         norm = np.arcsinh(np.clip((img - lo) / (hi - lo), 0, None) * 10) / np.arcsinh(10)
         fig, ax = plt.subplots(figsize=(4.2, 4.6), dpi=dpi, facecolor=BG)
         ax.imshow(np.nan_to_num(norm, nan=0.0), origin="lower", cmap="gray", vmin=0, vmax=1, interpolation="nearest")
+        if track:
+            tx, ty = zip(*track)
+            ax.plot(tx, ty, ls="--", color="#ffb199", lw=1.0, alpha=0.8)
         if marker_pixels is not None:
             px, py = marker_pixels(ep["mjd_mid"])
             ax.add_patch(plt.Circle((px, py), 3.0, fill=False, color="#ff5a36", lw=1.5))
