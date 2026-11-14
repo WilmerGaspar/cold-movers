@@ -148,7 +148,7 @@ def epoch_title(ep, det, k, n):
 
 # ----------------------------------------------------------------- save / load
 
-PHOT_COLUMNS = ["mjd", "detector", "wavelength_um", "bandwidth_um", "flux_ujy", "err_ujy", "snr",
+PHOT_COLUMNS = ["mjd", "detector", "wavelength_um", "bandwidth_um", "flux_ujy", "err_ujy", "snr", "wing_ujy",
                 "x", "y", "background", "inside", "hard_flag", "soft_flag", "saturated", "blend", "flag_bits",
                 "ra", "dec", "url"]
 
@@ -220,10 +220,10 @@ def load(outdir: str) -> dict | None:
 
         with open(csv_path) as fh:
             for r in csv.DictReader(fh):
-                for k in ("mjd", "wavelength_um", "bandwidth_um", "flux_ujy", "err_ujy", "snr", "x", "y",
+                for k in ("mjd", "wavelength_um", "bandwidth_um", "flux_ujy", "err_ujy", "snr", "wing_ujy", "x", "y",
                           "background", "ra", "dec"):
                     try:
-                        r[k] = float(r[k])
+                        r[k] = float(r.get(k))
                     except (TypeError, ValueError):
                         r[k] = float("nan")
                 for k in ("inside", "hard_flag", "soft_flag", "saturated", "blend"):

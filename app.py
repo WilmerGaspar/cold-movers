@@ -13,7 +13,7 @@ import os
 import numpy as np
 import streamlit as st
 
-from coldmovers import checks, madhava, movie, pipeline
+from coldmovers import checks, madhava, movie, pipeline, variability
 from coldmovers.references import PUBLISHED
 from coldmovers.targets import SHOWCASE, Target, parse_coordinates, resolve_simbad
 
@@ -411,9 +411,49 @@ with c_card:
             "when one curve does not describe the light."
         )
 
+# ------------------------------------------------------------------ does it change?
+
+st.markdown("### 3 · Does it change? Brightness visit by visit")
+lc = variability.light_curve(rows, epochs)
+v_plot, v_text = st.columns([3, 2])
+with v_text:
+    st.markdown(f"<div class='cm-card'>{lc['verdict']['text']}</div>", unsafe_allow_html=True)
+    if "wings" in lc["methods"].values():
+        st.caption("Its core saturates SPHEREx, so we follow the light in the wings of the star (3-6 pixels "
+                   "from the centre), which rises and falls with the total brightness.")
+    st.caption("For each detector we remove the smooth change of brightness with wavelength, so what remains "
+               "is the change in time. Lower magnitude means brighter.")
+with v_plot:
+    if lc["points"]:
+        import plotly.graph_objects as go
+        from astropy.time import Time
+
+        figv = go.Figure()
+        for d in sorted({p["detector"] for p in lc["points"]}):
+            pts = [p for p in lc["points"] if p["detector"] == d]
+            figv.add_trace(go.Scatter(
+                x=Time([p["mjd"] for p in pts], format="mjd").to_datetime(), y=[p["dmag"] for p in pts],
+                mode="markers", name=f"D{d}", marker=dict(size=5, color=DET_COLORS[d], opacity=0.55),
+            ))
+        if lc["visits"]:
+            figv.add_trace(go.Scatter(
+                x=Time([v["mjd"] for v in lc["visits"]], format="mjd").to_datetime(),
+                y=[v["dmag"] for v in lc["visits"]], mode="lines+markers", name="visit median",
+                error_y=dict(type="data", array=[v["err"] for v in lc["visits"]]),
+                line=dict(color="#ffffff", width=2), marker=dict(size=10),
+            ))
+        figv.update_layout(
+            template="plotly_dark", height=340, margin=dict(l=10, r=10, t=30, b=10),
+            yaxis=dict(title="Change (magnitudes)", autorange="reversed"), xaxis_title="Date",
+            legend=dict(orientation="h", y=1.1), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        )
+        st.plotly_chart(figv, use_container_width=True)
+    else:
+        st.caption("Not enough usable measurements to follow its brightness.")
+
 # ------------------------------------------------------------------ is it real?
 
-st.markdown("### 3 · Is it real? Can the universe fool us?")
+st.markdown("### 4 · Is it real? Can the universe fool us?")
 STATUS_ICON = {"pass": "🟢", "warn": "🟡", "fail": "🔴"}
 if view.get("stacks"):
     real = checks.run_checks(rows, epochs, view["stacks"], marker)
@@ -430,7 +470,7 @@ else:
 
 # ------------------------------------------------------------------ human scale
 
-st.markdown("### 4 · On a human scale")
+st.markdown("### 5 · On a human scale")
 h1, h2 = st.columns(2)
 with h1:
     if target.distance_pc:
@@ -458,7 +498,7 @@ with h2:
 
 # ------------------------------------------------------------------ data
 
-st.markdown("### 5 · The data")
+st.markdown("### 6 · The data")
 if rows:
     import pandas as pd
 

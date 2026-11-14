@@ -54,7 +54,7 @@ def measure(image, variance, flags, x, y, pixel_sr, r_ap=R_APERTURE, r_in=R_IN, 
     out = {
         "x": float(x), "y": float(y), "flux_ujy": np.nan, "err_ujy": np.nan,
         "background": np.nan, "hard_flag": True, "soft_flag": False, "saturated": False, "flag_bits": 0,
-        "inside": False, "n_ap": 0,
+        "inside": False, "n_ap": 0, "wing_ujy": np.nan,
     }
     if not (np.isfinite(x) and np.isfinite(y)):
         return out
@@ -81,6 +81,7 @@ def measure(image, variance, flags, x, y, pixel_sr, r_ap=R_APERTURE, r_in=R_IN, 
         ring_ok = ring & ~hard
     bkg, bkg_sd = _robust_stats(image[ring_ok])
     out["background"] = bkg
+    out["wing_ujy"] = _wing_flux(image, rr, hard, pixel_sr)
     if not np.isfinite(bkg):
         return out
 
@@ -100,6 +101,28 @@ def measure(image, variance, flags, x, y, pixel_sr, r_ap=R_APERTURE, r_in=R_IN, 
     out["flux_ujy"] = float(signal * pixel_sr * UJY_PER_MJY)
     out["err_ujy"] = float(np.sqrt(var) * pixel_sr * UJY_PER_MJY)
     return out
+
+
+WING_IN, WING_OUT = 3.0, 6.0
+FAR_IN, FAR_OUT = 10.0, 14.0
+
+
+def _wing_flux(image, rr, hard, pixel_sr) -> float:
+    """Light in the wings of the star (3-6 px), with the sky measured further out (10-14 px).
+
+    Saturation only affects the core, and at a fixed wavelength the wings are a fixed
+    fraction of the total light, so wing flux tracks brightness changes of very
+    bright (saturated) stars from one visit to the next. Returns uJy or NaN.
+    """
+    wing = (rr >= WING_IN) & (rr <= WING_OUT)
+    far = (rr >= FAR_IN) & (rr <= FAR_OUT) & ~hard
+    good = wing & ~hard
+    if far.sum() < 12 or good.sum() < 0.5 * wing.sum():
+        return float("nan")
+    sky, _ = _robust_stats(image[far])
+    if not np.isfinite(sky):
+        return float("nan")
+    return float(np.sum(image[good] - sky) * wing.sum() / good.sum() * pixel_sr * UJY_PER_MJY)
 
 
 def measure_frame(frame, ra_deg: float, dec_deg: float) -> dict:
