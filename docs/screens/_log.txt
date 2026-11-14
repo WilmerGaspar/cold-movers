@@ -2,6 +2,6 @@ click test R Draconis: OK
 click test Epsilon Indi B: OK
 click test RW Aurigae: OK
 click test Barnard's Star: OK
-atlas: service did not answer (message shown)
+atlas: atlas image shown
 atlas screenshot saved
 done
