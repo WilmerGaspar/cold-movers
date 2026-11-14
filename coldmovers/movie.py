@@ -22,6 +22,8 @@ from scipy.ndimage import map_coordinates
 from .spherex import DETECTOR_RANGE_UM, MOVIE_MASK, PIXEL_ARCSEC, SAT_MASK
 
 EPOCH_GAP_DAYS = 20.0
+BG = "#0b0f1a"  # matches the app theme
+FG = "#e8ecf4"
 
 
 def make_reference_wcs(ra_deg: float, dec_deg: float, size_deg: float, pixel_arcsec: float = PIXEL_ARCSEC):
@@ -152,17 +154,20 @@ def render_frames(epochs, det: int, marker_pixels=None, title_fn=None, dpi: int 
     for k, ep in enumerate(usable):
         img = ep["stacks"][det]
         norm = np.arcsinh(np.clip((img - lo) / (hi - lo), 0, None) * 10) / np.arcsinh(10)
-        fig, ax = plt.subplots(figsize=(4.2, 4.6), dpi=dpi)
+        fig, ax = plt.subplots(figsize=(4.2, 4.6), dpi=dpi, facecolor=BG)
         ax.imshow(np.nan_to_num(norm, nan=0.0), origin="lower", cmap="gray", vmin=0, vmax=1, interpolation="nearest")
         if marker_pixels is not None:
             px, py = marker_pixels(ep["mjd_mid"])
             ax.add_patch(plt.Circle((px, py), 3.0, fill=False, color="#ff5a36", lw=1.5))
         ax.set_xticks([])
         ax.set_yticks([])
-        ax.set_title(title_fn(ep, det, k, len(usable)) if title_fn else f"epoch {k + 1}", fontsize=9)
+        ax.set_title(title_fn(ep, det, k, len(usable)) if title_fn else f"epoch {k + 1}", fontsize=9,
+                     color=FG)
+        for spine in ax.spines.values():
+            spine.set_color("#232b40")
         fig.tight_layout()
         buf = io.BytesIO()
-        fig.savefig(buf, format="png")
+        fig.savefig(buf, format="png", facecolor=BG)
         plt.close(fig)
         pngs.append(buf.getvalue())
     return pngs

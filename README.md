@@ -12,6 +12,8 @@ Enter sky coordinates, a star name, or pick one of the five challenge objects. C
 4. runs the **Madhava engine**, a band-integrated Planck fit that gives a *blackbody-equivalent temperature* with an uncertainty and a **traffic light** that says how far to trust it,
 5. runs three **"Is it real?"** checks: seen again in another visit, clean pixels, and moves as the catalogue predicts.
 
+**Live app: https://cold-movers.streamlit.app**
+
 Every result can be shared as a link (`?object=wise0855` or `?ra=..&dec=..`) and downloaded as CSV or GIF.
 
 ## How it works

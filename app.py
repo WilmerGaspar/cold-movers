@@ -249,8 +249,9 @@ m3.metric("Epochs (visits)", len(epochs))
 if mjds:
     from astropy.time import Time
 
-    span = f"{Time(min(mjds), format='mjd').iso[:7]} → {Time(max(mjds), format='mjd').iso[:7]}"
-    m4.metric("Time span", span)
+    months = (max(mjds) - min(mjds)) / 30.44
+    m4.metric("Time span", f"{months:.0f} months",
+              help=f"From {Time(min(mjds), format='mjd').iso[:10]} to {Time(max(mjds), format='mjd').iso[:10]}")
 st.caption(
     f"Position from {target.source}. Proper motion {target.pmra_masyr:.0f}, {target.pmdec_masyr:.0f} mas/yr "
     f"({target.total_pm_arcsec_per_year:.2f} arcsec/yr). Data: SPHEREx DR1 + QR3 via NASA/IPAC IRSA"
