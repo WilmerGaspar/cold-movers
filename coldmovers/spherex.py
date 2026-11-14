@@ -109,11 +109,23 @@ def _table_to_rows(table, url_col, time_col, band_col, obs_col=None, collection=
     return rows
 
 
-def search_images(ra_deg: float, dec_deg: float, collections=COLLECTIONS):
+def search_images(ra_deg: float, dec_deg: float, collections=COLLECTIONS, attempts: int = 4):
     """List SPHEREx spectral images covering a sky position, sorted by time.
 
     Returns a list of dicts: url, mjd, detector (1-6), obs_id, collection.
+    IRSA sometimes answers 502/503 for a moment, so the search is retried.
     """
+    last = None
+    for attempt in range(attempts):
+        try:
+            return _search_once(ra_deg, dec_deg, collections)
+        except RuntimeError as exc:
+            last = exc
+            time.sleep(5 * (attempt + 1))
+    raise last
+
+
+def _search_once(ra_deg: float, dec_deg: float, collections=COLLECTIONS):
     _quiet()
     import astropy.units as u
     from astropy.coordinates import SkyCoord
