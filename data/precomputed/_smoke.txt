@@ -1,8 +1,8 @@
-2026-11-14 22:52:17.578 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
-2026-11-14 22:52:21.491 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
-2026-11-14 22:52:22.937 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
-2026-11-14 22:52:23.680 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
-2026-11-14 22:52:24.457 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-14 23:26:26.566 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-14 23:26:28.675 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-14 23:26:29.387 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-14 23:26:29.755 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-14 23:26:30.151 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
 barnard: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real, or a ghost in the detector?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
 epsindib: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real, or a ghost in the detector?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
 wise0855: OK  sections=['### 1 · The sky, visit by visit', '### 2 · Its light, and how cold it is', '### 3 · Does it change? Brightness visit by visit', '### 4 · Is it real, or a ghost in the detector?', '### 5 · On a human scale', '### 6 · The data']  errors=[]  warnings=[]
