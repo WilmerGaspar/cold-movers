@@ -409,7 +409,11 @@ with c_plot:
 
 with c_card:
     light = fit.light
-    if np.isfinite(fit.temperature):
+    if np.isfinite(fit.temperature) and light == "red":
+        temp_html = ("<div class='cm-big'>Not reliable</div>"
+                     f"<div class='cm-muted'>The curve fit gives about {fit.temperature:,.0f} K, but read the "
+                     "reasons below before trusting it.</div>")
+    elif np.isfinite(fit.temperature):
         temp_html = (f"<div class='cm-big'>{fit.temperature:,.0f} K</div>"
                      f"<div class='cm-muted'>range {fit.t_low:,.0f} – {fit.t_high:,.0f} K · "
                      f"about {fit.temperature - 273.15:,.0f} °C</div>")
@@ -546,6 +550,42 @@ if rows:
         st.dataframe(df, use_container_width=True, height=300)
     st.download_button("Download measurements (CSV)", df.to_csv(index=False).encode(),
                        file_name=f"coldmovers_{target.key}.csv", mime="text/csv")
+
+
+@st.cache_data(show_spinner=False)
+def validation_table():
+    from coldmovers import validation
+
+    return validation.validate(PRECOMPUTED)
+
+
+with st.expander("How well does it work? Validation on the five challenge objects"):
+    try:
+        vt = validation_table()
+    except Exception as exc:
+        vt = []
+        st.caption(f"Validation unavailable: {exc}")
+    if vt:
+        import pandas as pd
+
+        light_word = {"green": "🟢", "yellow": "🟡", "red": "🔴"}
+        st.dataframe(pd.DataFrame([{
+            "Object": v["name"],
+            "SPHEREx images": v["images"],
+            "Visits": v["visits"],
+            "Moved (measured)": f"{v['moved_measured']:.1f}\"" if v["moved_measured"] is not None else "—",
+            "Moved (catalogue)": f"{v['moved_predicted']:.1f}\"" if v["moved_predicted"] is not None else "—",
+            "Madhava": (f"{light_word[v['light']]} {v['temperature']:,.0f} K"
+                        if v["temperature"] and v["light"] != "red" else f"{light_word[v['light']]} not reliable"),
+            "Why": "; ".join(madhava.REASON_TEXT.get(r, r).split(":")[0].split(".")[0] for r in v["reasons"]),
+            "Published": v["published"],
+        } for v in vt]), use_container_width=True, hide_index=True)
+        st.caption(
+            "Motion: the target's position measured by centroiding each visit, compared with the catalogue proper "
+            "motion between the first and last visit. A reliable tool must also say when it cannot measure: three "
+            "of the five objects are bright enough to saturate SPHEREx, and the app says so instead of inventing a "
+            "number."
+        )
 
 st.divider()
 st.markdown(
