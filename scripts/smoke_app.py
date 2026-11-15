@@ -61,6 +61,10 @@ for key in ALL_EXAMPLES:
             if not any("What am I looking at?" in str(m.value) for m in at.markdown):
                 failed += 1
                 print(f"{key}: the plain-words panel is missing")
+            evaluator = [str(m.value) for m in at.markdown if "Motion verdict" in str(m.value)]
+            if not evaluator or "CONFIRMED" not in evaluator[0] or "Held-out A" not in evaluator[0]:
+                failed += 1
+                print(f"{key}: the evaluator summary (verdicts and held-out metrics) is missing")
             # Difference view with every assistant layer on
             at.radio(key="view_mode").set_value("Difference from the first visit").run()
             if at.exception or any("could not be shown" in str(w.value) for w in at.warning):

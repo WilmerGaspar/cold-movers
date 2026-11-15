@@ -55,6 +55,8 @@ for key in sorted(os.listdir(PRE)):
 
 check("IRSA SIA2 search (spherex_dr1, TRAPPIST-1)",
       "https://irsa.ipac.caltech.edu/SIA?COLLECTION=spherex_dr1&POS=circle+346.6264+-5.0434+0.001&RESPONSEFORMAT=VOTABLE")
+check("IRSA TAP (the app's fallback search, spherex.plane)",
+      "https://irsa.ipac.caltech.edu/TAP/sync?LANG=ADQL&FORMAT=csv&QUERY=SELECT+TOP+1+planeid+FROM+spherex.plane")
 check("DOI of SPHEREx DR1 (doi:10.26131/IRSA678)", "https://doi.org/10.26131/IRSA678")
 
 print(f"# IRSA link check ({time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())})\n")

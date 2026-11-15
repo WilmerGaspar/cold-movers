@@ -1,3 +1,5 @@
+> For version 0.6.0, see the [final validation report](FINAL_VALIDATION_REPORT.md), which adds the pre-registered held-out evaluation, explicit verdicts and the checks run from a fresh install. This review (v0.5.0) is kept unchanged below.
+
 # Final submission review
 
 ## README claims checked against code and evidence
