@@ -1,0 +1,41 @@
+name: licences
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "requirements.txt"
+      - "scripts/licenses.py"
+      - ".github/workflows/licenses.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: licenses
+  cancel-in-progress: false
+
+jobs:
+  licenses:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the pinned app requirements and the test tools
+        run: pip install -r requirements.txt pytest playwright
+      - name: Read every package's licence from its own metadata
+        run: python -u scripts/licenses.py
+      - name: Commit the licence table
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/licenses.md
+          git commit -m "Update the licence table" || { echo "nothing to commit"; exit 0; }
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push origin HEAD:main && break
+            sleep 5
+          done
