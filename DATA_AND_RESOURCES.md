@@ -65,6 +65,7 @@ The project's own code is released under the MIT licence (see [LICENSE](LICENSE)
 | GitHub Actions | GitHub Terms of Service | Running the tests, precomputing the five challenge objects, keeping the app awake |
 | Streamlit Community Cloud | Streamlit terms | Public hosting of the app at https://cold-movers.streamlit.app |
 | Claude (Anthropic) | Anthropic terms | AI coding assistant (see README, "AI use") |
+| Gemini (Google) | Google terms | Generated the team logo only; the logo carries a visible "AI-generated image (Gemini)" mark (see README, "AI use") |
 
 ## 6. Products we generated (derived from the data above)
 

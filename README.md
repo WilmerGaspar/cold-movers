@@ -153,7 +153,7 @@ Not an official NASA product.
 
 We used Claude (Anthropic), an AI coding assistant, to accelerate coding and documentation. The team (Wilmer Espinoza, Miguel Eduardo Romero Sánchez) chose the challenge, the idea and the scientific approach: a modern blink comparator for SPHEREx; the Madhava engine, which fits temperatures with an exact series for the blackbody light in each band and adds Madhava's correction term with a guaranteed error bound; and an honest traffic light that says when a result cannot be trusted. We decided every feature and which objects to test, and we reviewed the code.
 
-All AI-generated code was reviewed and tested by the team and refined from our feedback before it went into the app. We checked every result against published temperatures and catalogue motions, and independent reviewers reported bugs that we fixed. Automated tests and a full headless run of the app check every change. Commits made with the assistant carry a `Co-Authored-By: Claude` line. No NASA branding is used.
+All AI-generated code was reviewed and tested by the team and refined from our feedback before it went into the app. We checked every result against published temperatures and catalogue motions, and independent reviewers reported bugs that we fixed. Automated tests and a full headless run of the app check every change. Commits made with the assistant carry a `Co-Authored-By: Claude` line. Our team logo ([docs/logo_ai_marked.png](docs/logo_ai_marked.png)) was generated with Gemini (Google) and carries a visible "AI-generated image (Gemini)" mark; every other image in the app, this README and our video is real SPHEREx data processed by our code or a capture of the live app. No NASA branding is used.
 
 ## License
 
