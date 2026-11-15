@@ -1,0 +1,63 @@
+hips2fits: 404 text/html 4245 bytes 1.8s https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=CDS%2FP%2FallWISE%2Fcolor&width=480&height=480&fov=0.1&projection=TAN&coordsys=icrs&ra=133.7602&dec=-7.2436&format=jpg
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#f8fafc">
+  <title>Page unavailable â CDS</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-synthesis: none;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0;
+      display: flex;
+    
+Status messages could not be retrieved
+gaia failed:
+Traceback (most recent call last):
+  File "/home/runner/work/cold-movers/cold-movers/scripts/diag_services.py", line 25, in <module>
+    job = Gaia.launch_job("SELECT TOP 5 source_id, ra, dec FROM gaiadr3.gaia_source WHERE "
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/astroquery/gaia/core.py", line 1104, in launch_job
+    return TapPlus.launch_job(self, query=query, name=name,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/astroquery/utils/tap/core.py", line 309, in launch_job
+    response = self.__launchJob(query=query,
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/astroquery/utils/tap/core.py", line 663, in __launchJob
+    response = self.__connHandler.execute_tappost(subcontext=context, data=urlencode(args), verbose=verbose)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/astroquery/utils/tap/conn/tapconn.py", line 269, in execute_tappost
+    return self.__execute_post(context, data, content_type, verbose=verbose)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/astroquery/utils/tap/conn/tapconn.py", line 422, in __execute_post
+    conn.request("POST", context, data, self.__postHeaders)
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/http/client.py", line 1386, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/http/client.py", line 1432, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/http/client.py", line 1381, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/http/client.py", line 1141, in _send_output
+    self.send(msg)
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/http/client.py", line 1085, in send
+    self.connect()
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/http/client.py", line 1520, in connect
+    super().connect()
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/http/client.py", line 1051, in connect
+    self.sock = self._create_connection(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/socket.py", line 865, in create_connection
+    raise exceptions[0]
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/socket.py", line 850, in create_connection
+    sock.connect(sa)
+TimeoutError: [Errno 110] Connection timed out
+
