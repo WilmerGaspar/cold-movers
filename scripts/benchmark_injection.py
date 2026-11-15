@@ -81,6 +81,10 @@ out = {
     "red_all": group(lambda t: "all", lambda t: t["set"] == "D5+D6 only" and t["rate"] in (5.0, 10.0, 20.0)),
 }
 os.makedirs(os.path.join(ROOT, "docs"), exist_ok=True)
+if "--per-trial" in sys.argv:  # every trial as JSON lines, for scripts/calibration.py
+    with open(sys.argv[sys.argv.index("--per-trial") + 1], "w") as fh:
+        for t in trials:
+            fh.write(json.dumps(t) + "\n")
 name = "benchmark_injection_quick.json" if QUICK else "benchmark_injection.json"
 with open(os.path.join(ROOT, "docs", name), "w") as fh:
     json.dump(out, fh, indent=1)

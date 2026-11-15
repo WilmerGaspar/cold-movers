@@ -93,6 +93,7 @@ def main():
     ap.add_argument("--label", default="A")
     ap.add_argument("--out", default=None)
     ap.add_argument("--smoke", action="store_true", help="tiny run with another seed, only to check the code runs")
+    ap.add_argument("--per-trial", default=None, help="also write every trial as JSON lines (for calibration)")
     args = ap.parse_args()
     global SEED, SPOTS_PER_KIND, MOTIONS_PER_SPOT
     if args.smoke:
@@ -158,6 +159,10 @@ def main():
         "red_D5D6_snr15_core": summarize([t for t in trials if t["set"] == "D5+D6 only" and 5.0 <= t["rate"] < 20.0]),
         "red_by_field": group(lambda t: t["field"], lambda t: t["set"] == "D5+D6 only" and 5.0 <= t["rate"] < 20.0),
     }
+    if args.per_trial:
+        with open(args.per_trial, "w") as fh:
+            for t in trials:
+                fh.write(json.dumps(t) + "\n")
     path = args.out or os.path.join(ROOT, "docs", f"benchmark_holdout_{args.label}.json")
     with open(path, "w") as fh:
         json.dump(out, fh, indent=1)

@@ -326,7 +326,10 @@ def blind_trial(epochs, stacks, baseline, x0, y0, rate_arcsec_yr, pa_deg, snr, d
     if hit:
         c = hit[1]
         out.update(rate_err=(c["rate_arcsec_yr"] - rate_arcsec_yr) / rate_arcsec_yr,
-                   pa_err=_pa_diff(c["pa_deg"], pa_deg), n_detectors=len(c["detectors"]))
+                   pa_err=_pa_diff(c["pa_deg"], pa_deg), n_detectors=len(c["detectors"]),
+                   # for the calibration of uncertainties (scripts/calibration.py); no decision uses them
+                   rate_measured=float(c["rate_arcsec_yr"]), pa_measured=float(c["pa_deg"]),
+                   significance=float(c["significance"]))
     return out
 
 
