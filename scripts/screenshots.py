@@ -66,6 +66,30 @@ with sync_playwright() as p:
             print(f"click test {name}: {'OK' if ok else 'DID NOT LOAD'}")
         except Exception as exc:
             print(f"click test {name}: error {exc}")
+    # New in 0.4.4-0.4.5: scoreboard, plain-words panel, detectors that confirm, difference view.
+    fr = open_app(page, "?object=epsindib")
+    for text, what in (("Validation scoreboard", "scoreboard"), ("What am I looking at?", "plain-words panel"),
+                       ("of 6 detectors see the same motion", "detectors that confirm"),
+                       ("Visual assistant", "visual-assistant layers")):
+        print(f"live check {what}: {'OK' if fr.get_by_text(text, exact=False).count() else 'MISSING'}")
+    try:
+        el = fr.get_by_text("What am I looking at?", exact=False).first
+        el.scroll_into_view_if_needed()
+        page.wait_for_timeout(2_000)
+        page.screenshot(path=os.path.join(OUT, "desktop_plain_words.png"))
+        fr.get_by_text("Difference from the first visit", exact=False).first.click()
+        ok = False
+        for _ in range(24):
+            page.wait_for_timeout(2_500)
+            if fr.get_by_text("Blue circle: predicted position", exact=False).count():
+                ok = True
+                break
+        print(f"live check difference view: {'OK' if ok else 'DID NOT APPEAR'}")
+        fr.get_by_text("1 · The sky, visit by visit", exact=False).first.scroll_into_view_if_needed()
+        page.wait_for_timeout(3_000)
+        page.screenshot(path=os.path.join(OUT, "desktop_difference.png"))
+    except Exception as exc:
+        print("live check difference view: error", exc)
     fr = open_app(page, "?object=wise0855")
     try:
         toggle = fr.get_by_text("Overlay Gaia DR3 stars").first
