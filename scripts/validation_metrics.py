@@ -33,7 +33,8 @@ def cells(s):
     prec = f"{s['precision']:.3f} ({pl:.2f}–{ph:.2f})" if tp + fp else "— (nothing confirmed)"
     distinct = s.get("distinct_false_sources")
     err = f"{100 * s['rate_err_median']:.1f} %" if s["rate_err_median"] == s["rate_err_median"] else "—"
-    return (f"{n} | {tp} | {n - tp} | {s.get('candidate_only', 0)} | {fp}"
+    cand = s.get("candidate_only")
+    return (f"{n} | {tp} | {n - tp} | {'—' if cand is None else cand} | {fp}"
             f"{'' if distinct is None else f' ({distinct})'} | {prec} | {s['recall']:.2f} ({rl:.2f}–{rh:.2f}) | "
             f"{s['f1']:.2f} | {err}")
 
