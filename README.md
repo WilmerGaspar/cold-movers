@@ -19,9 +19,29 @@ Enter sky coordinates, a star name, or pick one of the five challenge objects. C
 2. downloads small cutouts, **aligns them on the same patch of sky** and plays them as a **movie, visit by visit**, one per detector, so anything that moves or varies stands out,
 3. **follows the object's proper motion** and measures it in every image to build its **0.75–5 µm spectrum**,
 4. runs the **Madhava engine**, a band-integrated Planck fit that gives a *blackbody-equivalent temperature* with an uncertainty and a **traffic light** that says how far to trust it,
-5. runs four **"Is it real?"** consistency checks (indicators, not confirmation of a discovery): seen again in another visit, clean pixels, positions consistent with the catalogue motion, and no blended neighbour.
+5. **finds what moves in the field without any catalogue**: every source is followed through the visits and a motion is fitted; a mover is *confirmed* only when two or more detectors agree,
+6. runs four **"Is it real?"** consistency checks (indicators, not confirmation of a discovery): seen again in another visit, clean pixels, positions consistent with the catalogue motion, and no blended neighbour.
 
 Every result can be shared as a link (`?object=wise0855` or `?ra=..&dec=..`) and downloaded as CSV or GIF.
+
+In one sentence: **Cold Movers follows and verifies the motion of known objects with SPHEREx's repeated observations, finds movers in a field with no catalogue, and says explicitly when the data cannot support a temperature.** Every measurement links to its original SPHEREx file at NASA/IPAC IRSA (the `url` column of every CSV and the audit trail in the app).
+
+## Validation (results frozen on Nov 14, 2026)
+
+Real SPHEREx DR1 + QR3 data, processed by the app. "Measured near the track" centroids the target close to the catalogue prediction (it tests agreement). "Found with no catalogue" uses no prior position or motion at all.
+
+| Object | SPHEREx images / visits | Moved between first and last visit (measured / catalogue) | Found with no catalogue | Catalogue motion | Blackbody-equivalent temperature | Published |
+|---|---|---|---|---|---|---|
+| Barnard's Star | 300 / 6 | 11.1″ / 11.1″ | **9.83″/yr towards 354°, confirmed** (detectors 5, 6) | 10.39″/yr, 356° | 🔴 too bright: saturates SPHEREx | 3231 ± 21 K |
+| Epsilon Indi B | 300 / 4 | 6.4″ / 6.6″ | **4.56″/yr towards 126°, confirmed** (5 detectors) | 4.68″/yr, 122° | 🟡 1,877 K: not a single blackbody (methane, water) | Ba ≈ 1300–1340 K, Bb ≈ 880–940 K |
+| WISE 0855−0714 | 256 / 4 | 9.3″ / 8.1″ | 6.2″/yr towards 267°, candidate (detector 5 only) | 8.15″/yr, 275° | 🔴 only seen beyond 3.8 µm: very cold, range too narrow | ≈ 285 K |
+| RW Aurigae | 298 / 3 | 0.5″ / 0.0″ | no mover (correct) | 0.02″/yr | 🔴 saturates beyond 1.1 µm | K-type star with a disk |
+| R Draconis | 300 / 3 | 0.4″ / 0.0″ | field not trusted (saturated halo), says so | 0.02″/yr | 🔴 too bright | Mira variable |
+| TRAPPIST-1 *(extra)* | 295 / 3 | 1.1″ / 1.0″ | too slow to detect in one year (correct) | 1.05″/yr, 117° | 🟡 **2,464 K (−4 %)**: water bands | 2566 ± 26 K |
+
+Position angles are east of north. Published temperatures are effective temperatures from detailed models; a blackbody-equivalent temperature is a different quantity, shown next to them for comparison, not as a match. Sources: see [DATA_AND_RESOURCES.md](DATA_AND_RESOURCES.md).
+
+Software checks: 61 automated tests (series against numerical integration of Planck's law to 1e-8, synthetic spectra, photometry, proper motion, consistency checks, brightness changes, mover search), plus the whole app run headless for every example on each change.
 
 ## Why a blink comparator?
 
@@ -50,7 +70,7 @@ In 1930 Clyde Tombaugh found Pluto at Lowell Observatory, during the search for 
 
 - Make SPHEREx data **easy to explore for anyone**: the app queries the configured SPHEREx collections live and retrieves whatever observations they hold today; adding a future release is a one-line change.
 - Show that a tool can be **honest about its limits**: when SPHEREx saturates, when a neighbour blends in, when one blackbody does not describe the light, the app says so instead of inventing a number.
-- Next steps after the hackathon: point-spread-function photometry for crowded fields, a batch mode that checks a whole list of candidates, motion fitted freely from the images without using the catalogue (today positions are measured by centroiding near the catalogue prediction), and a Spanish version of the interface.
+- Next steps after the hackathon: point-spread-function photometry for crowded fields, a batch mode that checks a whole list of candidates, combining all six detectors in the catalogue-free motion fit to reach fainter movers, and a Spanish version of the interface.
 
 ## Tools we used
 
@@ -84,7 +104,7 @@ pip install pytest
 python -m pytest -q
 ```
 
-Tests check the series against numerical integration of Planck's law (to 1e-8), the classic 25 % of energy below the Wien peak, recovery of known temperatures from synthetic spectra, the traffic light, aperture photometry, proper-motion propagation and the "Is it real?" checks.
+Tests check the series against numerical integration of Planck's law (to 1e-8), the classic 25 % of energy below the Wien peak, recovery of known temperatures from synthetic spectra, the traffic light, aperture photometry, proper-motion propagation, the "Is it real?" checks, brightness changes and the catalogue-free mover search.
 
 ## Data and references
 
