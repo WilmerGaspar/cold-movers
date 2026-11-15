@@ -207,7 +207,7 @@ try:
         c = sb["counts"]
         n_all = c["pass"] + c["partial"] + c["fail"]
         st.markdown(
-            "<div class='cm-card' style='margin-top:10px'><b>How do we know it works? Validation scoreboard</b> "
+            "<div class='cm-card' style='margin-top:10px'><b>Validation scoreboard: known objects, injected movers, fixed rules</b> "
             f"<span style='margin-left:8px'>🟢 <b>{c['pass']}</b> pass · 🟡 <b>{c['partial']}</b> partial · "
             f"🔴 <b>{c['fail']}</b> fail</span> <span class='cm-muted'>out of {n_all} checks</span>"
             "<div class='cm-muted' style='margin-top:4px'>Positive controls (known movers, known temperatures, known "
@@ -241,8 +241,8 @@ except Exception as _exc:
     note_problem("validation scoreboard", _exc)
 with st.expander("📖 Words used on this page (glossary)"):
     st.markdown(
-        "- **SPHEREx**: a NASA space telescope, launched in March 2025, that maps the whole sky every six months in "
-        "102 colours of infrared light, from 0.75 to 5 µm.\n"
+        "- **SPHEREx**: a NASA space telescope, launched in March 2025, that covers the entire sky twice a year, "
+        "measuring each point in 102 infrared wavelength bands from 0.75 to 5 µm.\n"
         "- **Visit**: SPHEREx comes back to the same patch of sky about every six months. All images from one pass "
         "are stacked into one frame of the movie.\n"
         "- **Detectors D1 to D6**: SPHEREx has six detector arrays, each for a range of infrared colours, from "
@@ -654,7 +654,8 @@ try:
         )
         st.markdown(
             "<span class='cm-muted'>In 1930 Clyde Tombaugh found Pluto at Lowell Observatory, during the search "
-            "for \"Planet X\", by blinking two photographs of the same sky taken days apart. Cold Movers is a "
+            "for \"Planet X\": a blink comparator flipped between two plates of one star field, exposed days apart, "
+            "and the planet was the dot that jumped. Cold Movers is a "
             "digital blink comparator for SPHEREx. Cold brown dwarfs like WISE 0855 are invisible to the eye: only "
             "infrared light and their motion give them away.</span>",
             unsafe_allow_html=True,

@@ -2,7 +2,7 @@
 
 Complete inventory of everything external that Cold Movers uses, how we use it, its licence or terms, and the attribution it asks for. NASA Space Apps Challenge 2026, team Cold Movers.
 
-The project's own code is released under the MIT licence (see [LICENSE](LICENSE)). That licence covers only our code; every third-party item below keeps its own licence or terms.
+The project's own code is released under the MIT licence (see [LICENSE](LICENSE)). That licence covers only our code; every third-party item below keeps its own licence or terms. The licence of every installed package, read from its own metadata on GitHub Actions, is in [docs/licenses.md](docs/licenses.md); where each method and component comes from is in [evidence/ORIGINALITY_AND_PROVENANCE.md](evidence/ORIGINALITY_AND_PROVENANCE.md).
 
 ## 1. Original data (not ours)
 
@@ -55,7 +55,7 @@ The project's own code is released under the MIT licence (see [LICENSE](LICENSE)
 | Streamlit | Apache-2.0 | Web application |
 | Aladin Lite (CDS) | External page only | The app links to it to explore the wider sky; nothing is embedded or downloaded |
 | pytest | MIT | Unit tests |
-| Playwright | Apache-2.0 | Opening the app on a schedule so it stays awake |
+| Playwright | Apache-2.0 | Opening the app on a schedule so it stays awake, and the screenshot robot that checks the live app |
 
 ## 5. Services
 
@@ -73,7 +73,7 @@ Everything in `data/precomputed/` (movie GIFs, epoch stacks, photometry tables, 
 
 ## 7. Images, fonts and audio
 
-The app contains no third-party images, fonts or audio: all graphics are generated from data by our code, and the text uses the default Streamlit fonts. No NASA logos or mission insignia are used. Our team logo (on the Space Apps team page, not in this repository) was generated with an AI image tool and is marked as such.
+The app contains no third-party images, fonts or audio: all graphics are generated from data by our code, and the text uses the default Streamlit fonts. No NASA logos or mission insignia are used. Our team logo ([docs/logo_ai_marked.png](docs/logo_ai_marked.png), also on the Space Apps team page) was generated with Gemini (Google) and carries a visible "AI-generated image (Gemini)" mark; it is not used inside the app.
 
 ## Required acknowledgements (verbatim)
 
