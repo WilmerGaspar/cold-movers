@@ -4,14 +4,9 @@ click test TRAPPIST-1: OK
 click test Epsilon Indi B: OK
 click test RW Aurigae: OK
 click test Barnard's Star: OK
-atlas: nothing appeared
+atlas: service did not answer (message shown)
 atlas screenshot saved
 spectrum screenshot failed: Locator.scroll_into_view_if_needed: Timeout 30000ms exceeded.
 Call log:
   - waiting for get_by_text("3 · Its light").first
 
-is_it_real screenshot failed: Locator.scroll_into_view_if_needed: Timeout 30000ms exceeded.
-Call log:
-  - waiting for get_by_text("5 · Is it real").first
-
-done
