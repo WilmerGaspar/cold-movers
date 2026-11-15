@@ -1,0 +1,6 @@
+list_collections(SIA) failed: DALServiceError: 502 Server Error: Proxy Error for url: https://irsa.ipac.caltech.edu/TAP/sync
+list_collections(None) failed: DALServiceError: 502 Server Error: Proxy Error for url: https://irsa.ipac.caltech.edu/TAP/sync
+TAP obscore query failed: DALServiceError 502 Server Error: Proxy Error for url: https://irsa.ipac.caltech.edu/TAP/sync
+configured in the app: ['spherex_dr1', 'spherex_qr3']
+offered by IRSA: []
+NEW, not used by the app: none
