@@ -42,3 +42,18 @@ def test_saturated_star_uses_wings():
     out = variability.light_curve(rows, epochs)
     assert out["methods"] == {2: "wings"}
     assert out["verdict"]["variable"]
+
+
+def test_intermediate_change_is_possible_not_yes_or_no():
+    rows, epochs = fake_rows(-0.12, seed=4)
+    for r in rows:  # add noise so the change sits between 3 and 5 sigma
+        r["flux_ujy"] *= 1 + np.random.default_rng(int(r["mjd"])).normal(0, 0.12)
+    out = variability.light_curve(rows, epochs)
+    sig = out["verdict"]["significance"]
+    text = out["verdict"]["text"]
+    if 3 < sig <= 5:
+        assert text.startswith("Possibly")
+    elif sig > 5:
+        assert text.startswith("Yes")
+    else:
+        assert text.startswith("No clear change")

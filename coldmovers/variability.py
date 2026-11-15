@@ -84,6 +84,10 @@ def light_curve(rows, epochs) -> dict:
             verdict["variable"] = True
             verdict["text"] = (f"Yes. Between visits its brightness changed by {amp:.2f} magnitudes "
                                f"(about {pct:.0f} %), {sig:.0f} times larger than the measurement noise.")
+        elif amp > 0.05 and sig > 3:
+            verdict["text"] = (f"Possibly. Between visits its brightness changed by {amp:.2f} magnitudes "
+                               f"(about {pct:.0f} %), {sig:.1f} times the measurement noise; more visits are "
+                               "needed to confirm it.")
         else:
             verdict["text"] = (f"No clear change: visits agree within {amp:.2f} magnitudes "
                                f"(about {pct:.0f} %), compared with a noise of {noise:.3f} magnitudes.")

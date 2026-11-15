@@ -1037,6 +1037,9 @@ try:
                 "Visits": v["visits"],
                 "Moved (measured)": f"{v['moved_measured']:.1f}\"" if v["moved_measured"] is not None else "—",
                 "Moved (catalogue)": f"{v['moved_predicted']:.1f}\"" if v["moved_predicted"] is not None else "—",
+                "Found with no catalogue": (f"{v['free_rate']:.2f}\"/yr, {v['free_pa']:.0f}° ({v['free_status']})"
+                                           if v.get("free_rate") else "—"),
+                "Catalogue motion": f"{v['catalogue_rate']:.2f}\"/yr, {v['catalogue_pa']:.0f}°",
                 "Madhava": (f"{light_word[v['light']]} {v['temperature']:,.0f} K"
                             if v["temperature"] and v["light"] != "red" else f"{light_word[v['light']]} not reliable"),
                 "Why": "; ".join(madhava.REASON_TEXT.get(r, r).split(":")[0].split(".")[0] for r in v["reasons"]),

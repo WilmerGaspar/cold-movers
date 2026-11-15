@@ -7,6 +7,7 @@ on:
     paths:
       - "app.py"
       - "scripts/screenshots.py"
+      - "scripts/validation_report.py"
 
 permissions:
   contents: write
@@ -28,6 +29,11 @@ jobs:
         run: |
           pip install playwright
           python -m playwright install --with-deps chromium
+      - name: Validation numbers with the app's own code
+        continue-on-error: true
+        run: |
+          pip install -r requirements.txt
+          python scripts/validation_report.py
       - name: Check the services the sky atlas needs
         continue-on-error: true
         run: |
@@ -45,7 +51,7 @@ jobs:
           mv docs_services_log.txt docs/screens/_services.txt || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/screens
+          git add docs/screens docs/validation.md
           git commit -m "Update app screenshots" || { echo "nothing to commit"; exit 0; }
           for i in 1 2 3; do
             git pull --rebase -X theirs origin main && git push origin HEAD:main && break
