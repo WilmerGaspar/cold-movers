@@ -31,10 +31,13 @@ jobs:
       - name: Unit tests
         run: python -m pytest -q tests 2>&1 | tee tests.txt
       - name: Frozen results open
+        if: always()
         run: python scripts/check_results.py
       - name: README numbers match the generated results
+        if: always()
         run: python scripts/check_readme_numbers.py | tee readme_numbers.md
       - name: The whole app, headless, for every example
+        if: always()
         run: python -u scripts/smoke_app.py 2>&1 | tee smoke.txt
       - uses: actions/upload-artifact@v4
         if: always()
@@ -78,11 +81,18 @@ jobs:
               if isinstance(x, float) and x != x:
                   return "NaN"  # NaN never equals NaN; compare it as a label
               return x
-          def diffs(a, b, path=""):
+          def close(a, b):
+              if isinstance(a, float) and isinstance(b, float):
+                  return abs(a - b) <= 1e-9 * max(1.0, abs(a), abs(b))
+              return a == b
+          def diffs(a, b, path="", tol=True):
               if isinstance(a, dict) and isinstance(b, dict):
                   for k in sorted(set(a) | set(b)):
-                      yield from diffs(a.get(k), b.get(k), f"{path}/{k}")
-              elif a != b:
+                      yield from diffs(a.get(k), b.get(k), f"{path}/{k}", tol)
+              elif isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
+                  for i, (x, y) in enumerate(zip(a, b)):
+                      yield from diffs(x, y, f"{path}[{i}]", tol)
+              elif not (close(a, b) if tol else a == b):
                   yield f"{path}: regenerated {a!r}, committed {b!r}"
           pairs = [("data/scoreboard.json", "committed/scoreboard.json"), ("docs/scoreboard.md", "committed/scoreboard.md"),
                    ("docs/validation.md", "committed/validation.md"), ("docs/validation_records.md", "committed/validation_records.md"),
@@ -95,8 +105,13 @@ jobs:
                   print(f"| {new} | no committed copy to compare |"); continue
               if new.endswith(".json"):
                   ca, cb = clean(json.load(open(new))), clean(json.load(open(old)))
-                  same = ca == cb
-                  for line in list(diffs(ca, cb))[:15]:
+                  real = list(diffs(ca, cb))
+                  rounding = len(list(diffs(ca, cb, tol=False))) - len(real)
+                  same = not real
+                  if same and rounding:
+                      print(f"| {new} | yes: every count identical; {rounding} floating-point values differ only "
+                            "beyond the 9th significant digit (NumPy build) |"); continue
+                  for line in real[:15]:
                       print(f"|  ↳ {line} | |")
               else:
                   strip = lambda s: [l for l in s.splitlines() if "version 0." not in l and "Code version" not in l and "code_version" not in l]

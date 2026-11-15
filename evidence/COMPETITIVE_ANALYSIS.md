@@ -8,6 +8,11 @@ claimed about them**; their rows are left for a manual review with the repositor
 
 ## SkyShift (Nsa-2026/skyshift), from its README
 
+The two columns describe different tests on different data with different pass rules. **They are not
+comparable and no ranking is implied**: a larger number of checks or a higher pass count says nothing about
+which tool works better. A fair comparison would need both tools run on the same fields with the same
+injections, which has not been done.
+
 | Area | SkyShift (as documented) | Cold Movers |
 |---|---|---|
 | Moving objects, months | Visits compared; motion compared with Gaia (Barnard +5.5 %) | Blind search (Barnard −5 %, Epsilon Indi B −3 %), trajectory with uncertainty (Barnard 0.4σ), Gaia match requiring the same motion |

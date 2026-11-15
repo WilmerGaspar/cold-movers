@@ -29,3 +29,17 @@ def test_temperature_verdicts():
     assert temperature_verdict("green")[0] == "MEASURED"
     assert temperature_verdict("yellow")[0] == "MEASURED WITH CAVEATS"
     assert temperature_verdict("red")[0] == "INCONCLUSIVE"
+
+
+def test_one_pixel_scale_everywhere():
+    # The sky grid (movie, spherex) and the measurements (checks, movers, assistant) must use the same scale.
+    from coldmovers import checks, spherex
+
+    assert checks.PIXEL_ARCSEC == spherex.PIXEL_ARCSEC == 6.15
+
+
+def test_flux_unit_conversion():
+    # 1 MJy/sr over a solid angle of 1e-12 sr is 1 microjansky.
+    from coldmovers import photometry
+
+    assert photometry.UJY_PER_MJY * 1e-12 == 1.0

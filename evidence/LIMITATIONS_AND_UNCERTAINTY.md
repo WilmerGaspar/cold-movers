@@ -10,7 +10,8 @@
 | Alignment between visits trusted only when still stars line up (median shift ≤ 0.5 px) | saturated halos (Barnard's Star, R Draconis) and sparse long-wavelength fields leave detectors untrusted | scoreboard's failed check (very red movers, 28 %) |
 | Position uncertainty model | per position: 0.12 px alignment ⊕ 0.9 px / S/N; when the scatter exceeds it, trajectory errors are scaled by √χ²ᵣ | trajectory panel |
 | Blind-search speed uncertainty | approximated as speed / significance | evidence records |
-| Catalogue prediction | linear proper motion; parallax ignored (≤ 0.55″ for Barnard's Star, < 0.1 px) | — |
+| Parallax not modelled | at each object's own visit dates, parallax shifts the position by at most 1.09″ (0.18 px, Barnard's Star) between visits and biases the straight-line motion by at most 0.19″/yr (Epsilon Indi B), below every motion uncertainty | `docs/parallax_effect.md` (`scripts/parallax_effect.py`) |
+| Bright movers passing stars (held-out finding) | in held-out set A at S/N 30, 6 false confirmations in 173 trials (precision 0.93, interval 0.85–0.97, below the development 0.98). Each sat 0.02–0.87 px from a star; in most of them the injected mover itself was not confirmed, so the neighbour-pull rule, which compares two movers, could not act | `VALIDATION_METRICS.md`; not fixed: a fix must be tested on a new set |
 
 ## Light and temperature
 
@@ -29,6 +30,14 @@
 * Frozen results for six objects; a live search depends on IRSA (which returned 502 errors on the night of Nov 14-15).
 * Gaia and SIMBAD calls have time limits; when they fail the page says so and the SPHEREx measurements are unaffected.
 * SPHEREx DR1 and QR3 are the releases available on Nov 15, 2026; a new release is a one-line change.
+
+## When the answer is CANDIDATE or INCONCLUSIVE
+
+| Situation | Verdict | Example |
+|---|---|---|
+| Motion seen in one detector only, or a brighter mover passes within 4 px | CANDIDATE | WISE 0855 (detector 5 only) |
+| Fewer than two detectors can be trusted (saturated halo, too few still stars) | INCONCLUSIVE | R Draconis (0 of 6 trusted) |
+| Saturated, too faint, too narrow a wavelength range, or uncertainty above 50 % | temperature INCONCLUSIVE | Barnard's Star, RW Aurigae, R Draconis, WISE 0855 |
 
 ## What is never claimed
 

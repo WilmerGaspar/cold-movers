@@ -15,6 +15,42 @@ NASA Space Apps Challenge 2026 · Challenge: *Planet X and SPHEREx* · Team: Col
 
 > **Tests, not discoveries.** Every result shown here is a test on known objects (the five challenge objects and TRAPPIST-1). Cold Movers claims no discovery; the same tools run on any coordinates you type, and the [validation scoreboard](docs/scoreboard.md) shows how well they work.
 
+## For evaluators: the science in one page
+
+| Question | Answer |
+|---|---|
+| What problem does it solve? | It finds objects that move across the sky in SPHEREx's repeated observations, measures how cold they look, and says explicitly when the data cannot support a conclusion. |
+| What real data does it use? | SPHEREx spectral images, Data Release 1 + Quick Release 3, from NASA/IPAC IRSA ([doi:10.26131/IRSA678](https://doi.org/10.26131/IRSA678)): 1,749 images of six test objects. Every measurement keeps the URL of its original file (the `url` column of each CSV). A link check on GitHub Actions opens a sample of those files at IRSA. |
+| How does it detect a moving object? | In each detector's visit stacks it finds point sources (6σ peaks), follows each one to the nearest source in the other visits and fits a straight line. No catalogue position or motion is used. |
+| How does it validate a detection? | **CONFIRMED** only when two or more of SPHEREx's six simultaneously exposed detectors show the same motion with a combined significance of 5 or more, in detectors whose still stars line up, and no more significant mover passes within 4 px. Weaker evidence is a **CANDIDATE**; when the detectors cannot be trusted, **INCONCLUSIVE**; trusted detectors with no motion, **NOT DETECTED**. A temperature on a red traffic light is **INCONCLUSIVE**. |
+| What results did it get? | The verdicts below, the [validation table](#validation-results-frozen-on-nov-14-2026), the [scoreboard](docs/scoreboard.md) and the detection metrics below. |
+| What are its limits? | See [Honest limits](#honest-limits) and the [final validation report](evidence/FINAL_VALIDATION_REPORT.md). The search does not find every moving object. |
+| How can the analysis be reproduced? | `pip install -r requirements.txt`, then `python -m pytest -q`, `python scripts/scoreboard.py`, `python scripts/benchmark_injection.py`, `python scripts/benchmark_holdout.py`; see [REPRODUCIBILITY.md](evidence/REPRODUCIBILITY.md). |
+
+**Three kinds of data, never mixed.** *Observational*: the SPHEREx images and everything measured from them (movies, positions, photometry, temperatures, brightness changes). *Synthetic*: computed blackbody spectra and series checks, used only in tests and in the scoreboard's "Synthetic" rows. *Injected*: fake moving point sources added to copies of real SPHEREx stacks, used only to measure detection rates. Injected sources never appear in the app's movies or results.
+
+| Object | Motion verdict | Temperature verdict |
+|---|---|---|
+| Barnard's Star | **CONFIRMED** (detectors 5 and 6) | **INCONCLUSIVE** (saturated) |
+| Epsilon Indi B | **CONFIRMED** (5 detectors) | **MEASURED WITH CAVEATS** (blackbody-equivalent only) |
+| WISE 0855−0714 | **CANDIDATE** (one detector) | **INCONCLUSIVE** (seen only beyond 3 µm) |
+| RW Aurigae | **NOT DETECTED**, as expected for a star that barely moves | **INCONCLUSIVE** (saturated) |
+| R Draconis | **INCONCLUSIVE** (no detector can be trusted: saturated halo) | **INCONCLUSIVE** (saturated) |
+| TRAPPIST-1 *(extra)* | **NOT DETECTED**, as expected: 1.05″/yr is below what a year of visits can confirm | **MEASURED WITH CAVEATS** (2,464 K blackbody-equivalent) |
+
+**Detection metrics.** TP: an injected mover confirmed within 1.5 px of where it was. FN: an injected mover not confirmed. FP: a confirmed mover that was neither injected nor there before. Precision = TP / (TP + FP); recall = TP / injections; F1 is their harmonic mean. Conditions: all six detectors, speeds 5–20″/yr, 95 % Wilson intervals in brackets. The neighbour-pull rule was chosen on the development set, so its numbers are optimistic. The held-out set was [pre-registered](evidence/HOLDOUT_PREREGISTRATION.md) and run once, with no parameter changed.
+
+| Set and S/N | Injections | TP | FN | FP | Precision | Recall | F1 |
+|---|---|---|---|---|---|---|---|
+| Development (3,300 trials, seed 2026), S/N 15 | 396 | 153 | 243 | 3 | 0.98 (0.94–0.99) | 0.39 (0.34–0.44) | 0.55 |
+| Held-out A (seed 20261115, new spots and motions, same six fields), S/N 15 | 173 | 69 | 104 | 1 | 0.99 (0.92–1.00) | 0.40 (0.33–0.47) | 0.57 |
+| Development, S/N 30 | 396 | 170 | 226 | 3 | 0.98 (0.95–0.99) | 0.43 (0.38–0.48) | 0.60 |
+| Held-out A, S/N 30 | 173 | 79 | 94 | 6 | 0.93 (0.85–0.97) | 0.46 (0.38–0.53) | 0.61 |
+| Development, S/N 8 | 396 | 107 | 289 | 1 | 0.99 (0.95–1.00) | 0.27 (0.23–0.32) | 0.42 |
+| Held-out A, S/N 8 | 173 | 46 | 127 | 2 | 0.96 (0.86–0.99) | 0.27 (0.21–0.34) | 0.42 |
+
+At S/N 15 the held-out set agrees with the development set (held-out precision 0.99, recall 0.40). At S/N 30 the held-out precision is lower: a bright mover passing a star can still pull the star's centroid enough for the star to be confirmed when the mover itself is not tracked. Breakdowns by speed, environment (quiet, near a star, crowded), field and very red movers are in the [final validation report](evidence/FINAL_VALIDATION_REPORT.md).
+
 Enter sky coordinates, a star name, or pick one of the five challenge objects. Cold Movers:
 
 1. asks NASA/IPAC IRSA for **every SPHEREx image covering that spot** (Data Release 1 + Quick Release 3),
@@ -49,7 +85,7 @@ Pass rules are fixed in [`coldmovers/scoreboard.py`](coldmovers/scoreboard.py) b
 
 - **Positive controls:** Barnard's Star and Epsilon Indi B are found moving with no catalogue (−5 % and −3 % from the catalogue rate, 2° and 4° in direction); TRAPPIST-1's blackbody-equivalent temperature is −4 % from the published value; R Draconis is seen to vary (0.57 mag, 9.6σ).
 - **Negative controls:** R Draconis and RW Aurigae, which do not move, give no false mover; no unexplained confirmed mover in any of the six fields; Barnard's Star (saturated) and WISE 0855 (too cold for SPHEREx to see its peak) get a red light instead of a number.
-- **Injected movers:** fake moving point sources added to the real SPHEREx stacks, 120 per brightness level (quiet spots, speeds 5-20″/yr, in the four fields where at least four detectors line up): 88 % recovered as confirmed at S/N 15 (median rate error 5.3 %, direction 2°), 91 % at S/N 30, 66 % at S/N 8. A wider **blind benchmark** (3,300 trials over all six fields, spots next to stars, 2-40″/yr, S/N 5-30) measures precision as well as recall: at S/N 15 it found that a mover passing 2-4 px from a still star could make the star look like a mover (precision 0.87); the neighbour-pull rule fixed it (precision 0.98, recall 0.41 → 0.39). See the [evidence dossier](evidence/).
+- **Injected movers:** fake moving point sources added to the real SPHEREx stacks, 120 per brightness level (quiet spots, speeds 5-20″/yr, in the four fields where at least four detectors line up): 88 % recovered as confirmed at S/N 15 (median rate error 5.3 %, direction 2°), 91 % at S/N 30, 66 % at S/N 8. A wider **blind benchmark** (3,300 trials over all six fields, spots next to stars, 2-40″/yr, S/N 5-30) measures precision as well as recall: at S/N 15 it found that a mover passing 2-4 px from a still star could make the star look like a mover (precision 0.87); the neighbour-pull rule fixed it (precision 0.98, recall 0.41 → 0.39). That rule was chosen on the same trials, so a [pre-registered held-out set](evidence/HOLDOUT_PREREGISTRATION.md) re-measured it: precision 0.99, recall 0.40 at S/N 15, consistent, but precision 0.93 at S/N 30 (table above). See the [evidence dossier](evidence/).
 - **Partial:** WISE 0855 is only a candidate (one detector, rate −22 %); Epsilon Indi B's temperature is 40 % above the published range (flagged yellow); RW Aurigae only *possibly* varies (4.6σ); S/N 8 is our detection limit.
 - **Failed, and why:** very red movers seen by only the two longest-wavelength detectors are confirmed in 28 % of cases. In sparse long-wavelength fields, the rule that checks whether a detector lines up distrusts it when the target itself moves or a saturated halo is present. Fixing this is our first next step.
 
@@ -71,7 +107,7 @@ TRAPPIST-1 is not in the challenge brief. We added it because it does not satura
 
 Position angles are east of north. Published temperatures are effective temperatures from detailed models; a blackbody-equivalent temperature is a different quantity, shown next to them for comparison, not as a match. Sources: see [DATA_AND_RESOURCES.md](DATA_AND_RESOURCES.md). These numbers are generated by the app's own code in [docs/validation.md](docs/validation.md).
 
-Software checks: 87 automated tests (series against numerical integration of Planck's law to 1e-8, Madhava's correction term against its guaranteed error bound, synthetic spectra, photometry, proper motion, consistency checks, brightness changes, mover search, visual assistant and plain-language explanations), plus the whole app run headless for every example on each change.
+Software checks: 94 automated tests (series against numerical integration of Planck's law to 1e-8, Madhava's correction term against its guaranteed error bound, synthetic spectra, photometry, proper motion, consistency checks, brightness changes, mover search, visual assistant and plain-language explanations), plus the whole app run headless for every example on each change.
 
 ## Why a blink comparator?
 
@@ -116,6 +152,8 @@ In 1930 Clyde Tombaugh found Pluto at Lowell Observatory, during the search for 
 - **Very bright stars saturate SPHEREx.** Barnard's Star overflows the detector in every image: its motion is visible in the movie, but its brightness cannot be measured, and the app says so.
 - **Aperture photometry, not PSF fitting.** A constant aperture loss does not change the temperature (free scale), but crowded fields can blend neighbours.
 - **Variable objects** (R Draconis, RW Aurigae) change between visits; one fit over all visits mixes epochs.
+- **Parallax is not modelled; the baseline is about a year.** The motion fit is a straight line over 3–6 visits about six months apart. At these objects' own visit dates, parallax biases the fitted motion by at most 0.19″/yr (Epsilon Indi B; [docs/parallax_effect.md](docs/parallax_effect.md)), below their uncertainties. Motions slower than a few arcseconds per year are rarely confirmed with one year of visits (2″/yr: 2 % of injections in the development set).
+- **The search does not find every moving object.** At S/N 15 about 40 % of injected movers are confirmed (62 % at quiet spots, 29 % next to stars); very red movers seen by only two detectors, far fewer; at S/N 5 almost none.
 
 ## Run locally
 

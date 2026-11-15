@@ -14,7 +14,7 @@
 ```bash
 pip install -r requirements.txt
 
-# 1. Unit tests (87): series against numerical integration and against Madhava's bound, fit, photometry,
+# 1. Unit tests (94): series against numerical integration and against Madhava's bound, fit, photometry,
 #    checks, variability, movers (including the neighbour-pull rule), assistant, scoreboard rules
 python -m pytest -q tests
 
@@ -32,9 +32,24 @@ python scripts/scoreboard.py
 python scripts/benchmark_injection.py
 python scripts/benchmark_report.py
 
-# 6. Run the app
+# 6. Pre-registered held-out evaluation (set A, about 1 minute) and every metric table
+python scripts/benchmark_holdout.py --label A
+python scripts/validation_metrics.py            # evidence/VALIDATION_METRICS.md
+
+# 7. Astrometry and numerics
+python scripts/parallax_effect.py               # parallax bias at each object's visit dates
+python scripts/madhava_correction_check.py      # series error with and without Madhava's correction
+
+# 8. Consistency of what is published
+python scripts/check_readme_numbers.py          # every README number against the generated files
+python scripts/check_irsa_links.py              # original SPHEREx files still open at IRSA (needs internet)
+
+# 9. Run the app
 streamlit run app.py
 ```
+
+Held-out set B (new SPHEREx fields) needs IRSA: `python scripts/fetch_holdout_fields.py DIR` then
+`python scripts/benchmark_holdout.py --fields-dir DIR --label B`.
 
 To reproduce the "before" column of the benchmark, check out commit `ef5d02a` and run step 5 there.
 
@@ -47,6 +62,13 @@ To reproduce the "before" column of the benchmark, check out commit `ef5d02a` an
 | `screenshots.yml` | validation records with the app's code, then checks and screenshots the live public app |
 | `regen_gifs.yml` | re-renders the frozen movies from the stored stacks |
 | `precompute.yml` | (manual only) recomputes the frozen results from IRSA |
+
+## Automation on the `global-scientific-upgrade` branch (read-only, never commits)
+
+| Workflow | What it does |
+|---|---|
+| `branch_checks.yml` | a fresh install exactly as above, `pip check`, unit tests, the README number check and the headless app; regenerates every published result and compares it with the committed file; IRSA link check |
+| `holdout_b.yml` | held-out set B on four new SPHEREx fields |
 
 ## Determinism
 

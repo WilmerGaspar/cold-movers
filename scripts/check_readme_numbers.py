@@ -73,7 +73,18 @@ for name, cells in val.items():
         bad += not ok
         results.append((f"{name}: temperature", t.group(1), "docs/validation.md", "OK" if ok else f"README has {row[5]!r}"))
 
+expect("Total SPHEREx images", f"{sum(int(c[1].split('/')[0]) for c in val.values()):,} images", "docs/validation.md")
 rec = {r["key"]: r for r in csv.DictReader(open(os.path.join(ROOT, "docs", "validation_records.csv")))}
+for r in rec.values():
+    if r.get("motion_verdict"):
+        name = r["object"].replace("-", "−") if "WISE" in r["object"] else r["object"]
+        expect(f"{r['object']}: verdicts", f"| {name}{' *(extra)*' if r['key'] == 'trappist1' else ''} | "
+               f"**{r['motion_verdict']}**", "docs/validation_records.csv")
+        row = next((ln for ln in readme.splitlines() if ln.startswith(f"| {name}") and "**" + r["motion_verdict"] in ln), "")
+        ok = f"**{r['temperature_verdict']}**" in row
+        bad += not ok
+        results.append((f"{r['object']}: temperature verdict", r["temperature_verdict"], "docs/validation_records.csv",
+                        "OK" if ok else "NOT IN README"))
 b = rec["barnard"]
 expect("Barnard's Star trajectory", f"{b['trajectory_motion_arcsec_yr']} ± {b['trajectory_err_arcsec_yr']}″ per year",
        "docs/validation_records.csv")
@@ -91,6 +102,8 @@ if os.path.exists(holdout):
     h = json.load(open(holdout))["headline_snr15_core"]
     expect("Held-out precision (set A)", f"precision {h['precision']:.2f}", "docs/benchmark_holdout_A.json")
     expect("Held-out recall (set A)", f"recall {h['recall']:.2f}", "docs/benchmark_holdout_A.json")
+    h30 = json.load(open(holdout))["by_snr_core"]["30.0"]
+    expect("Held-out precision at S/N 30 (set A)", f"precision {h30['precision']:.2f} at S/N 30", "docs/benchmark_holdout_A.json")
 
 out = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "madhava_correction_check.py")],
                      capture_output=True, text=True).stdout
@@ -104,6 +117,6 @@ if m:
 
 print("| Claim | Expected text | From | Result |\n|---|---|---|---|")
 for r in results:
-    print("| " + " | ".join(r) + " |")
+    print("| " + " | ".join(str(x).replace("|", "\\|") for x in r) + " |")
 print(f"\n{len(results) - bad} of {len(results)} README numbers match the generated results.")
 sys.exit(1 if bad else 0)
