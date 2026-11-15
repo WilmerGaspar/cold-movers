@@ -1,12 +1,21 @@
-deployed app shows no version number (older than 0.3.0)
+deployed app shows version 0.3.0
 click test R Draconis: OK
-click test TRAPPIST-1: error Locator.click: Timeout 30000ms exceeded.
-Call log:
-  - waiting for get_by_text("TRAPPIST-1 ·").first
-
+click test TRAPPIST-1: OK
 click test Epsilon Indi B: OK
 click test RW Aurigae: OK
 click test Barnard's Star: OK
 atlas: atlas image shown
 atlas screenshot saved
+movers screenshot failed: Locator.scroll_into_view_if_needed: Timeout 30000ms exceeded.
+Call log:
+  - waiting for get_by_text("2 · What moves").first
+
+spectrum screenshot failed: Locator.scroll_into_view_if_needed: Timeout 30000ms exceeded.
+Call log:
+  - waiting for get_by_text("3 · Its light").first
+
+is_it_real screenshot failed: Locator.scroll_into_view_if_needed: Timeout 30000ms exceeded.
+Call log:
+  - waiting for get_by_text("5 · Is it real").first
+
 done
