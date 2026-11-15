@@ -1,4 +1,4 @@
-deployed app shows version 0.4.7
+deployed app shows version 0.4.8
 click test R Draconis: OK
 click test TRAPPIST-1: OK
 click test Epsilon Indi B: OK
@@ -11,4 +11,5 @@ live check visual-assistant layers: OK
 live check difference view: OK
 atlas: service did not answer (message shown)
 atlas screenshot saved
+trappist1 spectrum screenshot saved; series bound shown
 done
