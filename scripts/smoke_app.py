@@ -35,6 +35,7 @@ for key in ALL_EXAMPLES:
                 failed += 1
                 print(f"{key}: MISSING SECTIONS, only {len(heads)} found")
             broken = [w.value for w in at.warning if "could not be shown" in str(w.value)]
+            broken += [c.value for c in at.caption if "Parts that could not run" in str(c.value)]
             if broken:
                 failed += 1
                 print(f"{key}: SECTION FAILED: {broken}")

@@ -153,3 +153,11 @@ def test_series_report_for_spherex_bands():
     rep = m.series_report(lam, lam / 40, 2464.0)
     assert rep["terms"] > 0
     assert rep["max_rel_bound"] < 1e-10
+
+
+def test_uncertainty_rule_uses_the_larger_side():
+    # 1000 K with -100 / +600 K: the half-width (350 K) is under 50 %, but the upper side (60 %) is not.
+    res = m.FitResult(temperature=1000.0, t_low=900.0, t_high=1600.0, scale=1.0, chi2=10.0, dof=10, n_points=12,
+                      light="green", reasons=[])
+    light, reasons = m.traffic_light(res)
+    assert light == "red" and "uncertainty_too_large" in reasons

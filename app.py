@@ -66,8 +66,17 @@ st.markdown(
 
 def section_failed(name, exc):
     """Show a short notice instead of letting one failing part take the whole page down."""
+    note_problem(name, exc)
     st.warning(f"This part ({name}) could not be shown right now ({type(exc).__name__}). "
                "The rest of the page works; please try another object or reload.")
+
+
+def note_problem(name, exc):
+    """Keep the page alive, but never fail silently: log it (server log) and list it in the page footer."""
+    import logging
+
+    logging.getLogger("coldmovers").warning("%s failed: %s: %s", name, type(exc).__name__, exc, exc_info=exc)
+    st.session_state.setdefault("_problems", []).append(f"{name} ({type(exc).__name__})")
 
 
 # ------------------------------------------------------------------ inputs
@@ -108,6 +117,7 @@ _components.html(
     </script>""",
     height=0,
 )
+st.session_state["_problems"] = []  # filled by note_problem during this run
 st.title("Cold Movers")
 st.markdown(
     "**Cold Movers lets anyone explore SPHEREx observations, follow changes between visits, and see explicitly "
@@ -166,7 +176,8 @@ with g1:
 with g2:
     try:
         vt_top = validation_table()
-    except Exception:
+    except Exception as _exc:
+        note_problem("validation summary", _exc)
         vt_top = []
     if vt_top:
         st.markdown(f"<div class='cm-card'><b>Tested on the five challenge objects</b>"
@@ -220,8 +231,8 @@ try:
             st.caption(f"Injected movers: {sb['injection']['note']} Fields used: "
                        f"{', '.join(sb['injection']['fields_used'])}. Computed on GitHub Actions with the app's own "
                        f"code (version {sb['app_version']}, {sb['generated_utc']} UTC).")
-except Exception:
-    pass
+except Exception as _exc:
+    note_problem("validation scoreboard", _exc)
 st.write("")
 
 tab_obj, tab_coords, tab_name = st.tabs(["Challenge objects", "Coordinates", "Name"])
@@ -440,20 +451,24 @@ st.markdown("<div id='at-a-glance'></div>", unsafe_allow_html=True)
 
 try:
     fit = pipeline.fit_rows(rows)
-except Exception:
+except Exception as _exc:
+    note_problem("temperature fit", _exc)
     fit = madhava.FitResult(temperature=float('nan'), t_low=float('nan'), t_high=float('nan'), scale=0.0,
                             chi2=float('nan'), dof=0, n_points=0, light='red', reasons=['not_enough_signal'])
 try:
     real = checks.run_checks(rows, epochs, view["stacks"], marker) if view.get("stacks") else None
-except Exception:
+except Exception as _exc:
+    note_problem("consistency checks", _exc)
     real = None
 try:
     found = movers.search_all(epochs, view["stacks"]) if view.get("stacks") else None
-except Exception:
+except Exception as _exc:
+    note_problem("mover search", _exc)
     found = None
 try:
     lc = variability.light_curve(rows, epochs)
-except Exception:
+except Exception as _exc:
+    note_problem("brightness check", _exc)
     lc = {"points": [], "visits": [], "methods": {},
           "verdict": {"variable": False, "amplitude_mag": None, "significance": None,
                       "text": "The brightness check could not run for this object."}}
@@ -471,7 +486,8 @@ try:
         from coldmovers.validation import free_motion_from
 
         FREE = free_motion_from(found, epochs, marker)
-    except Exception:
+    except Exception as _exc:
+        note_problem("catalogue-free motion of the target", _exc)
         FREE = None
     FREE_NOTE = (f". Without the catalogue the app finds it moving {FREE['rate_arcsec_yr']:.1f}″/yr "
                  f"({'confirmed' if FREE['confirmed'] else 'candidate'}; see section 2)") if FREE else ""
@@ -517,8 +533,8 @@ try:
               "page; nothing is added by hand.</div></div>",
             unsafe_allow_html=True,
         )
-    except Exception:
-        pass
+    except Exception as _exc:
+        note_problem("plain-words panel", _exc)
 
     with st.expander("How were these three answers calculated? (audit trail)"):
         from astropy.time import Time
@@ -1008,7 +1024,8 @@ try:
                     terms = f"{rep['terms']} terms + Madhava correction · " if rep["terms"] else ""
                     series_html = (f"<div class='cm-muted' style='margin-top:4px'>Series: {terms}error below "
                                    f"10<sup>{ex}</sup>, guaranteed</div>")
-            except Exception:
+            except Exception as _exc:
+                note_problem("series error bound", _exc)
                 series_html = ""
         st.markdown(
             f"<div class='cm-card'><div class='cm-muted'>Blackbody-equivalent temperature</div>{temp_html}"
@@ -1220,3 +1237,6 @@ st.markdown(
     "How we built it, including AI use: see the README. Not an official NASA product.</div>",
     unsafe_allow_html=True,
 )
+if st.session_state.get("_problems"):
+    st.caption("Parts that could not run on this page (logged for the team): "
+               + "; ".join(dict.fromkeys(st.session_state["_problems"])))

@@ -77,7 +77,7 @@ def _c(n, x, x2, x3):
     return x3 / n + 3.0 * x2 / n**2 + 6.0 * x / n**3 + 6.0 / n**4
 
 
-def _large_x_with_bound(x: np.ndarray, tol: float = 1e-15, max_terms: int = 100000):
+def _large_x_with_bound(x: np.ndarray, tol: float = 1e-15, max_terms: int = 1000):
     """Sum N terms, then add a Madhava correction for everything that was left out.
 
     Madhava of Sangamagrama did not simply cut his series for pi: he added a correction
@@ -112,7 +112,7 @@ def _large_x_with_bound(x: np.ndarray, tol: float = 1e-15, max_terms: int = 1000
     return _SCALE * (total + 0.5 * (lower + upper)), _SCALE * bound, n
 
 
-def _fraction_large_x(x: np.ndarray, tol: float = 1e-15, max_terms: int = 100000) -> np.ndarray:
+def _fraction_large_x(x: np.ndarray, tol: float = 1e-15, max_terms: int = 1000) -> np.ndarray:
     """Series with Madhava's correction, accurate and fast for x >= ~0.5."""
     return _large_x_with_bound(x, tol, max_terms)[0]
 
@@ -359,7 +359,7 @@ def traffic_light(result: FitResult, t_min: float = DEFAULT_T_MIN, t_max: float 
         reasons.append("colder_than_range")
     if t >= t_max * 0.95:
         reasons.append("hotter_than_range")
-    if (result.t_high - result.t_low) / 2 > MAX_REL_ERROR * t:
+    if max(t - result.t_low, result.t_high - t) > MAX_REL_ERROR * t:  # the larger side of an asymmetric interval
         reasons.append("uncertainty_too_large")
     if reasons:
         return "red", reasons

@@ -13,6 +13,7 @@ Data: SPHEREx DR1 (doi:10.26131/IRSA678) and Quick Release 3, NASA/JPL-Caltech/I
 
 from __future__ import annotations
 
+from . import __version__
 import hashlib
 import io
 import logging
@@ -232,7 +233,7 @@ def fetch_bytes(url: str, retries: int = 6, timeout: float = 90.0) -> bytes:
     last = None
     for attempt in range(retries):
         try:
-            resp = requests.get(url, timeout=timeout, headers={"User-Agent": "ColdMovers/0.1 (NASA Space Apps 2026)"})
+            resp = requests.get(url, timeout=timeout, headers={"User-Agent": f"ColdMovers/{__version__} (NASA Space Apps 2026)"})
             if resp.status_code in (429, 502, 503, 504):
                 # IRSA is busy: wait longer each time before trying again.
                 last = RuntimeError(f"HTTP {resp.status_code}")
