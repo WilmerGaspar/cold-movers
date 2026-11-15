@@ -206,6 +206,8 @@ def _draw_layers(ax, plt, mjd, layers, marker_pixels, track, pal):
         if target_xy is not None and np.hypot(x - target_xy[0], y - target_xy[1]) <= 2.5:
             on_target.append(mv)  # the target itself, found without catalogue: said on its ring
             continue
+        if dt > 0:  # its fitted trajectory so far, from where it was first seen
+            ax.plot([mv["x"], x], [mv["y"], y], ls=(0, (2, 2)), color=col, lw=1.3)
         ax.add_patch(plt.Rectangle((x - 2.2, y - 2.2), 4.4, 4.4, fill=False, color=col, lw=1.3))
         ax.text(x - 2.4, y - 4.8, mv["label"], color=col, fontsize=7, weight="bold")
     if (ring or on_target) and target_xy is not None:

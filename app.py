@@ -745,7 +745,8 @@ try:
                        "**Cyan +**: the position measured in that visit; **cyan arrow**: the measured motion since "
                        "the first visit, drawn ×N longer so a pixel or two can be seen. **Dotted ring**: the "
                        "\"Is it real?\" checks (green all pass, yellow some, red few). **Squares #**: other sources "
-                       "that move, found without any catalogue (green confirmed, yellow candidate).")
+                       "that move, found without any catalogue (green confirmed, yellow candidate), with their "
+                       "fitted trajectory so far as a dotted line.")
             st.download_button("Download this movie (GIF)", gif, file_name=f"coldmovers_{target.key}_d{det}.gif",
                                mime="image/gif")
 
@@ -967,6 +968,53 @@ try:
         st.caption("No aligned images, so the search cannot run.")
 except Exception as _section_error:  # keep the rest of the page alive
     section_failed("the mover search", _section_error)
+
+# ------------------------------------------------------------------ trajectory
+try:
+    traj = (assistant.trajectory_fit(real["positions"], target.pmra_masyr, target.pmdec_masyr)
+            if real and real.get("positions") and target.total_pm_arcsec_per_year >= 0.5 else None)
+    if traj:
+        from plotly.subplots import make_subplots
+        import plotly.graph_objects as go
+
+        st.markdown(f"#### 📈 Trajectory of {target.name}: position versus time")
+        figt = make_subplots(rows=1, cols=2, subplot_titles=("East offset (″)", "North offset (″)"))
+        for col, key in ((1, "east"), (2, "north")):
+            figt.add_trace(go.Scatter(x=traj["pred_dates"], y=traj[f"pred_{key}"], mode="lines",
+                                      line=dict(color="#ff5a36", dash="dash"), name="catalogue prediction",
+                                      showlegend=col == 1), row=1, col=col)
+            figt.add_trace(go.Scatter(x=traj["dates"], y=traj[f"fit_{key}"], mode="lines",
+                                      line=dict(color="#38d9f5"), name="straight-line fit to SPHEREx",
+                                      showlegend=col == 1), row=1, col=col)
+            figt.add_trace(go.Scatter(x=traj["dates"], y=traj[key], mode="markers",
+                                      error_y=dict(type="data", array=traj["err"], visible=True, color="#38d9f5"),
+                                      marker=dict(color="#38d9f5", size=9), name="measured position (±1σ)",
+                                      showlegend=col == 1), row=1, col=col)
+        figt.update_layout(template="plotly_dark", height=330, margin=dict(l=10, r=10, t=40, b=10),
+                           legend=dict(orientation="h", y=-0.18), paper_bgcolor="rgba(0,0,0,0)",
+                           plot_bgcolor="rgba(0,0,0,0)")
+        st.plotly_chart(figt, use_container_width=True)
+        dsig = abs(traj["rate"] - traj["catalogue_rate"]) / traj["rate_err"] if traj["rate_err"] > 0 else float("nan")
+        chi = (f"reduced χ² {traj['chi2_red']:.2f}" + (" (the points follow a straight line within their errors)"
+                                                        if traj["chi2_red"] <= 2 else
+                                                        " (more scatter than the error bars; the uncertainty "
+                                                        "below has been enlarged to match)")
+               if np.isfinite(traj["chi2_red"]) else "two visits only, so a straight line always fits")
+        signif = ("" if traj["rate"] >= 3 * traj["rate_err"] else
+                  " The motion is smaller than three times its uncertainty: over these visits SPHEREx alone "
+                  "cannot measure it significantly, and the app says so.")
+        st.markdown(
+            f"<div class='cm-card'>Measured from {traj['n']} visits in the SPHEREx images: "
+            f"<b>{traj['rate']:.2f} ± {traj['rate_err']:.2f}″ per year towards {traj['pa']:.0f}° ± "
+            f"{traj['pa_err']:.0f}°</b>. Catalogue: {traj['catalogue_rate']:.2f}″ per year towards "
+            f"{traj['catalogue_pa']:.0f}°, a difference of {dsig:.1f}σ. {chi.capitalize()}.{signif}"
+            "<div class='cm-muted' style='margin-top:4px'>Each point is a position measured within 2.5 pixels of the "
+            "predicted track (so this uses the catalogue to know where to look, unlike section 2). Error bars "
+            "combine the alignment between visits (0.12 px) and the centroid noise (PSF width divided by S/N). "
+            "Offsets are from the predicted position at the first visit.</div></div>",
+            unsafe_allow_html=True)
+except Exception as _section_error:
+    section_failed("the trajectory", _section_error)
 
 # ------------------------------------------------------------------ spectrum + Madhava
 try:

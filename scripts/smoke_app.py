@@ -53,6 +53,11 @@ for key in ALL_EXAMPLES:
             if broken:
                 failed += 1
                 print(f"{key}: SECTION FAILED: {broken}")
+            from coldmovers.targets import ALL_EXAMPLES as _EX
+
+            if _EX[key].total_pm_arcsec_per_year >= 0.5 and not any("Trajectory of" in str(m.value) for m in at.markdown):
+                failed += 1
+                print(f"{key}: the trajectory panel is missing")
             if not any("What am I looking at?" in str(m.value) for m in at.markdown):
                 failed += 1
                 print(f"{key}: the plain-words panel is missing")

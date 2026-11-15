@@ -115,3 +115,24 @@ def test_coin_phrase_is_the_right_geometry():
     assert assistant.coin_phrase(1.0) == "the width of a 2 cm coin seen from 4.1 km away"
     assert assistant.coin_phrase(11.1) == "the width of a 2 cm coin seen from 370 m away"
     assert assistant.coin_phrase(0.0) == "" and assistant.coin_phrase(float("nan")) == ""
+
+
+def test_trajectory_fit_recovers_a_known_motion():
+    # 10"/yr due north = 10/6.15 px/yr in +y; three visits half a year apart, S/N 50
+    pos = [{"mjd": 60800.0 + 182.625 * i, "pred_x": 15.0, "pred_y": 15.0 + 10 / 6.15 * 0.5 * i,
+            "x": 15.0, "y": 15.0 + 10 / 6.15 * 0.5 * i + (0.02 if i == 1 else 0.0), "snr": 50.0, "detected": True}
+           for i in range(3)]
+    tr = assistant.trajectory_fit(pos, pmra_masyr=0.0, pmdec_masyr=10000.0)
+    assert abs(tr["rate"] - 10.0) < 0.3 and tr["rate_err"] > 0
+    assert min(tr["pa"], 360 - tr["pa"]) < 3
+    assert tr["n"] == 3 and abs(tr["catalogue_rate"] - 10.0) < 1e-9
+    assert np.isfinite(tr["chi2_red"])
+
+
+def test_trajectory_fit_east_is_minus_x():
+    pos = [{"mjd": 60800.0 + 365.25 * i, "pred_x": 15.0, "pred_y": 15.0, "x": 15.0 - i, "y": 15.0, "snr": 100.0,
+            "detected": True} for i in range(2)]
+    tr = assistant.trajectory_fit(pos)
+    assert abs(tr["pa"] - 90.0) < 1e-6 and abs(tr["rate"] - 6.15) < 1e-6
+    assert not np.isfinite(tr["chi2_red"])  # two visits: a straight line always fits
+    assert assistant.trajectory_fit(pos[:1]) is None

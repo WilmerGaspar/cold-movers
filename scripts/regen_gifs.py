@@ -1,4 +1,4 @@
-"""Re-render the movie GIFs of the frozen results, with the visual-assistant layers (GitHub Actions).
+"""Re-render the movie GIFs of the frozen results, with the visual-assistant layers and mover trajectories (GitHub Actions).
 
 Only the GIF files change: photometry, stacks and results stay exactly as they were frozen.
 The frames are drawn with the same code the app uses (movie.render_frames).
