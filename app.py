@@ -702,15 +702,28 @@ try:
                                                 round(view["size_deg"] * 0.75, 4))],
                     2000.0 + (first_mjd - 51544.5) / 365.25)
                 for i, c in enumerate(cands):
-                    best = None
+                    # The same object must sit at the same place AND move the same way: a stationary
+                    # Gaia star next to a fast mover (WISE 0855 passing a background star) is not it.
+                    best, nearby_static = None, False
                     for g in gstars:
                         gx, gy = ref_wcs.wcs_world2pix(g["ra"], g["dec"], 0)
                         d = float(np.hypot(gx - c["x"], gy - c["y"]))
-                        if d <= 2.0 and (best is None or d < best[0]):
-                            best = (d, g)
-                    gaia_note[i] = (f"Gaia DR3 star, proper motion {np.hypot(best[1]['pmra'], best[1]['pmdec']) / 1000:.2f}″/yr"
-                                    if best else "no Gaia DR3 counterpart (too faint or too red for Gaia, like a cold "
-                                                 "brown dwarf, or not a star)")
+                        if d > 2.0:
+                            continue
+                        g_rate = float(np.hypot(g["pmra"], g["pmdec"]) / 1000.0)
+                        if abs(g_rate - c["rate_arcsec_yr"]) <= max(1.0, 0.3 * c["rate_arcsec_yr"]):
+                            if best is None or d < best[0]:
+                                best = (d, g, g_rate)
+                        else:
+                            nearby_static = True
+                    if best:
+                        gaia_note[i] = f"Gaia DR3 star moving the same way: {best[2]:.2f}″/yr"
+                    elif nearby_static:
+                        gaia_note[i] = ("no Gaia DR3 star moves like this; the Gaia star next to it does not move, so "
+                                        "it is a different object (this mover is too faint or too red for Gaia)")
+                    else:
+                        gaia_note[i] = ("no Gaia DR3 counterpart (too faint or too red for Gaia, like a cold "
+                                        "brown dwarf, or not a star)")
             except Exception:
                 gaia_note = {}
 
