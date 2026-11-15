@@ -4,7 +4,7 @@ Branch `global-scientific-upgrade`, Nov 15, 2026. `main` was backed up first, as
 `backup/main-before-final-mission` (commit `209d359`), and was not changed by this work. Every number below comes
 from a generated file named next to it. The detection metrics are all in [VALIDATION_METRICS.md](VALIDATION_METRICS.md).
 
-**Status:** final checks running on GitHub Actions (this line is updated when they finish).
+**Status:** every check passes. On a fresh machine the 94 tests, the headless app (all six objects) and the 58 README numbers all pass, and every published result regenerates from the code (GitHub Actions run 43765531036, commit `c184b4b`). Ready to publish once the team authorizes updating `main`. The open scientific problems are listed in §8; none is hidden.
 
 ## 1. Audit and stability
 
@@ -13,9 +13,9 @@ from a generated file named next to it. The detection metrics are all in [VALIDA
 | Unit tests | Locally (Python 3.13) and on a fresh GitHub Actions machine with the pinned libraries (Python 3.12) | 94 passed, both locally and on the fresh machine |
 | Dependencies | `pip install -r requirements.txt pytest`, then `pip check`, on a fresh machine | Installs as the README says; "No broken requirements found." The licence of every package is in [docs/licenses.md](../docs/licenses.md) |
 | The whole app, headless, for every example | `scripts/smoke_app.py` on the fresh machine | SMOKE PASSED for all six objects: every section renders, plus the trajectory, the plain-words panel, the difference and sum views and the evaluator panel's verdicts and held-out metrics; no part reported as failed |
-| README numbers against generated files | `scripts/check_readme_numbers.py` | 53 of 53 numbers match: scoreboard counts, injection rates, the validation table, verdicts, trajectory, benchmark and held-out metrics, the Madhava improvement and the test count |
-| Original SPHEREx files at IRSA | `scripts/check_irsa_links.py`: 5 files per object as cutouts, the IRSA image search, the DR1 DOI | 32 of 32 links OK. Four files first answered HTTP 503 (IRSA busy) and opened on retry; in an earlier run, before retries were added, 3 files and the image search failed this way. The answers were FITS files |
-| Reproduction of every published result | `branch_checks.yml`, job `reproduce`: scoreboard, validation table, evidence records, development benchmark and held-out set A regenerated and compared with the committed files | Scoreboard (JSON and Markdown), validation table and evidence records (Markdown and CSV): identical. Development benchmark and held-out set A: every count identical, and 60 and 76 floating-point values differ only beyond the 9th significant digit (a different NumPy build). A local re-run of the development benchmark gave 0 differences |
+| README numbers against generated files | `scripts/check_readme_numbers.py` | 58 of 58 numbers match: scoreboard counts, injection rates, the validation table, verdicts, trajectory, benchmark and held-out metrics (sets A and B), the Madhava improvement and the test count |
+| Original SPHEREx files at IRSA | `scripts/check_irsa_links.py`: 5 cited files per object, opened as cutouts the way the app opens them; the DR1 DOI; IRSA's two search services | Cited files and DOI: OK in all 6 runs since retries were added. Every answer was a FITS file; up to 5 files per run first answered HTTP 503 (IRSA busy). In the first run, before retries, 3 files failed with 503. Search services, which no result cites: SIA2 was OK in 5 of 7 runs and answered 502 in the other 2; TAP (the app's fallback) answered 502 or timed out in both runs that tested it |
+| Reproduction of every published result | `branch_checks.yml`, job `reproduce`: scoreboard, validation table, evidence records, development benchmark and held-out set A regenerated and compared with the committed files | Scoreboard (JSON and Markdown), validation table and evidence records (Markdown and CSV): identical. Development benchmark and held-out set A: every count identical; some floating-point values (18 of each in the last run) differ only beyond the 9th significant digit (a different NumPy build). A local re-run of the development benchmark gave 0 differences |
 
 **Problems found and fixed during the audit.**
 
@@ -89,7 +89,7 @@ Conditions: all six detectors, 5–20″/yr, 95 % Wilson intervals. Full tables 
   false confirmation at 5–20″/yr, and recall was higher (0.72 at S/N 15), because these two fields have no
   saturated halos. Over every speed at S/N 30, set B had 3 false confirmations in 120 trials (precision 0.96).
 
-**Diagnosis, with no parameter changed.** The 7 false confirmations at S/N 15 and 30 sat 0.02 to 0.87 px from a
+**Diagnosis, with no parameter changed.** The 7 false confirmations of held-out A at S/N 15 and 30 sat 0.02 to 0.87 px from a
 real star, in the RW Aurigae and TRAPPIST-1 fields. In 6 of them the injected mover itself was not confirmed.
 The neighbour-pull rule compares two movers, so it cannot act when the passing mover is not tracked, and the
 pulled star is confirmed. Any fix must be evaluated on a new set.
@@ -103,8 +103,8 @@ spots, with precision between 0.94 and 1.00.
 **Very red movers** (detectors 5 and 6 only): recall 0.13 in held-out A and 0.16 in development, with no false
 confirmation; 0.60 on the two new fields of set B. This supports the diagnosis that the failure comes from sparse long-wavelength fields disturbed by the target itself or by a saturated halo. This remains the main weakness: it is the scoreboard's failed check, at 28 %.
 
-**The algorithm does not detect all moving objects.** At S/N 15 it confirms about 40 % of the injected movers, and
-at S/N 5 almost none.
+**The algorithm does not detect all moving objects.** At S/N 15 it confirms about 40 % of the injected movers in
+the six test fields and 72 % in the two new fields, and at S/N 5 almost none.
 
 ## 3. Astrometry and temperature
 
