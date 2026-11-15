@@ -14,14 +14,14 @@
   "size_deg": 0.05,
   "n_found": 258,
   "n_used": 256,
-  "n_clean": 66,
+  "n_clean": 65,
   "n_failures": 2,
   "fit": {
-    "temperature_k": 629.4,
-    "t_low_k": 550.7,
-    "t_high_k": 737.1,
-    "chi2_red": 1.949,
-    "n_points": 66,
+    "temperature_k": 628.8,
+    "t_low_k": 548.2,
+    "t_high_k": 738.9,
+    "chi2_red": 1.939,
+    "n_points": 65,
     "light": "red",
     "reasons": [
       "narrow_coverage",
@@ -34,16 +34,16 @@
       "index": 0,
       "mjd_start": 60800.700028,
       "mjd_end": 60801.518654,
-      "mjd_mid": 60801.2783565,
-      "n_frames": 28,
+      "mjd_mid": 60801.44564,
+      "n_frames": 30,
       "counts": {
-        "1": 3,
+        "1": 4,
         "2": 8,
         "3": 3,
-        "4": 3,
+        "4": 4,
         "5": 8,
         "6": 3,
-        "0": 28
+        "0": 30
       }
     },
     {
@@ -51,15 +51,15 @@
       "mjd_start": 60979.722677,
       "mjd_end": 60993.912885,
       "mjd_mid": 60986.787279,
-      "n_frames": 108,
+      "n_frames": 110,
       "counts": {
-        "1": 17,
+        "1": 18,
         "2": 19,
         "3": 18,
         "4": 18,
         "5": 19,
-        "6": 17,
-        "0": 108
+        "6": 18,
+        "0": 110
       }
     },
     {
@@ -80,14 +80,14 @@
       "index": 3,
       "mjd_start": 61151.197933,
       "mjd_end": 61174.287218,
-      "mjd_mid": 61162.403024,
+      "mjd_mid": 61162.401532,
       "n_frames": 98,
       "counts": {
         "1": 14,
         "2": 15,
         "3": 19,
         "4": 14,
-        "5": 15,
+        "5": 13,
         "6": 21,
         "0": 98
       }
@@ -128,10 +128,10 @@
     "spherex_qr3"
   ],
   "timings": {
-    "search_s": 14.5,
-    "download_s": 397.2,
-    "total_s": 412.7
+    "search_s": 2.2,
+    "download_s": 336.9,
+    "total_s": 339.7
   },
-  "generated_utc": "2026-11-14 23:45 UTC",
+  "generated_utc": "2026-11-15 00:17 UTC",
   "credits": "Cold Movers, NASA Space Apps 2026. SPHEREx DR1/QR3 data from NASA/IPAC IRSA. Code written with AI assistance (Claude, Anthropic) under the team's direction."
 }

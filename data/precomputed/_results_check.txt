@@ -1,6 +1,7 @@
 barnard: OK (300 images, 6 visits)
-epsindib: OK (300 images, 4 visits)
+epsindib: OK (299 images, 4 visits)
 wise0855: OK (256 images, 4 visits)
-rwaur: OK (298 images, 3 visits)
+rwaur: OK (299 images, 3 visits)
 rdra: OK (300 images, 3 visits)
+trappist1: OK (295 images, 3 visits)
 RESULTS CHECK PASSED

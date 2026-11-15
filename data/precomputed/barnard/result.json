@@ -148,10 +148,10 @@
     "spherex_qr3"
   ],
   "timings": {
-    "search_s": 22.1,
-    "download_s": 270.4,
-    "total_s": 293.1
+    "search_s": 1.6,
+    "download_s": 265.8,
+    "total_s": 267.7
   },
-  "generated_utc": "2026-11-14 23:33 UTC",
+  "generated_utc": "2026-11-15 00:05 UTC",
   "credits": "Cold Movers, NASA Space Apps 2026. SPHEREx DR1/QR3 data from NASA/IPAC IRSA. Code written with AI assistance (Claude, Anthropic) under the team's direction."
 }

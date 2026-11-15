@@ -18,27 +18,27 @@
   "epsindib": {
     "ok": true,
     "fit": {
-      "temperature_k": 1877.0,
-      "t_low_k": 1803.6,
-      "t_high_k": 1946.7,
-      "chi2_red": 46.284,
-      "n_points": 223,
+      "temperature_k": 1874.3,
+      "t_low_k": 1801.0,
+      "t_high_k": 1943.8,
+      "chi2_red": 46.128,
+      "n_points": 222,
       "light": "yellow",
       "reasons": [
         "not_a_single_blackbody"
       ]
     },
-    "n_used": 300,
+    "n_used": 299,
     "n_found": 458
   },
   "wise0855": {
     "ok": true,
     "fit": {
-      "temperature_k": 629.4,
-      "t_low_k": 550.7,
-      "t_high_k": 737.1,
-      "chi2_red": 1.949,
-      "n_points": 66,
+      "temperature_k": 628.8,
+      "t_low_k": 548.2,
+      "t_high_k": 738.9,
+      "chi2_red": 1.939,
+      "n_points": 65,
       "light": "red",
       "reasons": [
         "narrow_coverage",
@@ -63,7 +63,7 @@
         "too_bright"
       ]
     },
-    "n_used": 298,
+    "n_used": 299,
     "n_found": 335
   },
   "rdra": {
