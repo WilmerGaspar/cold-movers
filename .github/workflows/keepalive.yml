@@ -2,8 +2,13 @@ name: keep app awake
 
 on:
   schedule:
-    - cron: "17 */3 * * *"  # every 3 hours
+    - cron: "37 * * * *"  # every hour (GitHub may delay scheduled runs; hourly keeps a wide margin)
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/keepalive.yml"
+      - "scripts/keepalive.py"
 
 jobs:
   ping:
@@ -21,4 +26,4 @@ jobs:
       - name: Visit the app
         env:
           APP_URL: https://cold-movers.streamlit.app/
-        run: python scripts/keepalive.py
+        run: python -u scripts/keepalive.py
