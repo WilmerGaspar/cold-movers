@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-11-15 05:33",
+  "generated_utc": "2026-11-15 05:55",
   "app_version": "0.4.5",
   "counts": {
     "pass": 14,
@@ -124,7 +124,7 @@
       "check": "Series error stays inside Madhava's guaranteed bound",
       "status": "pass",
       "result": "6 terms: error 5.4e-05 ≤ bound 6.6e-05; 19 terms: error 5.8e-09 ≤ bound 6.6e-09; full precision (47 terms): error 1.1e-15, at the level of computer rounding",
-      "rule": "pass: |series − exactly summed series| ≤ bound (plus rounding) at every test point",
+      "rule": "pass: the difference from the exactly summed series is within the bound (plus rounding) at every test point",
       "note": ""
     },
     {
@@ -157,7 +157,7 @@
       "status": "fail",
       "result": "34 of 120 confirmed (28%); median rate error 7.6%; by field: epsindib 0/36, wise0855 0/24, rwaur 4/24, trappist1 30/36",
       "rule": "pass: at least 80% recovered as confirmed, median rate error ≤ 10%; partial: at least 50%",
-      "note": "Diagnosis: a detector is trusted only if its still stars line up between visits. At the longest wavelengths these fields hold only one to three stars, and when one of them is a real mover (the target itself) the rule distrusts the whole detector, so a second mover cannot be confirmed. Making this rule work in sparse fields is our first next step."
+      "note": "Diagnosis: a detector is trusted only if its still stars line up between visits. At the longest wavelengths these fields hold only one to three stars. When one of them is a real mover (Epsilon Indi B or WISE 0855 themselves) or the halo of a saturated star (RW Aurigae), the rule distrusts the whole detector, so a second mover cannot be confirmed; in the richer TRAPPIST-1 field most are. Making this rule work in sparse fields is our first next step."
     }
   ],
   "injection": {
