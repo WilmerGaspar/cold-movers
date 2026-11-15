@@ -1,4 +1,5 @@
 """Take screenshots of the public app in a real browser (runs on GitHub Actions).
+# Re-run marker: verify version 0.4.0 after the manual reboot (Nov 14, 20:08 local).
 
 AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
 Saves docs/screens/*.png so the team can see what a judge sees, on desktop and phone.
