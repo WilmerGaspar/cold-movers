@@ -696,7 +696,7 @@ try:
     def gaia_stars(ra, dec, radius):
         from coldmovers import atlas
 
-        return atlas.gaia_field(ra, dec, radius)
+        return atlas.gaia_field_timed(ra, dec, radius)
 
 
     if st.toggle("Overlay Gaia DR3 stars and their motion on the SPHEREx image", value=False) and view.get("stacks"):
@@ -759,7 +759,7 @@ try:
         def gaia_for_movers(ra, dec, radius):
             from coldmovers import atlas
 
-            return atlas.gaia_field(ra, dec, radius)
+            return atlas.gaia_field_timed(ra, dec, radius)
 
         gaia_note = {}
         if cands:

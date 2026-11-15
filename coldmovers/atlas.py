@@ -13,6 +13,8 @@ import io
 
 import numpy as np
 
+from .net import call_with_timeout  # noqa: F401  (re-exported)
+
 HIPS2FITS = "https://alasky.cds.unistra.fr/hips-image-services/hips2fits"
 WISE_EPOCH = 2010.5
 GAIA_EPOCH = 2016.0
@@ -32,6 +34,12 @@ def fetch_allwise(ra_deg: float, dec_deg: float, fov_deg: float, size: int = 480
     resp.raise_for_status()
     img = np.array(Image.open(io.BytesIO(resp.content)).convert("RGB"))
     return img[::-1]  # first row at the bottom, like the sky coordinates
+
+
+def gaia_field_timed(ra_deg: float, dec_deg: float, radius_deg: float, timeout_s: float = 12.0,
+                     max_rows: int = 400) -> list:
+    """gaia_field with a time limit (TimeoutError instead of a frozen page)."""
+    return call_with_timeout(gaia_field, timeout_s, ra_deg, dec_deg, radius_deg, max_rows)
 
 
 def gaia_field(ra_deg: float, dec_deg: float, radius_deg: float, max_rows: int = 400) -> list:

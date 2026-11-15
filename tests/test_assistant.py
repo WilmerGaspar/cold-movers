@@ -72,3 +72,19 @@ def test_frames_and_difference_render_with_layers():
     assert len(pngs) == 3 and all(p[:4] == b"\x89PNG" for p in pngs)
     assert movie.render_difference(eps, 2, 2, lambda mjd: (15.0, 15.0), layers=layers)[:4] == b"\x89PNG"
     assert movie.render_difference(eps, 2, 0, lambda mjd: (15.0, 15.0)) is None
+
+
+def test_external_calls_cannot_freeze_the_page():
+    import time
+
+    import pytest
+
+    from coldmovers import atlas
+
+    assert atlas.call_with_timeout(lambda a, b: a + b, 2.0, 1, 2) == 3
+    t = time.time()
+    with pytest.raises(TimeoutError):
+        atlas.call_with_timeout(time.sleep, 0.3, 5)
+    assert time.time() - t < 2.0
+    with pytest.raises(ValueError):
+        atlas.call_with_timeout(lambda: int("x"), 2.0)

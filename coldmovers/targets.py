@@ -153,8 +153,11 @@ def resolve_simbad(name: str, key: str | None = None) -> Target:
 
     Raises LookupError when the name is unknown and ServiceDown when no service answers.
     """
+    from .net import call_with_timeout
+
     try:
-        return _resolve_simbad_tap(name, key)
+        # SIMBAD's TAP service sometimes stops answering; after 20 s the Sesame mirrors are asked instead.
+        return call_with_timeout(_resolve_simbad_tap, 20.0, name, key)
     except LookupError:
         raise
     except Exception:

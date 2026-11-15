@@ -144,7 +144,7 @@ def series_bound_check():
         parts.append(f"{n} terms: error {err.max():.1e} ≤ bound {bound.max():.1e}" if tol > 1e-15 else
                      f"full precision ({n} terms): error {err.max():.1e}, at the level of computer rounding")
     return row("Synthetic", "Series error stays inside Madhava's guaranteed bound", "pass" if ok else "fail",
-               "; ".join(parts), "pass: |series − exactly summed series| ≤ bound (plus rounding) at every test point")
+               "; ".join(parts), "pass: the difference from the exactly summed series is within the bound (plus rounding) at every test point")
 
 
 # ------------------------------------------------------------------ injected movers
@@ -255,9 +255,11 @@ def injection_campaign(fields, rates=(5.0, 10.0, 20.0), pas=(30.0, 120.0, 210.0,
                     (f"{nc} of {n} confirmed ({frac:.0%}); median rate error {med:.1%}" if nc
                      else f"0 of {n} confirmed") + f"; by field: {by_field}", rule,
                     note=("Diagnosis: a detector is trusted only if its still stars line up between visits. At the "
-                          "longest wavelengths these fields hold only one to three stars, and when one of them is a "
-                          "real mover (the target itself) the rule distrusts the whole detector, so a second mover "
-                          "cannot be confirmed. Making this rule work in sparse fields is our first next step.")))
+                          "longest wavelengths these fields hold only one to three stars. When one of them is a real "
+                          "mover (Epsilon Indi B or WISE 0855 themselves) or the halo of a saturated star (RW "
+                          "Aurigae), the rule distrusts the whole detector, so a second mover cannot be confirmed; "
+                          "in the richer TRAPPIST-1 field most are. Making this rule work in sparse fields is our "
+                          "first next step.")))
     details = {"fields_used": used, "rates_arcsec_yr": list(rates), "pa_deg": list(pas), "snrs": list(snrs),
                "note": "Gaussian point sources (sigma 0.9 px) added to the frozen visit stacks, same S/N in every "
                        "detector used; one fake mover at a time, at random quiet spots, in fields where at least "
