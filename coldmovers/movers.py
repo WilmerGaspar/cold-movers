@@ -107,7 +107,7 @@ def search(epochs, stacks, det: int = 0) -> dict:
             continue
         vx = float(np.polyfit(t, xs, 1)[0])
         vy = float(np.polyfit(t, ys, 1)[0])
-        tracks.append({"x": float(x0), "y": float(y0), "snr": s0, "n_visits": len(pts),
+        tracks.append({"x": float(x0), "y": float(y0), "snr": s0, "n_visits": len(pts), "t0_mjd": float(t0),
                        "t_span": float(t.max() - t.min()),
                        "vx_px_yr": vx, "vy_px_yr": vy,
                        "shift_px": float(np.hypot(vx, vy) * (t.max() - t.min())),
@@ -184,8 +184,15 @@ def search_all(epochs, stacks) -> dict:
         vx = float(np.average([m["vx_px_yr"] for m in g], weights=w))
         vy = float(np.average([m["vy_px_yr"] for m in g], weights=w))
         sig = float(np.sqrt(w.sum()))
+        members = sorted(({"detector": m["detector"], "rate_arcsec_yr": m["rate_arcsec_yr"], "pa_deg": m["pa_deg"],
+                           "significance": m["significance"], "n_visits": m["n_visits"]} for m in g),
+                         key=lambda m: m["detector"])
+        rates = np.array([m["rate_arcsec_yr"] for m in members])
         candidates.append({
-            "x": g[0]["x"], "y": g[0]["y"], "detectors": sorted(m["detector"] for m in g),
+            "x": g[0]["x"], "y": g[0]["y"], "t0_mjd": g[0]["t0_mjd"], "detectors": sorted(m["detector"] for m in g),
+            "members": members,
+            # how well the detectors agree with each other (0 when only one detector sees it)
+            "rate_spread_arcsec_yr": float(rates.max() - rates.min()) if rates.size > 1 else 0.0,
             "significance": sig, "vx_px_yr": vx, "vy_px_yr": vy,
             "rate_arcsec_yr": float(np.hypot(vx, vy) * PIXEL_ARCSEC),
             "pa_deg": float(np.degrees(np.arctan2(-vx, vy)) % 360),

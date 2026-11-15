@@ -1,4 +1,4 @@
-"""Re-render the movie GIFs of the frozen results from their stored stacks (runs on GitHub Actions).
+"""Re-render the movie GIFs of the frozen results, with the visual-assistant layers (GitHub Actions).
 
 Only the GIF files change: photometry, stacks and results stay exactly as they were frozen.
 The frames are drawn with the same code the app uses (movie.render_frames).
@@ -9,7 +9,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from coldmovers import movie, pipeline, validation  # noqa: E402
+from coldmovers import assistant, checks, movers, movie, pipeline, validation  # noqa: E402
 from coldmovers.targets import Target  # noqa: E402
 
 PRE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "precomputed")
@@ -25,8 +25,14 @@ for key in sorted(os.listdir(PRE)):
     epochs = [dict(ep, stacks=stacks.get(ep["index"], {}),
                    counts={int(k): v for k, v in ep.get("counts", {}).items()}) for ep in view["epochs"]]
     track = pipeline.track_points(marker, view["epochs"])
+    # Every visual-assistant layer on, computed exactly as the app does.
+    rows = view["rows"]
+    checks.mark_blends(rows, view["epochs"], stacks, marker)
+    real = checks.run_checks(rows, view["epochs"], stacks, marker)
+    found = movers.search_all(view["epochs"], stacks)
+    layers = assistant.layers_for(real, found)
     for det, name in sorted(view.get("gifs", {}).items()):
-        pngs = movie.render_frames(epochs, int(det), marker, pipeline.epoch_title, track=track)
+        pngs = movie.render_frames(epochs, int(det), marker, pipeline.epoch_title, track=track, layers=layers)
         if not pngs:
             print(key, name, "no frames, left as it was")
             continue

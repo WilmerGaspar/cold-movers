@@ -13,7 +13,7 @@ import numpy as np
 import streamlit as st
 
 from coldmovers import __version__ as APP_VERSION
-from coldmovers import checks, madhava, movers, movie, pipeline, variability
+from coldmovers import assistant, checks, madhava, movers, movie, pipeline, variability
 from coldmovers.references import PUBLISHED
 from coldmovers.targets import ALL_EXAMPLES, SHOWCASE, ServiceDown, Target, parse_coordinates, resolve_simbad
 
@@ -405,6 +405,10 @@ try:
 except Exception:
     real = None
 try:
+    found = movers.search_all(epochs, view["stacks"]) if view.get("stacks") else None
+except Exception:
+    found = None
+try:
     lc = variability.light_curve(rows, epochs)
 except Exception:
     lc = {"points": [], "visits": [], "methods": {},
@@ -421,9 +425,9 @@ try:
 
 
     try:
-        from coldmovers.validation import free_motion_of_target
+        from coldmovers.validation import free_motion_from
 
-        FREE = free_motion_of_target(epochs, view["stacks"], marker) if view.get("stacks") else None
+        FREE = free_motion_from(found, epochs, marker)
     except Exception:
         FREE = None
     FREE_NOTE = (f". Without the catalogue the app finds it moving {FREE['rate_arcsec_yr']:.1f}″/yr "
@@ -459,6 +463,19 @@ try:
         color = "#2fbf71" if n_pass == len(real["checks"]) else ("#f2c94c" if n_pass >= 2 else "#eb5757")
         s3.markdown(summary_card("Is it real?", f"{n_pass} of {len(real['checks'])} checks pass", icons, color),
                     unsafe_allow_html=True)
+
+    try:
+        bullets = assistant.explain(target, fit, real, FREE, lc["verdict"], epochs)
+        st.markdown(
+            "<div class='cm-card' style='margin-top:10px'><div style='font-weight:600; margin-bottom:6px'>"
+            "🧭 What am I looking at? In plain words</div>"
+            + "".join(f"<div style='margin:4px 0'>{icon} {text}</div>" for icon, text in bullets)
+            + "<div class='cm-muted' style='margin-top:6px'>Every sentence is written from the measurements on this "
+              "page; nothing is added by hand.</div></div>",
+            unsafe_allow_html=True,
+        )
+    except Exception:
+        pass
 
     with st.expander("How were these three answers calculated? (audit trail)"):
         from astropy.time import Time
@@ -552,8 +569,20 @@ try:
         options = available or [0]
         det = st.radio("Detector", options, index=options.index(best) if best in options else 0,
                        format_func=movie.detector_label)
-        show_diff = st.toggle("Show difference (last visit minus first)", value=False,
-                              help="Things that did not change cancel out; moving or varying things remain.")
+        view_mode = st.radio("View", ["Movie", "Difference from the first visit"], horizontal=True,
+                             key="view_mode",
+                             help="Difference: things that did not change cancel out; moving or varying things remain.")
+        show_diff = view_mode != "Movie"
+        layers_on = st.pills("Visual assistant", list(assistant.LAYERS), selection_mode="multi",
+                             default=list(assistant.LAYERS), key="layers_on") or []
+        layers = assistant.layers_for(real, found, layers_on)
+        diff_k = None
+        usable_det = [ep for ep in epochs if det in view["stacks"].get(ep["index"], {})] if view.get("stacks") else []
+        if show_diff and len(usable_det) >= 2:
+            diff_k = st.select_slider(
+                "Visit to compare with the first one", options=list(range(1, len(usable_det))),
+                value=len(usable_det) - 1,
+                format_func=lambda k: f"{assistant.mjd_to_date(usable_det[k]['mjd_mid'])} (visit {k + 1})")
         st.markdown(
             f"<span class='cm-muted'>Field of view {view['size_deg'] * 60:.1f} arcmin · SPHEREx pixels are 6.15 arcsec. "
             f"<a href='https://simbad.cds.unistra.fr/simbad/sim-coo?Coord={target.ra_deg}+{target.dec_deg}"
@@ -564,49 +593,51 @@ try:
         )
 
 
-    @st.cache_data(show_spinner=False, max_entries=24)
-    def gif_for(cache_key: str, det: int, _epochs, _stacks):
+    @st.cache_data(show_spinner=False, max_entries=48)
+    def gif_for(cache_key: str, det: int, layers_key: str, _epochs, _stacks, _layers):
         eps = [dict(ep, stacks=_stacks.get(ep["index"], {}),
                     counts={int(k): v for k, v in ep["counts"].items()}) for ep in _epochs]
-        pngs = movie.render_frames(eps, det, marker, pipeline.epoch_title, track=pipeline.track_points(marker, _epochs))
+        pngs = movie.render_frames(eps, det, marker, pipeline.epoch_title, track=pipeline.track_points(marker, _epochs),
+                                   layers=_layers)
         return movie.frames_to_gif(pngs, 800)
+
+
+    def eps_with_stacks():
+        return [dict(ep, stacks=view["stacks"].get(ep["index"], {}),
+                     counts={int(k): v for k, v in ep["counts"].items()}) for ep in epochs]
 
 
     with left:
         if not view.get("stacks"):
             st.warning("No images could be aligned for this position.")
         elif show_diff:
-            usable = [ep for ep in epochs if det in view["stacks"].get(ep["index"], {})]
-            if len(usable) < 2:
+            if diff_k is None:
                 st.info("Only one visit so far for this detector, so there is nothing to subtract yet.")
             else:
-                import matplotlib.pyplot as plt
-
-                diff = view["stacks"][usable[-1]["index"]][det] - view["stacks"][usable[0]["index"]][det]
-                v = np.nanpercentile(np.abs(diff), 99) or 1.0  # relative to each visit's sky level
-                fig, ax = plt.subplots(figsize=(4.2, 4.4), dpi=110)
-                ax.imshow(np.nan_to_num(diff), origin="lower", cmap="RdBu_r", vmin=-v, vmax=v, interpolation="nearest")
-                path = pipeline.track_points(marker, epochs)
-                if path:
-                    ax.plot(*zip(*path), ls="--", color="#555555", lw=1.0)
-                for ep, col in ((usable[0], "#5b8def"), (usable[-1], "#eb5757")):
-                    px, py = marker(ep["mjd_mid"])
-                    ax.add_patch(plt.Circle((px, py), 3.0, fill=False, color=col, lw=1.5))
-                ax.set_xticks([])
-                ax.set_yticks([])
-                ax.set_title("Last visit minus first: red = brighter now, blue = was there before", fontsize=8)
-                fig.tight_layout()
-                fig.text(0.99, 0.005, movie.WATERMARK, ha="right", va="bottom", fontsize=6, color="#8a93a6")
-                st.pyplot(fig, use_container_width=True)
+                png = movie.render_difference(
+                    eps_with_stacks(), det, diff_k, marker, track=pipeline.track_points(marker, epochs), layers=layers,
+                    title=(f"{assistant.mjd_to_date(usable_det[diff_k]['mjd_mid'])} minus "
+                           f"{assistant.mjd_to_date(usable_det[0]['mjd_mid'])} · {movie.detector_label(det)}\n"
+                           "red = brighter now, blue = brighter then"))
+                st.image(png, use_container_width=True)
+                st.caption("Blue circle: predicted position at the first visit; orange: at the chosen visit. A real "
+                           "mover leaves a blue spot where it was and a red spot where it is now.")
         else:
             key = f"{target.key}-{target.ra_deg:.5f}-{target.dec_deg:.5f}-{view.get('dir')}-{view['size_deg']}-{len(epochs)}"
             gif_file = view.get("gifs", {}).get(str(det)) if view.get("dir") else None
-            if gif_file and os.path.exists(os.path.join(view["dir"], gif_file)):
+            all_layers = set(layers_on) == set(assistant.LAYERS)
+            if all_layers and gif_file and os.path.exists(os.path.join(view["dir"], gif_file)):
                 with open(os.path.join(view["dir"], gif_file), "rb") as fh:
-                    gif = fh.read()
+                    gif = fh.read()  # frozen GIFs are rendered with every assistant layer on
             else:
-                gif = gif_for(key, det, epochs, view["stacks"])
+                with st.spinner("Drawing the movie"):
+                    gif = gif_for(key, det, ",".join(sorted(layers_on)), epochs, view["stacks"], layers)
             st.image(gif, use_container_width=True)
+            st.caption("**Orange circle**: where the catalogue says the object is on that date (dashed: its path). "
+                       "**Cyan +**: the position measured in that visit; **cyan arrow**: the measured motion since "
+                       "the first visit, drawn ×N longer so a pixel or two can be seen. **Dotted ring**: the "
+                       "\"Is it real?\" checks (green all pass, yellow some, red few). **Squares #**: other sources "
+                       "that move, found without any catalogue (green confirmed, yellow candidate).")
             st.download_button("Download this movie (GIF)", gif, file_name=f"coldmovers_{target.key}_d{det}.gif",
                                mime="image/gif")
 
@@ -675,10 +706,9 @@ try:
         "images its six detectors at the same moments, a real mover must show the same motion in at least two "
         "detectors to be called confirmed; one detector alone gives only a candidate."
     )
-    if view.get("stacks"):
+    if view.get("stacks") and found is not None:
         from astropy.time import Time
 
-        found = movers.search_all(epochs, view["stacks"])
         cands = found["candidates"]
         first_mjd = min(ep["mjd_mid"] for ep in epochs)
         last_mjd = max(ep["mjd_mid"] for ep in epochs)
@@ -761,7 +791,21 @@ try:
                             unsafe_allow_html=True)
             for i, c in enumerate(cands[:6]):
                 is_target = bool(np.hypot(c["x"] - tx, c["y"] - ty) <= 2.0)
-                head = ("🟢 Confirmed mover" if c["confirmed"] else "🟡 Candidate (one detector only)")
+                n_det = len(c["detectors"])
+                head = (f"🟢 Confirmed: {n_det} of 6 detectors see the same motion" if c["confirmed"]
+                        else f"🟡 Candidate: {n_det} of 6 detectors")
+                chips = []
+                for d in range(1, 7):
+                    info = found["per_detector"].get(d, {})
+                    if d in c["detectors"]:
+                        chips.append(f"<span style='color:#2fbf71; font-weight:700'>D{d} ✓</span>")
+                    elif not info.get("reliable", False) and info.get("n_sources"):
+                        chips.append(f"<span class='cm-muted' title='field not trusted in this detector'>D{d} ?</span>")
+                    else:
+                        chips.append(f"<span class='cm-muted'>D{d} ·</span>")
+                each = " · ".join(f"D{m['detector']} {m['rate_arcsec_yr']:.2f}″/yr" for m in c.get("members", []))
+                agree = (f"; the detectors agree within {c['rate_spread_arcsec_yr']:.2f}″/yr"
+                         if len(c.get("members", [])) > 1 else "")
                 cat = ""
                 if is_target and target.total_pm_arcsec_per_year > 0:
                     cat_pa = float(np.degrees(np.arctan2(target.pmra_masyr, target.pmdec_masyr)) % 360)
@@ -769,13 +813,17 @@ try:
                            f"towards {cat_pa:.0f}°.")
                 st.markdown(
                     f"<div class='cm-card' style='margin-bottom:8px'><b>#{i + 1} · {head}</b><br>"
+                    f"<div style='margin:4px 0; letter-spacing:0.5px'>{'&nbsp; '.join(chips)}</div>"
                     f"{c['rate_arcsec_yr']:.2f}″ per year towards {c['pa_deg']:.0f}° (east of north) · "
-                    f"{c['significance']:.1f}σ · detectors {', '.join(map(str, c['detectors']))}"
+                    f"{c['significance']:.1f}σ combined"
+                    f"<div class='cm-muted' style='margin-top:2px'>Each detector on its own: {each}{agree}. The "
+                    f"combined value weights each detector by its significance.</div>"
                     f"{cat}<div class='cm-muted' style='margin-top:4px'>{gaia_note.get(i, '')}</div></div>",
                     unsafe_allow_html=True,
                 )
             unreliable = [str(d) for d, x in found["per_detector"].items() if not x["reliable"] and x["n_sources"]]
             st.caption(
+                "✓ sees the motion · · does not see it · ? field not trusted. "
                 "Detectors whose field could not be trusted (saturated halos, moving ghosts): "
                 + (", ".join(unreliable) if unreliable else "none") + ". Visits from "
                 + f"{Time(first_mjd, format='mjd').iso[:10]} to {Time(last_mjd, format='mjd').iso[:10]}."

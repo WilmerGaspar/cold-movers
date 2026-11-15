@@ -145,10 +145,88 @@ def _stretch(images):
     return float(lo), float(hi if hi > lo else lo + 1)
 
 
-def render_frames(epochs, det: int, marker_pixels=None, title_fn=None, dpi: int = 100, track=None):
+DARK = {"track": "#ffb199", "pred": "#ff5a36", "first": "#5b8def", "measured": "#38d9f5",
+        "ok": "#2fbf71", "warn": "#f2c94c", "bad": "#eb5757"}
+LIGHT_BG = {"track": "#555555", "pred": "#d9480f", "first": "#1d4ed8", "measured": "#111111",
+            "ok": "#15803d", "warn": "#b45309", "bad": "#b91c1c"}
+LEGEND = ("orange circle: catalogue prediction  ·  + and arrow: measured position and motion  ·  "
+          "dotted ring: consistency checks  ·  squares: moving, found without catalogue")
+
+
+def _draw_layers(ax, plt, mjd, layers, marker_pixels, track, pal):
+    """Draw the visual-assistant layers for one moment (mjd) on an image axis."""
+    show_pred = layers.get("prediction", True) if layers is not None else True
+    target_xy = None
+    if show_pred and track:
+        tx, ty = zip(*track)
+        ax.plot(tx, ty, ls="--", color=pal["track"], lw=1.2, alpha=0.9)
+        ax.annotate("", xy=track[-1], xytext=track[-3], arrowprops=dict(arrowstyle="-|>", color=pal["track"], lw=1.2))
+    if marker_pixels is not None:
+        px, py = marker_pixels(mjd)
+        target_xy = (px, py)
+        if show_pred:
+            ax.add_patch(plt.Circle((px, py), 3.0, fill=False, color=pal["pred"], lw=1.5))
+    if not layers:
+        return
+    allm = layers.get("measured") or []
+    meas = [m for m in allm if m[0] <= mjd + 0.5]
+    if meas:
+        xs, ys = [m[1] for m in meas], [m[2] for m in meas]
+        ax.plot(xs, ys, "-", color=pal["measured"], lw=0.9, alpha=0.8)
+        if len(meas) > 1:
+            ax.plot(xs[:-1], ys[:-1], "o", ms=2.5, color=pal["measured"])
+        cur = meas[-1]
+        if abs(cur[0] - mjd) < 30:  # measured in this very visit
+            ax.plot(cur[1], cur[2], "+", ms=11, mew=1.8, color=pal["measured"])
+            target_xy = (cur[1], cur[2])
+        # Real motion is often a pixel or two, so the arrow is drawn N times longer, with
+        # one fixed N for the whole movie (from the total measured shift) and N printed.
+        total = np.hypot(allm[-1][1] - allm[0][1], allm[-1][2] - allm[0][2]) if len(allm) >= 2 else 0.0
+        shift = np.hypot(cur[1] - xs[0], cur[2] - ys[0])
+        if total >= 0.3 and len(meas) >= 2 and shift > 0:
+            xl, yl = ax.get_xlim(), ax.get_ylim()
+            room = 0.4 * min(abs(xl[1] - xl[0]), abs(yl[1] - yl[0]))  # keep the arrow inside the picture
+            fits = [f for f in (1, 2, 3, 5, 10, 20, 50) if total * f <= room] or [1]
+            n = next((f for f in fits if total * f >= 9.0), fits[-1])
+            ex, ey = xs[0] + (cur[1] - xs[0]) * n, ys[0] + (cur[2] - ys[0]) * n
+            ax.annotate("", xy=(ex, ey), xytext=(xs[0], ys[0]),
+                        arrowprops=dict(arrowstyle="-|>", color=pal["measured"], lw=1.8))
+            if n > 1:
+                ux, uy = (ex - xs[0]), (ey - ys[0])
+                norm_u = max(np.hypot(ux, uy), 1e-9)
+                ax.text(ex + 1.6 * ux / norm_u, ey + 1.6 * uy / norm_u, f"×{n}", color=pal["measured"], fontsize=7,
+                        weight="bold", ha="left" if ux >= 0 else "right", va="bottom" if uy >= 0 else "top")
+    ring = layers.get("ring")
+    on_target = []
+    movers = layers.get("movers") or []
+    for mv in movers:
+        dt = (mjd - mv["t0_mjd"]) / 365.25
+        x, y = mv["x"] + mv["vx_px_yr"] * dt, mv["y"] + mv["vy_px_yr"] * dt
+        col = pal["ok"] if mv["confirmed"] else pal["warn"]
+        if target_xy is not None and np.hypot(x - target_xy[0], y - target_xy[1]) <= 2.5:
+            on_target.append(mv)  # the target itself, found without catalogue: said on its ring
+            continue
+        ax.add_patch(plt.Rectangle((x - 2.2, y - 2.2), 4.4, 4.4, fill=False, color=col, lw=1.3))
+        ax.text(x - 2.4, y - 4.8, mv["label"], color=col, fontsize=7, weight="bold")
+    if (ring or on_target) and target_xy is not None:
+        col = pal["bad"]
+        if ring:
+            col = {"#2fbf71": pal["ok"], "#f2c94c": pal["warn"]}.get(ring["color"], pal["bad"])
+            ax.add_patch(plt.Circle(target_xy, 5.5, fill=False, color=col, lw=1.6, ls=":"))
+        label = ring["label"] if ring else ""
+        if on_target:
+            found = on_target[0]
+            label += ("\n" if label else "") + (f"{found['label']} moving, found without catalogue"
+                                                  if found["confirmed"] else f"{found['label']} candidate mover")
+            col = col if ring else (pal["ok"] if found["confirmed"] else pal["warn"])
+        ax.text(target_xy[0] + 4.6, target_xy[1] + 4.6, label, color=col, fontsize=7, weight="bold")
+
+
+def render_frames(epochs, det: int, marker_pixels=None, title_fn=None, dpi: int = 100, track=None, layers=None):
     """Render one PNG (bytes) per epoch for a detector, with a common stretch.
 
     track: optional list of (x, y) pixels, the predicted path, drawn as a dashed line.
+    layers: optional visual-assistant layers (see assistant.layers_for).
     """
     import matplotlib
 
@@ -165,14 +243,10 @@ def render_frames(epochs, det: int, marker_pixels=None, title_fn=None, dpi: int 
         norm = np.arcsinh(np.clip((img - lo) / (hi - lo), 0, None) * 10) / np.arcsinh(10)
         fig, ax = plt.subplots(figsize=(4.2, 4.6), dpi=dpi, facecolor=BG)
         ax.imshow(np.nan_to_num(norm, nan=0.0), origin="lower", cmap="gray", vmin=0, vmax=1, interpolation="nearest")
-        if track:
-            tx, ty = zip(*track)
-            ax.plot(tx, ty, ls="--", color="#ffb199", lw=1.2, alpha=0.9)
-            ax.annotate("", xy=track[-1], xytext=track[-3],
-                        arrowprops=dict(arrowstyle="-|>", color="#ffb199", lw=1.2))
-        if marker_pixels is not None:
-            px, py = marker_pixels(ep["mjd_mid"])
-            ax.add_patch(plt.Circle((px, py), 3.0, fill=False, color="#ff5a36", lw=1.5))
+        xlim, ylim = ax.get_xlim(), ax.get_ylim()
+        _draw_layers(ax, plt, ep["mjd_mid"], layers, marker_pixels, track, DARK)
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_title(title_fn(ep, det, k, len(usable)) if title_fn else f"epoch {k + 1}", fontsize=9,
@@ -186,6 +260,41 @@ def render_frames(epochs, det: int, marker_pixels=None, title_fn=None, dpi: int 
         plt.close(fig)
         pngs.append(buf.getvalue())
     return pngs
+
+
+def render_difference(epochs, det: int, k: int, marker_pixels=None, track=None, layers=None, title="",
+                      dpi: int = 110):
+    """PNG of visit k minus the first visit for a detector, with the same layers (None if impossible)."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    usable = [ep for ep in epochs if det in ep["stacks"]]
+    if len(usable) < 2 or not 1 <= k < len(usable):
+        return None
+    first, cur = usable[0], usable[k]
+    diff = cur["stacks"][det] - first["stacks"][det]
+    v = float(np.nanpercentile(np.abs(diff), 99)) if np.isfinite(diff).any() else 1.0
+    v = v if v > 0 else 1.0
+    fig, ax = plt.subplots(figsize=(4.2, 4.6), dpi=dpi, facecolor="white")
+    ax.imshow(np.nan_to_num(diff), origin="lower", cmap="RdBu_r", vmin=-v, vmax=v, interpolation="nearest")
+    xlim, ylim = ax.get_xlim(), ax.get_ylim()
+    if marker_pixels is not None and (layers is None or layers.get("prediction", True)):
+        fx, fy = marker_pixels(first["mjd_mid"])
+        ax.add_patch(plt.Circle((fx, fy), 3.0, fill=False, color=LIGHT_BG["first"], lw=1.5))
+    _draw_layers(ax, plt, cur["mjd_mid"], layers, marker_pixels, track, LIGHT_BG)
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_title(title, fontsize=8)
+    fig.tight_layout()
+    fig.text(0.99, 0.005, WATERMARK, ha="right", va="bottom", fontsize=6, color="#8a93a6")
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", facecolor="white")
+    plt.close(fig)
+    return buf.getvalue()
 
 
 def frames_to_gif(pngs, ms_per_frame: int = 700) -> bytes:

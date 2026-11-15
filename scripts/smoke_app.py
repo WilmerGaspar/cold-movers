@@ -34,6 +34,18 @@ for key in ALL_EXAMPLES:
             if len(heads) < 6:
                 failed += 1
                 print(f"{key}: MISSING SECTIONS, only {len(heads)} found")
+            broken = [w.value for w in at.warning if "could not be shown" in str(w.value)]
+            if broken:
+                failed += 1
+                print(f"{key}: SECTION FAILED: {broken}")
+            if not any("What am I looking at?" in str(m.value) for m in at.markdown):
+                failed += 1
+                print(f"{key}: the plain-words panel is missing")
+            # Difference view with every assistant layer on
+            at.radio(key="view_mode").set_value("Difference from the first visit").run()
+            if at.exception or any("could not be shown" in str(w.value) for w in at.warning):
+                failed += 1
+                print(f"{key}: DIFFERENCE VIEW FAILED {[e.value for e in at.exception]}")
             print(f"{key}: OK  sections={heads}  errors={[e.value for e in at.error]}  warnings={[w.value for w in at.warning]}")
     except Exception:
         failed += 1

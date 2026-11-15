@@ -59,3 +59,11 @@ def test_badly_aligned_field_is_not_trusted():
     epochs, stacks = epochs_and_stacks(jitter=1.5, with_mover=False)
     res = movers.search_all(epochs, stacks)
     assert not any(c["confirmed"] for c in res["candidates"])
+
+
+def test_confirmed_mover_lists_each_detector():
+    epochs, stacks = epochs_and_stacks(dets=(2, 3, 4))
+    c = movers.search_all(epochs, stacks)["candidates"][0]
+    assert [m["detector"] for m in c["members"]] == c["detectors"] == [2, 3, 4]
+    assert c["rate_spread_arcsec_yr"] >= 0
+    assert c["t0_mjd"] == 60800.0

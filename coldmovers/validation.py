@@ -89,9 +89,13 @@ def catalogue_pa(target) -> float:
 
 def free_motion_of_target(epochs, stacks, marker, radius_px: float = 2.0):
     """The catalogue-free mover found at the target's first-visit position, if any."""
-    res = movers.search_all(epochs, stacks)
-    if not epochs:
+    return free_motion_from(movers.search_all(epochs, stacks), epochs, marker, radius_px)
+
+
+def free_motion_from(found, epochs, marker, radius_px: float = 2.0):
+    """Same as free_motion_of_target, from a search that has already run."""
+    if not epochs or not found:
         return None
     x0, y0 = marker(min(ep["mjd_mid"] for ep in epochs))
-    near = [c for c in res["candidates"] if np.hypot(c["x"] - x0, c["y"] - y0) <= radius_px]
+    near = [c for c in found["candidates"] if np.hypot(c["x"] - x0, c["y"] - y0) <= radius_px]
     return near[0] if near else None
