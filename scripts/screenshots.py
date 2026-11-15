@@ -121,6 +121,18 @@ with sync_playwright() as p:
             page.screenshot(path=os.path.join(OUT, f"desktop_{name}.png"))
         except Exception as exc:
             print(f"{name} screenshot failed:", exc)
+    # TRAPPIST-1: the Madhava engine's showcase (unsaturated, published temperature to compare with)
+    try:
+        fr = open_app(page, "?object=trappist1")
+        el = fr.get_by_text("3 · Its light", exact=False).first
+        el.scroll_into_view_if_needed()
+        page.mouse.wheel(0, 120)
+        page.wait_for_timeout(4_000)
+        page.screenshot(path=os.path.join(OUT, "desktop_trappist1_spectrum.png"))
+        print("trappist1 spectrum screenshot saved;",
+              "series bound shown" if fr.get_by_text("Madhava correction", exact=False).count() else "NO series bound")
+    except Exception as exc:
+        print("trappist1 spectrum screenshot failed:", exc)
     page.close()
 
     # Phone
