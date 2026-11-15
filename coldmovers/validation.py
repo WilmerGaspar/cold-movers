@@ -10,7 +10,7 @@ import os
 
 import numpy as np
 
-from . import checks, movers, pipeline
+from . import assistant, variability, checks, movers, pipeline
 from .references import PUBLISHED
 from .targets import ALL_EXAMPLES, EXTRAS, Target
 
@@ -78,6 +78,20 @@ def validate(precomputed_dir: str) -> list:
             "free_pa": free["pa_deg"] if free else None,
             "free_status": ("confirmed" if free["confirmed"] else "candidate") if free else None,
             "free_detectors": free["detectors"] if free else [],
+            # evidence record fields (docs/validation_records.*)
+            "free_significance": free["significance"] if free else None,
+            "free_rate_err": (free["rate_arcsec_yr"] / free["significance"]) if free and free["significance"] else None,
+            "trajectory": (assistant.trajectory_fit(real["positions"], target.pmra_masyr, target.pmdec_masyr)
+                           if real.get("positions") and target.total_pm_arcsec_per_year >= 0.5 else None),
+            "t_low": fit.t_low if np.isfinite(fit.t_low) else None,
+            "t_high": fit.t_high if np.isfinite(fit.t_high) else None,
+            "brightness": variability.light_curve(rows, view["epochs"])["verdict"],
+            "n_files": len({r.get("url") for r in rows if r.get("url")}),
+            "detectors_used": sorted({int(r["detector"]) for r in rows}),
+            "first_date": assistant.mjd_to_date(min(ep["mjd_mid"] for ep in view["epochs"])),
+            "last_date": assistant.mjd_to_date(max(ep["mjd_mid"] for ep in view["epochs"])),
+            "checks": {c["name"]: c["status"] for c in real["checks"]},
+            "position_source": getattr(target, "source", ""),
         })
     return table
 

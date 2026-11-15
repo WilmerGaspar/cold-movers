@@ -27,7 +27,13 @@ MIN_SHIFT_PX = 0.5
 SYS_ALIGN_PX = 0.12  # per-visit alignment uncertainty (static stars line up to ~0.1-0.2 px)
 PSF_SIGMA_PX = 0.9  # SPHEREx point-spread function width (sigma) in pixels, roughly
 MAX_FIELD_MEDIAN_SHIFT_PX = 0.5  # beyond this the field is too disturbed to trust
-MAX_FIT_RMS_PX = 0.6  # a real mover follows a straight line
+MAX_FIT_RMS_PX = 0.6
+# Neighbour pull: when two movers come within this distance of each other in some visit, the
+# light of one can pull the measured centroid of the other. Found with the blind injection
+# benchmark: a fake mover passing 2-4 px from a still star made the star itself look like a
+# confirmed mover. The less significant of the pair (a pulled centroid gives a small shift
+# for its uncertainty) is therefore kept as a candidate, never confirmed.
+BLEND_PX = 4.0  # a real mover follows a straight line
 
 
 def _noise(image):
@@ -79,9 +85,15 @@ def search(epochs, stacks, det: int = 0) -> dict:
     years = {ep["index"]: (ep["mjd_mid"] - t0) / 365.25 for ep in usable}
     span = years[usable[-1]["index"]]
 
+    def nearest_other(cands, j):
+        others = [np.hypot(c[0] - cands[j][0], c[1] - cands[j][1]) for k, c in enumerate(cands) if k != j]
+        return float(min(others)) if others else float("inf")
+
     tracks = []
-    for (x0, y0, s0) in found[first["index"]]:
+    first_found = found[first["index"]]
+    for i0, (x0, y0, s0) in enumerate(first_found):
         pts = [(0.0, x0, y0)]
+        neighbour = nearest_other(first_found, i0)
         for ep in usable[1:]:
             cands = found[ep["index"]]
             if not cands:
@@ -98,6 +110,7 @@ def search(epochs, stacks, det: int = 0) -> dict:
             j = int(np.argmin(d))
             if d[j] <= MATCH_RADIUS_PX:
                 pts.append((years[ep["index"]], cands[j][0], cands[j][1]))
+                neighbour = min(neighbour, nearest_other(cands, j))
         if len(pts) < 2:
             continue
         t = np.array([p[0] for p in pts])
@@ -111,6 +124,7 @@ def search(epochs, stacks, det: int = 0) -> dict:
                        "t_span": float(t.max() - t.min()),
                        "vx_px_yr": vx, "vy_px_yr": vy,
                        "shift_px": float(np.hypot(vx, vy) * (t.max() - t.min())),
+                       "min_neighbour_px": neighbour,
                        "points": [(float(a), float(b), float(c)) for a, b, c in pts]})
 
     # Uncertainty of each position: a centroiding term that shrinks with brightness plus a
@@ -197,9 +211,24 @@ def search_all(epochs, stacks) -> dict:
             "rate_arcsec_yr": float(np.hypot(vx, vy) * PIXEL_ARCSEC),
             "pa_deg": float(np.degrees(np.arctan2(-vx, vy)) % 360),
             "shift_px": float(np.hypot(vx, vy) * g[0]["span_years"]),
+            "min_neighbour_px": float(min(m.get("min_neighbour_px", float("inf")) for m in g)),
+            "pulled_by_neighbour": False,
             "confirmed": len(g) >= 2 and sig >= MIN_SIGNIFICANCE,
             "points": g[0]["points"],
         })
+    # Neighbour pull: compare every pair of movers at the visit times.
+    times = sorted(ep["mjd_mid"] for ep in epochs)
+    for a in candidates:
+        for b in candidates:
+            if a is b or b["significance"] <= a["significance"]:
+                continue
+            dmin = min(np.hypot((a["x"] + a["vx_px_yr"] * (t - a["t0_mjd"]) / 365.25)
+                                - (b["x"] + b["vx_px_yr"] * (t - b["t0_mjd"]) / 365.25),
+                                (a["y"] + a["vy_px_yr"] * (t - a["t0_mjd"]) / 365.25)
+                                - (b["y"] + b["vy_px_yr"] * (t - b["t0_mjd"]) / 365.25)) for t in times)
+            if dmin < BLEND_PX:
+                a["pulled_by_neighbour"] = True
+                a["confirmed"] = False
     candidates.sort(key=lambda c: (not c["confirmed"], -c["significance"]))
     usable = [ep for ep in epochs if any(ep["index"] in stacks for _ in [0])]
     return {"candidates": candidates, "per_detector": per_det, "n_visits": len(usable)}

@@ -260,8 +260,9 @@ with st.expander("📖 Words used on this page (glossary)"):
         "- **σ (sigma)**: how many times larger a change is than its uncertainty; above 5σ is a strong result.\n"
         "- **Magnitude**: the astronomers' brightness scale; a change of 0.1 magnitudes is about 10 %.\n"
         "- **Found without catalogue / confirmed / candidate**: motion found only from the SPHEREx images, without "
-        "knowing where to look. Confirmed when at least two of the six detectors see the same motion; a candidate "
-        "is seen by one."
+        "knowing where to look. Confirmed when at least two of the six detectors see the same motion and no faster "
+        "mover passes within 4 pixels of it (whose light could pull its measured position); otherwise it stays a "
+        "candidate. Nothing is ever called a discovery."
     )
 st.write("")
 
@@ -905,6 +906,8 @@ try:
                 is_target = bool(np.hypot(c["x"] - tx, c["y"] - ty) <= 2.0)
                 n_det = len(c["detectors"])
                 head = (f"🟢 Confirmed: {n_det} of 6 detectors see the same motion" if c["confirmed"]
+                        else f"🟡 Candidate: passes within {movers.BLEND_PX:.0f} px of a faster mover, whose "
+                             "light can pull its measured position" if c.get("pulled_by_neighbour")
                         else f"🟡 Candidate: {n_det} of 6 detectors")
                 chips = []
                 for d in range(1, 7):
@@ -956,6 +959,7 @@ try:
                         "ra_deg": round(float(ra_m), 6), "dec_deg": round(float(dec_m), 6),
                         "position_date": Time(c["t0_mjd"], format="mjd").iso[:10],
                         "is_the_target": bool(np.hypot(c["x"] - tx, c["y"] - ty) <= 2.0),
+                        "pulled_by_neighbour": bool(c.get("pulled_by_neighbour", False)),
                         "gaia_check": gaia_note.get(i, "not checked"),
                         "open_in_cold_movers": (f"https://cold-movers.streamlit.app/?ra={float(ra_m):.5f}"
                                                 f"&dec={float(dec_m):.5f}"),

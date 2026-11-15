@@ -269,3 +269,79 @@ def injection_campaign(fields, rates=(5.0, 10.0, 20.0), pas=(30.0, 120.0, 210.0,
 
 def counts(rows):
     return {s: sum(r["status"] == s for r in rows) for s in ("pass", "partial", "fail")}
+
+
+# ------------------------------------------------------------------ blind benchmark
+
+
+def _spots_near_sources(stacks, epochs, rng, n, margin=7.0, near=(2.5, 4.0)):
+    """Random positions 2.5-4 px from a source seen in the first visit (crowded conditions)."""
+    first = min(epochs, key=lambda ep: ep["mjd_mid"])
+    imgs = [im for d, im in stacks[first["index"]].items() if d != 0]
+    shape = imgs[0].shape
+    sources = [s for im in imgs for s in movers.detect(im, snr=6.0)]
+    spots, tries = [], 0
+    while sources and len(spots) < n and tries < 5000:
+        tries += 1
+        sx, sy = sources[rng.integers(len(sources))][:2]
+        r, a = rng.uniform(*near), rng.uniform(0, 2 * math.pi)
+        x, y = sx + r * math.cos(a), sy + r * math.sin(a)
+        if margin <= x <= shape[1] - 1 - margin and margin <= y <= shape[0] - 1 - margin:
+            spots.append((x, y))
+    return spots
+
+
+def blind_trial(epochs, stacks, baseline, x0, y0, rate_arcsec_yr, pa_deg, snr, detectors=(1, 2, 3, 4, 5, 6)):
+    """One injected mover, a blind search, and every confirmed mover the search reports.
+
+    The search never sees (x0, y0) or the motion: matching happens afterwards. Confirmed movers
+    that match neither the injection nor a mover already present before injecting (baseline)
+    are counted as false positives of this trial.
+    """
+    t0 = min(ep["mjd_mid"] for ep in epochs)
+    vx = -rate_arcsec_yr * math.sin(math.radians(pa_deg)) / PIXEL_ARCSEC
+    vy = rate_arcsec_yr * math.cos(math.radians(pa_deg)) / PIXEL_ARCSEC
+    new = {}
+    for ep in epochs:
+        t = (ep["mjd_mid"] - t0) / 365.25
+        new[ep["index"]] = {}
+        for d, img in stacks.get(ep["index"], {}).items():
+            if d in detectors:
+                _, sd = movers._noise(img)
+                img = img + _gauss(img.shape, x0 + vx * t, y0 + vy * t, snr * sd)
+            new[ep["index"]][d] = img
+    found = movers.search_all(epochs, new)
+    hit, fps = None, 0
+    for c in found["candidates"]:
+        dt = (c["t0_mjd"] - t0) / 365.25
+        d_inj = math.hypot(c["x"] - (x0 + vx * dt), c["y"] - (y0 + vy * dt))
+        if d_inj <= MATCH_PX and (hit is None or d_inj < hit[0]):
+            hit = (d_inj, c)
+            continue
+        if c["confirmed"] and not any(math.hypot(c["x"] - b["x"], c["y"] - b["y"]) <= 2.0 for b in baseline):
+            fps += 1
+    out = {"found": hit is not None, "confirmed": bool(hit and hit[1]["confirmed"]), "false_confirmed": fps}
+    if hit:
+        c = hit[1]
+        out.update(rate_err=(c["rate_arcsec_yr"] - rate_arcsec_yr) / rate_arcsec_yr,
+                   pa_err=_pa_diff(c["pa_deg"], pa_deg), n_detectors=len(c["detectors"]))
+    return out
+
+
+def summarize_trials(trials):
+    """Recall, precision, F1 and errors for a list of blind trials (confirmed movers only)."""
+    n = len(trials)
+    tp = sum(t["confirmed"] for t in trials)
+    cand = sum(t["found"] and not t["confirmed"] for t in trials)
+    fp = sum(t["false_confirmed"] for t in trials)
+    recall = tp / n if n else float("nan")
+    precision = tp / (tp + fp) if (tp + fp) else float("nan")
+    f1 = (2 * precision * recall / (precision + recall)) if tp else 0.0
+    rate_err = [abs(t["rate_err"]) for t in trials if t["confirmed"]]
+    pa_err = [t["pa_err"] for t in trials if t["confirmed"]]
+    return {"n": n, "confirmed": tp, "candidate_only": cand, "missed": n - tp - cand, "false_confirmed": fp,
+            "recall": recall, "precision": precision, "f1": f1,
+            "false_confirmed_per_trial": fp / n if n else float("nan"),
+            "rate_err_median": float(np.median(rate_err)) if rate_err else float("nan"),
+            "rate_err_p84": float(np.percentile(rate_err, 84)) if rate_err else float("nan"),
+            "pa_err_median": float(np.median(pa_err)) if pa_err else float("nan")}

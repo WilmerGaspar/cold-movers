@@ -67,3 +67,27 @@ def test_confirmed_mover_lists_each_detector():
     assert [m["detector"] for m in c["members"]] == c["detectors"] == [2, 3, 4]
     assert c["rate_spread_arcsec_yr"] >= 0
     assert c["t0_mjd"] == 60800.0
+
+
+def test_slower_of_two_crossing_movers_is_not_confirmed():
+    """Neighbour pull: when two movers pass within BLEND_PX, the slower one stays a candidate."""
+    from coldmovers import scoreboard
+
+    rng = np.random.default_rng(3)
+    epochs = [{"index": i, "mjd_mid": 60800.0 + 182.625 * i} for i in range(3)]
+    stacks = {}
+    for i in range(3):
+        t = 0.5 * i
+        stacks[i] = {}
+        for d in (2, 3, 4):
+            img = rng.normal(0, 1, (45, 45))
+            for (x, y) in [(6, 6), (38, 7), (7, 38), (38, 38), (22, 6)]:  # still stars for alignment
+                img += scoreboard._gauss((45, 45), x, y, 40.0)
+            img += scoreboard._gauss((45, 45), 8 + 6.0 * t, 20, 40.0)  # fast mover, 6 px/yr
+            img += scoreboard._gauss((45, 45), 15.5, 22 + 1.4 * t, 40.0)  # slow mover, 3.7 px away at the end
+            stacks[i][d] = img
+    cands = movers.search_all(epochs, stacks)["candidates"]
+    fast = [c for c in cands if abs(c["vx_px_yr"] - 6.0) < 1.5]
+    slow = [c for c in cands if abs(c["vy_px_yr"] - 1.4) < 0.8 and abs(c["vx_px_yr"]) < 0.8]
+    assert fast and fast[0]["confirmed"] and not fast[0]["pulled_by_neighbour"]
+    assert slow and not slow[0]["confirmed"] and slow[0]["pulled_by_neighbour"]
