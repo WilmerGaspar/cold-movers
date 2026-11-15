@@ -1,0 +1,188 @@
+{
+  "generated_utc": "2026-11-15 05:33",
+  "app_version": "0.4.5",
+  "counts": {
+    "pass": 14,
+    "partial": 4,
+    "fail": 1
+  },
+  "rows": [
+    {
+      "category": "Positive control · motion",
+      "check": "Barnard's Star found without any catalogue",
+      "status": "pass",
+      "result": "9.83″/yr towards 354° vs catalogue 10.39″/yr, 356° (-5%, 2° off); confirmed, 2 detectors",
+      "rule": "pass: confirmed (2+ detectors) with rate within 10% and direction within 10° of the catalogue; partial: found but not both; fail: not found",
+      "note": ""
+    },
+    {
+      "category": "Positive control · motion",
+      "check": "Epsilon Indi B found without any catalogue",
+      "status": "pass",
+      "result": "4.54″/yr towards 125° vs catalogue 4.68″/yr, 122° (-3%, 4° off); confirmed, 5 detectors",
+      "rule": "pass: confirmed (2+ detectors) with rate within 10% and direction within 10° of the catalogue; partial: found but not both; fail: not found",
+      "note": ""
+    },
+    {
+      "category": "Positive control · motion",
+      "check": "WISE 0855-0714 found without any catalogue",
+      "status": "partial",
+      "result": "6.36″/yr towards 268° vs catalogue 8.15″/yr, 275° (-22%, 7° off); candidate, 1 detector",
+      "rule": "pass: confirmed (2+ detectors) with rate within 10% and direction within 10° of the catalogue; partial: found but not both; fail: not found",
+      "note": ""
+    },
+    {
+      "category": "Positive control · motion",
+      "check": "Shift between first and last visit agrees with the catalogue",
+      "status": "pass",
+      "result": "Barnard's Star 11.1″ vs 11.1″; Epsilon Indi B 6.4″ vs 6.6″; WISE 0855-0714 9.5″ vs 8.1″; TRAPPIST-1 1.1″ vs 1.0″",
+      "rule": "pass: every fast mover's measured shift is within 1 SPHEREx pixel (6.15″) of the catalogue shift",
+      "note": ""
+    },
+    {
+      "category": "Positive control · temperature",
+      "check": "TRAPPIST-1 temperature vs published",
+      "status": "pass",
+      "result": "2,464 K vs 2,540–2,592 K (-4% from 2,566 K); light yellow",
+      "rule": "pass: blackbody-equivalent within 10% of the published effective temperature; partial: outside but flagged yellow or red; fail: outside and green",
+      "note": ""
+    },
+    {
+      "category": "Positive control · temperature",
+      "check": "Epsilon Indi B temperature vs published",
+      "status": "partial",
+      "result": "1,874 K vs 880–1,340 K (+40% beyond the published range); light yellow",
+      "rule": "pass: blackbody-equivalent within 10% of the published effective temperature; partial: outside but flagged yellow or red; fail: outside and green",
+      "note": ""
+    },
+    {
+      "category": "Positive control · brightness",
+      "check": "R Draconis, a known variable, is seen to change",
+      "status": "pass",
+      "result": "0.57 mag between visits, 9.6σ",
+      "rule": "pass: 'Yes' (change above 5σ); partial: 'Possibly' (3–5σ); fail: 'No clear change'",
+      "note": ""
+    },
+    {
+      "category": "Positive control · brightness",
+      "check": "RW Aurigae, a known variable, is seen to change",
+      "status": "partial",
+      "result": "0.21 mag between visits, 4.6σ",
+      "rule": "pass: 'Yes' (change above 5σ); partial: 'Possibly' (3–5σ); fail: 'No clear change'",
+      "note": ""
+    },
+    {
+      "category": "Negative control · motion",
+      "check": "R Draconis (does not move) gives no false mover",
+      "status": "pass",
+      "result": "no mover at the star; confirmed movers elsewhere in the field: 0",
+      "rule": "pass: no mover reported at the star (its catalogue motion is far below one pixel)",
+      "note": ""
+    },
+    {
+      "category": "Negative control · motion",
+      "check": "RW Aurigae (does not move) gives no false mover",
+      "status": "pass",
+      "result": "no mover at the star; confirmed movers elsewhere in the field: 0",
+      "rule": "pass: no mover reported at the star (its catalogue motion is far below one pixel)",
+      "note": ""
+    },
+    {
+      "category": "Negative control · motion",
+      "check": "No unexplained confirmed movers in the six fields",
+      "status": "pass",
+      "result": "0 confirmed movers besides the targets (barnard 0, epsindib 0, wise0855 0, rwaur 0, rdra 0, trappist1 0)",
+      "rule": "pass: no confirmed mover other than the known target; partial: some (they must then be checked one by one)",
+      "note": ""
+    },
+    {
+      "category": "Negative control · temperature",
+      "check": "Barnard's Star (saturates the detector) gets a red light",
+      "status": "pass",
+      "result": "light red: Too bright for SPHEREx: the star saturates the detector, so its brightness cannot be measured from these images",
+      "rule": "pass: red light, so no temperature is presented as reliable",
+      "note": ""
+    },
+    {
+      "category": "Negative control · temperature",
+      "check": "WISE 0855-0714 (too cold for SPHEREx to see its peak) gets a red light",
+      "status": "pass",
+      "result": "light red: The usable measurements cover too narrow a range of wavelengths to pin down a temperature; It only shows up beyond 3 um; A neighbouring source blended with the target in some images; those measurements were left out",
+      "rule": "pass: red light, so no temperature is presented as reliable",
+      "note": ""
+    },
+    {
+      "category": "Synthetic",
+      "check": "Madhava recovers known temperatures",
+      "status": "pass",
+      "result": "25 spectra; worst error 0.5%; all green",
+      "rule": "pass: every synthetic blackbody (600–3500 K, 3 % noise) recovered within 5 % and green",
+      "note": ""
+    },
+    {
+      "category": "Synthetic",
+      "check": "Series error stays inside Madhava's guaranteed bound",
+      "status": "pass",
+      "result": "6 terms: error 5.4e-05 ≤ bound 6.6e-05; 19 terms: error 5.8e-09 ≤ bound 6.6e-09; full precision (47 terms): error 1.1e-15, at the level of computer rounding",
+      "rule": "pass: |series − exactly summed series| ≤ bound (plus rounding) at every test point",
+      "note": ""
+    },
+    {
+      "category": "Synthetic · injected movers",
+      "check": "Fake movers at S/N 8 in real SPHEREx images",
+      "status": "partial",
+      "result": "83 of 120 confirmed (69%); median rate error 7.1%, direction 3°; by speed: 5″/yr 28/40, 10″/yr 31/40, 20″/yr 24/40",
+      "rule": "pass: at least 80% recovered as confirmed, median rate error ≤ 10%; partial: at least 50%",
+      "note": ""
+    },
+    {
+      "category": "Synthetic · injected movers",
+      "check": "Fake movers at S/N 15 in real SPHEREx images",
+      "status": "pass",
+      "result": "110 of 120 confirmed (92%); median rate error 5.5%, direction 2°; by speed: 5″/yr 40/40, 10″/yr 37/40, 20″/yr 33/40",
+      "rule": "pass: at least 80% recovered as confirmed, median rate error ≤ 10%; partial: at least 50%",
+      "note": ""
+    },
+    {
+      "category": "Synthetic · injected movers",
+      "check": "Fake movers at S/N 30 in real SPHEREx images",
+      "status": "pass",
+      "result": "113 of 120 confirmed (94%); median rate error 2.9%, direction 1°; by speed: 5″/yr 39/40, 10″/yr 38/40, 20″/yr 36/40",
+      "rule": "pass: at least 80% recovered as confirmed, median rate error ≤ 10%; partial: at least 50%",
+      "note": ""
+    },
+    {
+      "category": "Synthetic · injected movers",
+      "check": "Very red fake movers (only the two longest-wavelength detectors), S/N 15",
+      "status": "fail",
+      "result": "34 of 120 confirmed (28%); median rate error 7.6%; by field: epsindib 0/36, wise0855 0/24, rwaur 4/24, trappist1 30/36",
+      "rule": "pass: at least 80% recovered as confirmed, median rate error ≤ 10%; partial: at least 50%",
+      "note": "Diagnosis: a detector is trusted only if its still stars line up between visits. At the longest wavelengths these fields hold only one to three stars, and when one of them is a real mover (the target itself) the rule distrusts the whole detector, so a second mover cannot be confirmed. Making this rule work in sparse fields is our first next step."
+    }
+  ],
+  "injection": {
+    "fields_used": [
+      "epsindib",
+      "wise0855",
+      "rwaur",
+      "trappist1"
+    ],
+    "rates_arcsec_yr": [
+      5.0,
+      10.0,
+      20.0
+    ],
+    "pa_deg": [
+      30.0,
+      120.0,
+      210.0,
+      300.0
+    ],
+    "snrs": [
+      8.0,
+      15.0,
+      30.0
+    ],
+    "note": "Gaussian point sources (sigma 0.9 px) added to the frozen visit stacks, same S/N in every detector used; one fake mover at a time, at random quiet spots, in fields where at least four detectors line up well."
+  }
+}
