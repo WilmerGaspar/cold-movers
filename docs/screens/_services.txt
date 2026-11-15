@@ -1,4 +1,4 @@
-hips2fits: 404 text/html 4245 bytes 0.9s https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=CDS%2FP%2FallWISE%2Fcolor&width=480&height=480&fov=0.1&projection=TAN&coordsys=icrs&ra=133.7602&dec=-7.2436&format=jpg
+hips2fits: 404 text/html 4245 bytes 0.8s https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=CDS%2FP%2FallWISE%2Fcolor&width=480&height=480&fov=0.1&projection=TAN&coordsys=icrs&ra=133.7602&dec=-7.2436&format=jpg
 <!doctype html>
 <html lang="en">
 <head>
