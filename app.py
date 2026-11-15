@@ -179,6 +179,47 @@ with g2:
         "first look at any position.</div></div>",
         unsafe_allow_html=True,
     )
+
+
+@st.cache_data(show_spinner=False)
+def load_scoreboard():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "scoreboard.json")
+    if not os.path.exists(path):
+        return None
+    with open(path) as fh:
+        return json.load(fh)
+
+
+try:
+    sb = load_scoreboard()
+    if sb:
+        c = sb["counts"]
+        n_all = c["pass"] + c["partial"] + c["fail"]
+        st.markdown(
+            "<div class='cm-card' style='margin-top:10px'><b>How do we know it works? Validation scoreboard</b> "
+            f"<span style='margin-left:8px'>🟢 <b>{c['pass']}</b> pass · 🟡 <b>{c['partial']}</b> partial · "
+            f"🔴 <b>{c['fail']}</b> fail</span> <span class='cm-muted'>out of {n_all} checks</span>"
+            "<div class='cm-muted' style='margin-top:4px'>Positive controls (known movers, known temperatures, known "
+            "variables), negative controls (stars that do not move, objects SPHEREx cannot measure), synthetic "
+            "spectra, and fake movers injected into real SPHEREx images. Pass rules were fixed before the results; "
+            "partial and failed checks are shown too.</div></div>",
+            unsafe_allow_html=True,
+        )
+        with st.expander("See every check, its result and its rule"):
+            import pandas as pd
+
+            icon = {"pass": "🟢 pass", "partial": "🟡 partial", "fail": "🔴 fail"}
+            st.dataframe(pd.DataFrame([{"Status": icon[r["status"]], "Category": r["category"], "Check": r["check"],
+                                        "Result": r["result"], "Pass rule": r["rule"]} for r in sb["rows"]]),
+                         use_container_width=True, hide_index=True)
+            for r in sb["rows"]:
+                if r.get("note"):
+                    st.caption(f"**{r['check']}.** {r['note']}")
+            st.caption(f"Injected movers: {sb['injection']['note']} Fields used: "
+                       f"{', '.join(sb['injection']['fields_used'])}. Computed on GitHub Actions with the app's own "
+                       f"code (version {sb['app_version']}, {sb['generated_utc']} UTC).")
+except Exception:
+    pass
 st.write("")
 
 tab_obj, tab_coords, tab_name = st.tabs(["Challenge objects", "Coordinates", "Name"])
