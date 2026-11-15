@@ -23,12 +23,20 @@ rows, failures = [], 0
 def check(label, url, want_fits=False):
     global failures
     t = time.time()
-    try:
-        r = requests.get(url, headers=HEADERS, timeout=90, allow_redirects=True)
-        ok = r.status_code == 200 and (not want_fits or r.content[:6] == b"SIMPLE")
-        note = f"HTTP {r.status_code}, {len(r.content):,} bytes" + (", FITS" if r.content[:6] == b"SIMPLE" else "")
-    except Exception as exc:  # report every failure; nothing is hidden
-        ok, note = False, f"{type(exc).__name__}: {exc}"
+    tries = []
+    for attempt in range(4):  # IRSA answers 502/503 when busy; the app retries the same way
+        try:
+            r = requests.get(url, headers=HEADERS, timeout=90, allow_redirects=True)
+            ok = r.status_code == 200 and (not want_fits or r.content[:6] == b"SIMPLE")
+            note = f"HTTP {r.status_code}, {len(r.content):,} bytes" + (", FITS" if r.content[:6] == b"SIMPLE" else "")
+        except Exception as exc:  # report every failure; nothing is hidden
+            ok, note = False, f"{type(exc).__name__}: {exc}"
+        tries.append(note.split(",")[0])
+        if ok or "HTTP 4" in note:
+            break
+        time.sleep(10 * (attempt + 1))
+    if len(tries) > 1:
+        note += f" (attempts: {' → '.join(tries)})"
     failures += not ok
     rows.append((label, "OK" if ok else "FAILED", note, f"{time.time() - t:.1f} s", url))
 

@@ -64,6 +64,8 @@ MOVIE_MASK = int((1 << 6) | (1 << 9))
 
 
 def _quiet():
+    import astropy  # noqa: F401  (astropy must create its own logger first, or a later import fails)
+
     logging.getLogger("astropy").setLevel(logging.ERROR)
     warnings.filterwarnings("ignore", module="astropy")
     warnings.filterwarnings("ignore", message=".*SIP.*")
