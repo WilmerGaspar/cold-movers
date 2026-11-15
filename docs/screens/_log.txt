@@ -1,3 +1,4 @@
+deployed app shows no version number (older than 0.3.0)
 click test R Draconis: OK
 click test TRAPPIST-1: error Locator.click: Timeout 30000ms exceeded.
 Call log:
