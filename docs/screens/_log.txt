@@ -1,4 +1,4 @@
-deployed app shows version 0.4.6
+deployed app shows version 0.4.7
 click test R Draconis: OK
 click test TRAPPIST-1: OK
 click test Epsilon Indi B: OK
