@@ -3,4 +3,4 @@
 NASA Space Apps Challenge 2026, challenge "Planet X and SPHEREx", team Cold Movers.
 """
 
-__version__ = "0.4.7"
+__version__ = "0.4.8"

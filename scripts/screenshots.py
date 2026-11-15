@@ -47,7 +47,7 @@ with sync_playwright() as p:
         import coldmovers  # noqa: F401  (repository version, for comparison)
     except Exception:
         pass
-    for v in ("0.4.7", "0.4.6"):
+    for v in ("0.4.8", "0.4.7"):
         if fr.get_by_text(f"version {v}", exact=False).count():
             print(f"deployed app shows version {v}")
             break

@@ -108,3 +108,10 @@ def test_gaia_pause_after_timeout(monkeypatch):
     with pytest.raises(TimeoutError):  # paused: answers at once, without asking the archive
         atlas.gaia_field_timed(0.0, 0.0, 0.1, timeout_s=0.2)
     assert time.time() - t < 0.1 and len(calls) == 1
+
+
+def test_coin_phrase_is_the_right_geometry():
+    # 2 cm at 4.125 km spans 1 arcsec (0.02 / 4125 rad = 1.0 arcsec)
+    assert assistant.coin_phrase(1.0) == "the width of a 2 cm coin seen from 4.1 km away"
+    assert assistant.coin_phrase(11.1) == "the width of a 2 cm coin seen from 370 m away"
+    assert assistant.coin_phrase(0.0) == "" and assistant.coin_phrase(float("nan")) == ""

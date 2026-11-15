@@ -20,6 +20,15 @@ WIEN_UM_K = 2897.771955
 COIN_KM_PER_ARCSEC = 4.0
 
 
+def coin_phrase(arcsec: float) -> str:
+    """'the width of a 2 cm coin seen from 370 m away': an angle a person can picture."""
+    if not np.isfinite(arcsec) or arcsec <= 0:
+        return ""
+    metres = 0.02 / (arcsec * np.pi / 648000.0)
+    far = f"{metres / 1000:.1f} km" if metres >= 1000 else f"{round(metres, -1):.0f} m"
+    return f"the width of a 2 cm coin seen from {far} away"
+
+
 def mjd_to_date(mjd: float) -> str:
     return (datetime(1858, 11, 17) + timedelta(days=float(mjd))).strftime("%Y-%m-%d")
 
@@ -75,9 +84,7 @@ def explain(target, fit, real, free, lc_verdict, epochs) -> list:
         pred = motion["predicted_px"] * PIXEL_ARCSEC
         out.append(("🧭", f"Between {mjd_to_date(min(mjds))} and {mjd_to_date(max(mjds))} it moved {meas:.1f} "
                           f"arcseconds in the SPHEREx images, about {meas / PIXEL_ARCSEC:.1f} pixels (the cyan "
-                          f"arrow in the movie). The catalogue predicts {pred:.1f}. One arcsecond is a 2 cm coin "
-                          f"seen from about "
-                          f"{COIN_KM_PER_ARCSEC:.0f} km away."))
+                          f"arrow in the movie): {coin_phrase(meas)}. The catalogue predicts {pred:.1f}."))
     if free:
         n = len(free["detectors"])
         status = ("confirmed, because more than one detector sees the same motion" if free["confirmed"]

@@ -219,12 +219,18 @@ try:
             unsafe_allow_html=True,
         )
         with st.expander("See every check, its result and its rule"):
-            import pandas as pd
+            import html as _html
 
-            icon = {"pass": "🟢 pass", "partial": "🟡 partial", "fail": "🔴 fail"}
-            st.dataframe(pd.DataFrame([{"Status": icon[r["status"]], "Category": r["category"], "Check": r["check"],
-                                        "Result": r["result"], "Pass rule": r["rule"]} for r in sb["rows"]]),
-                         use_container_width=True, hide_index=True)
+            icon = {"pass": "🟢", "partial": "🟡", "fail": "🔴"}
+            st.markdown(
+                "".join(
+                    "<div style='padding:7px 0; border-bottom:1px solid #232b40'>"
+                    f"<b>{icon[r['status']]} {_html.escape(r['check'])}</b> "
+                    f"<span class='cm-muted'>· {_html.escape(r['category'])} · {r['status']}</span>"
+                    f"<div style='margin-top:2px'>{_html.escape(r['result'])}</div>"
+                    f"<div class='cm-muted' style='font-size:0.85em'>Rule: {_html.escape(r['rule'])}</div></div>"
+                    for r in sb["rows"]),
+                unsafe_allow_html=True)
             for r in sb["rows"]:
                 if r.get("note"):
                     st.caption(f"**{r['check']}.** {r['note']}")
@@ -233,6 +239,30 @@ try:
                        f"code (version {sb['app_version']}, {sb['generated_utc']} UTC).")
 except Exception as _exc:
     note_problem("validation scoreboard", _exc)
+with st.expander("📖 Words used on this page (glossary)"):
+    st.markdown(
+        "- **SPHEREx**: a NASA space telescope, launched in March 2025, that maps the whole sky every six months in "
+        "102 colours of infrared light, from 0.75 to 5 µm.\n"
+        "- **Visit**: SPHEREx comes back to the same patch of sky about every six months. All images from one pass "
+        "are stacked into one frame of the movie.\n"
+        "- **Detectors D1 to D6**: SPHEREx has six detector arrays, each for a range of infrared colours, from "
+        "0.75 µm (D1) to 5 µm (D6).\n"
+        "- **Arcsecond (″)**: 1/3600 of a degree. A 2 cm coin seen from 4 km away spans about one arcsecond; one "
+        "SPHEREx pixel spans 6.15″.\n"
+        "- **mas/yr**: thousandths of an arcsecond per year, how catalogues give the speed of a star across the sky.\n"
+        "- **Blackbody-equivalent temperature**: the temperature of an ideal glowing object (a blackbody) whose "
+        "infrared colours match the measured ones. Stars and brown dwarfs are not perfect blackbodies, so it is not "
+        "their true surface temperature.\n"
+        "- **Traffic light**: green, one blackbody describes the light well; yellow, usable but one blackbody does "
+        "not describe it well; red, SPHEREx cannot give a reliable temperature here (too bright, too cold, too faint "
+        "or too few colours), so no number is presented as reliable.\n"
+        "- **S/N (signal-to-noise)**: how many times brighter a source is than the noise around it.\n"
+        "- **σ (sigma)**: how many times larger a change is than its uncertainty; above 5σ is a strong result.\n"
+        "- **Magnitude**: the astronomers' brightness scale; a change of 0.1 magnitudes is about 10 %.\n"
+        "- **Found without catalogue / confirmed / candidate**: motion found only from the SPHEREx images, without "
+        "knowing where to look. Confirmed when at least two of the six detectors see the same motion; a candidate "
+        "is seen by one."
+    )
 st.write("")
 
 tab_obj, tab_coords, tab_name = st.tabs(["Challenge objects", "Coordinates", "Name"])
@@ -476,9 +506,10 @@ STATUS_ICON = {"pass": "🟢", "warn": "🟡", "fail": "🔴"}
 
 
 try:
-    def summary_card(title, big, small, color="#232b40"):
+    def summary_card(title, big, small, color="#232b40", icon=""):
         return (f"<div class='cm-card' style='border-left:5px solid {color}; min-height:128px'>"
-                f"<div class='cm-muted'>{title}</div><div class='cm-big' style='font-size:1.7rem'>{big}</div>"
+                f"<div class='cm-muted'><span style='font-size:1.25rem; margin-right:6px'>{icon}</span>{title}</div>"
+                f"<div class='cm-big' style='font-size:1.7rem'>{big}</div>"
                 f"<div class='cm-muted' style='margin-top:4px'>{small}</div></div>")
 
 
@@ -494,34 +525,40 @@ try:
     s1, s2, s3 = st.columns(3)
     motion = real.get("motion") if real else None
     if motion and target.total_pm_arcsec_per_year >= 0.5:
+        moved_as = motion["measured_px"] * checks.PIXEL_ARCSEC
         s1.markdown(summary_card(
-            "Does it move?", f"Yes · {motion['measured_px'] * checks.PIXEL_ARCSEC:.1f}″",
-            f"measured in the SPHEREx images (centroids near the predicted track) between the first and last "
-            f"visit; the catalogue predicts "
-            f"{motion['predicted_px'] * checks.PIXEL_ARCSEC:.1f}″" + FREE_NOTE, "#2fbf71"), unsafe_allow_html=True)
+            "Does it move?", f"Yes · {moved_as:.1f}″",
+            f"between the first and last visit, {assistant.coin_phrase(moved_as)}. Measured in the SPHEREx images "
+            f"(centroids near the predicted track); the catalogue predicts "
+            f"{motion['predicted_px'] * checks.PIXEL_ARCSEC:.1f}″" + FREE_NOTE, "#2fbf71", icon="🧭"),
+            unsafe_allow_html=True)
     elif target.total_pm_arcsec_per_year < 0.5:
         s1.markdown(summary_card(
             "Does it move?", "Too slowly to see",
             f"{target.total_pm_arcsec_per_year * 1000:.0f} milliarcsec per year: far below one SPHEREx pixel "
-            "over these visits"), unsafe_allow_html=True)
+            "over these visits", icon="🧭"), unsafe_allow_html=True)
     else:
-        s1.markdown(summary_card("Does it move?", "Not measured", "not enough clear detections to follow it"),
-                    unsafe_allow_html=True)
+        s1.markdown(summary_card("Does it move?", "Not measured", "not enough clear detections to follow it",
+                                 icon="🧭"), unsafe_allow_html=True)
 
     if np.isfinite(fit.temperature) and fit.light != "red":
         big_t, small_t = f"{fit.temperature:,.0f} K", madhava.REASON_TEXT.get(fit.reasons[0], "") if fit.reasons else ""
     else:
         big_t = "Too bright to measure" if "too_bright" in fit.reasons else "Not reliable"
         small_t = madhava.REASON_TEXT.get(fit.reasons[0], "") if fit.reasons else ""
-    s2.markdown(summary_card(f"How cold? (blackbody-equivalent) · {LIGHT_WORDS[fit.light]}", big_t, small_t.split(". ")[0].rstrip(".") + ".",
-                             LIGHT_COLORS[fit.light]), unsafe_allow_html=True)
+    small_t = small_t.split(". ")[0].rstrip(".") + "." if small_t else ""
+    if fit.light == "red" and {"too_bright", "narrow_coverage", "only_long_wavelengths"} & set(fit.reasons):
+        # A limit of the instrument, not a failure of the app: say so on the card itself.
+        small_t = "<b>Instrument limit, not an app error.</b> " + small_t.replace(" um", " µm")
+    s2.markdown(summary_card(f"How cold? (blackbody-equivalent) · {LIGHT_WORDS[fit.light]}", big_t, small_t,
+                             LIGHT_COLORS[fit.light], icon="🌡️"), unsafe_allow_html=True)
 
     if real:
         n_pass = sum(c["status"] == "pass" for c in real["checks"])
         icons = " ".join(f"{STATUS_ICON[c['status']]} {c['name']}" for c in real["checks"])
         color = "#2fbf71" if n_pass == len(real["checks"]) else ("#f2c94c" if n_pass >= 2 else "#eb5757")
-        s3.markdown(summary_card("Is it real?", f"{n_pass} of {len(real['checks'])} checks pass", icons, color),
-                    unsafe_allow_html=True)
+        s3.markdown(summary_card("Is it real?", f"{n_pass} of {len(real['checks'])} checks pass", icons, color,
+                                 icon="🔍"), unsafe_allow_html=True)
 
     try:
         bullets = assistant.explain(target, fit, real, FREE, lc["verdict"], epochs)
