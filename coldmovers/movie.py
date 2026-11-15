@@ -262,6 +262,39 @@ def render_frames(epochs, det: int, marker_pixels=None, title_fn=None, dpi: int 
     return pngs
 
 
+def render_sum(epochs, det: int, marker_pixels=None, track=None, layers=None, title="", dpi: int = 110):
+    """PNG of all visits of a detector added together (their mean), with the assistant layers."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    usable = [ep for ep in epochs if det in ep["stacks"]]
+    if not usable:
+        return None
+    with np.errstate(all="ignore"):
+        total = np.nanmean([ep["stacks"][det] for ep in usable], axis=0)
+    lo, hi = _stretch([total])
+    norm = np.arcsinh(np.clip((total - lo) / (hi - lo), 0, None) * 10) / np.arcsinh(10)
+    fig, ax = plt.subplots(figsize=(4.2, 4.6), dpi=dpi, facecolor=BG)
+    ax.imshow(np.nan_to_num(norm, nan=0.0), origin="lower", cmap="gray", vmin=0, vmax=1, interpolation="nearest")
+    xlim, ylim = ax.get_xlim(), ax.get_ylim()
+    _draw_layers(ax, plt, max(ep["mjd_mid"] for ep in usable), layers, marker_pixels, track, DARK)
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_title(title, fontsize=8, color=FG)
+    for spine in ax.spines.values():
+        spine.set_color("#232b40")
+    fig.tight_layout()
+    fig.text(0.99, 0.005, WATERMARK, ha="right", va="bottom", fontsize=6, color="#8a93a6")
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", facecolor=BG)
+    plt.close(fig)
+    return buf.getvalue()
+
+
 def render_difference(epochs, det: int, k: int, marker_pixels=None, track=None, layers=None, title="",
                       dpi: int = 110):
     """PNG of visit k minus the first visit for a detector, with the same layers (None if impossible)."""

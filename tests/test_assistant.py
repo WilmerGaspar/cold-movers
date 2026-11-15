@@ -72,6 +72,8 @@ def test_frames_and_difference_render_with_layers():
     assert len(pngs) == 3 and all(p[:4] == b"\x89PNG" for p in pngs)
     assert movie.render_difference(eps, 2, 2, lambda mjd: (15.0, 15.0), layers=layers)[:4] == b"\x89PNG"
     assert movie.render_difference(eps, 2, 0, lambda mjd: (15.0, 15.0)) is None
+    assert movie.render_sum(eps, 2, lambda mjd: (15.0, 15.0), layers=layers)[:4] == b"\x89PNG"
+    assert movie.render_sum(eps, 5) is None
 
 
 def test_external_calls_cannot_freeze_the_page():

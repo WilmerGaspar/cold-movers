@@ -46,6 +46,10 @@ for key in ALL_EXAMPLES:
             if at.exception or any("could not be shown" in str(w.value) for w in at.warning):
                 failed += 1
                 print(f"{key}: DIFFERENCE VIEW FAILED {[e.value for e in at.exception]}")
+            at.radio(key="view_mode").set_value("Sum of all visits").run()
+            if at.exception or any("could not be shown" in str(w.value) for w in at.warning):
+                failed += 1
+                print(f"{key}: SUM VIEW FAILED {[e.value for e in at.exception]}")
             print(f"{key}: OK  sections={heads}  errors={[e.value for e in at.error]}  warnings={[w.value for w in at.warning]}")
     except Exception:
         failed += 1

@@ -13,6 +13,8 @@ NASA Space Apps Challenge 2026 · Challenge: *Planet X and SPHEREx* · Team: Col
 
 *Images are real SPHEREx data processed by the app.*
 
+> **Tests, not discoveries.** Every result shown here is a test on known objects (the five challenge objects and TRAPPIST-1). Cold Movers claims no discovery; the same tools run on any coordinates you type, and the [validation scoreboard](docs/scoreboard.md) shows how well they work.
+
 Enter sky coordinates, a star name, or pick one of the five challenge objects. Cold Movers:
 
 1. asks NASA/IPAC IRSA for **every SPHEREx image covering that spot** (Data Release 1 + Quick Release 3),
@@ -21,7 +23,7 @@ Enter sky coordinates, a star name, or pick one of the five challenge objects. C
 4. runs the **Madhava engine**, a band-integrated Planck fit that gives a *blackbody-equivalent temperature* with an uncertainty and a **traffic light** that says how far to trust it,
 5. **finds what moves in the field without any catalogue**: every source is followed through the visits and a motion is fitted; a mover is *confirmed* only when two or more detectors agree,
 6. runs four **"Is it real?"** consistency checks (indicators, not confirmation of a discovery): seen again in another visit, clean pixels, positions consistent with the catalogue motion, and no blended neighbour,
-7. draws a **visual assistant** on the movie: the catalogue prediction, the position measured in each visit with the measured motion vector, a ring coloured by the consistency checks, and the movers found without any catalogue; a **difference view** subtracts the first visit from any later one,
+7. draws a **visual assistant** on the movie: the catalogue prediction, the position measured in each visit with the measured motion vector, a ring coloured by the consistency checks, and the movers found without any catalogue; a **difference view** subtracts the first visit from any later one, and a **sum view** adds all visits together (still faint sources stand out, movers smear along their path); the movers found can be **downloaded as CSV** with positions, motion and the Gaia check,
 8. explains **what you are looking at in plain words** ("it moved 11.1 arcseconds, about 1.8 pixels"; "it only shows up beyond 3 µm, so it is very cold"; "red light because it saturates the detector"), every sentence written from the measurements on the page.
 
 Every result can be shared as a link (`?object=wise0855` or `?ra=..&dec=..`) and downloaded as CSV or GIF.

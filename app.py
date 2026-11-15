@@ -202,7 +202,9 @@ try:
             "<div class='cm-muted' style='margin-top:4px'>Positive controls (known movers, known temperatures, known "
             "variables), negative controls (stars that do not move, objects SPHEREx cannot measure), synthetic "
             "spectra, and fake movers injected into real SPHEREx images. Pass rules were fixed before the results; "
-            "partial and failed checks are shown too.</div></div>",
+            "partial and failed checks are shown too.</div>"
+            "<div style='margin-top:6px'><b>Tests, not discoveries:</b> every result on this site is a test on known "
+            "objects. Cold Movers claims no discovery; the same tools run on any coordinates you type.</div></div>",
             unsafe_allow_html=True,
         )
         with st.expander("See every check, its result and its rule"):
@@ -610,10 +612,12 @@ try:
         options = available or [0]
         det = st.radio("Detector", options, index=options.index(best) if best in options else 0,
                        format_func=movie.detector_label)
-        view_mode = st.radio("View", ["Movie", "Difference from the first visit"], horizontal=True,
+        view_mode = st.radio("View", ["Movie", "Difference from the first visit", "Sum of all visits"],
+                             horizontal=True,
                              key="view_mode",
                              help="Difference: things that did not change cancel out; moving or varying things remain.")
-        show_diff = view_mode != "Movie"
+        show_diff = view_mode == "Difference from the first visit"
+        show_sum = view_mode == "Sum of all visits"
         layers_on = st.pills("Visual assistant", list(assistant.LAYERS), selection_mode="multi",
                              default=list(assistant.LAYERS), key="layers_on") or []
         layers = assistant.layers_for(real, found, layers_on)
@@ -651,6 +655,16 @@ try:
     with left:
         if not view.get("stacks"):
             st.warning("No images could be aligned for this position.")
+        elif show_sum:
+            png = movie.render_sum(eps_with_stacks(), det, marker, track=pipeline.track_points(marker, epochs),
+                                   layers=layers, title=f"Sum of all {len(usable_det)} visits · "
+                                                        f"{movie.detector_label(det)}")
+            if png is None:
+                st.info("No visits to add up for this detector.")
+            else:
+                st.image(png, use_container_width=True)
+                st.caption("All visits added together: faint sources that stay still become clearer, while anything "
+                           "that moves is smeared into a short streak or a row of dots along its path.")
         elif show_diff:
             if diff_k is None:
                 st.info("Only one visit so far for this detector, so there is nothing to subtract yet.")
@@ -872,6 +886,30 @@ try:
                 + (", ".join(unreliable) if unreliable else "none") + ". Visits from "
                 + f"{Time(first_mjd, format='mjd').iso[:10]} to {Time(last_mjd, format='mjd').iso[:10]}."
             )
+            if cands:
+                import pandas as pd
+
+                out_rows = []
+                for i, c in enumerate(cands):
+                    ra_m, dec_m = ref_wcs.wcs_pix2world(float(c["x"]), float(c["y"]), 0)
+                    out_rows.append({
+                        "id": f"#{i + 1}", "status": "confirmed" if c["confirmed"] else "candidate",
+                        "detectors": " ".join(map(str, c["detectors"])), "n_detectors": len(c["detectors"]),
+                        "rate_arcsec_per_yr": round(c["rate_arcsec_yr"], 3),
+                        "direction_deg_east_of_north": round(c["pa_deg"], 1),
+                        "detector_rate_spread_arcsec_per_yr": round(c.get("rate_spread_arcsec_yr", 0.0), 3),
+                        "significance_sigma": round(c["significance"], 1),
+                        "ra_deg": round(float(ra_m), 6), "dec_deg": round(float(dec_m), 6),
+                        "position_date": Time(c["t0_mjd"], format="mjd").iso[:10],
+                        "is_the_target": bool(np.hypot(c["x"] - tx, c["y"] - ty) <= 2.0),
+                        "gaia_check": gaia_note.get(i, "not checked"),
+                        "open_in_cold_movers": (f"https://cold-movers.streamlit.app/?ra={float(ra_m):.5f}"
+                                                f"&dec={float(dec_m):.5f}"),
+                    })
+                st.download_button(
+                    "Download the movers found (CSV)", pd.DataFrame(out_rows).to_csv(index=False).encode(),
+                    file_name=f"coldmovers_movers_{target.key}.csv", mime="text/csv",
+                    help="Position on the first visit, motion, detectors and the Gaia check, for use in other tools.")
     else:
         st.caption("No aligned images, so the search cannot run.")
 except Exception as _section_error:  # keep the rest of the page alive
