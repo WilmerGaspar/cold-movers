@@ -12,7 +12,7 @@ import os
 
 import numpy as np
 
-from . import checks, pipeline
+from . import checks, movers, pipeline
 from .references import PUBLISHED
 from .targets import ALL_EXAMPLES, EXTRAS, Target
 
@@ -58,6 +58,7 @@ def validate(precomputed_dir: str) -> list:
         real = checks.run_checks(rows, view["epochs"], stacks, marker)
         fit = pipeline.fit_rows(rows)
         motion = real.get("motion")
+        free = free_motion_of_target(view["epochs"], stacks, marker)
         table.append({
             "key": key,
             "name": target.name,
@@ -73,5 +74,26 @@ def validate(precomputed_dir: str) -> list:
             "published": PUBLISHED.get(key, {}).get("text", ""),
             "published_k": PUBLISHED.get(key, {}).get("teff_k"),
             "extra": key in EXTRAS,
+            "catalogue_rate": target.total_pm_arcsec_per_year,
+            "catalogue_pa": catalogue_pa(target),
+            "free_rate": free["rate_arcsec_yr"] if free else None,
+            "free_pa": free["pa_deg"] if free else None,
+            "free_status": ("confirmed" if free["confirmed"] else "candidate") if free else None,
+            "free_detectors": free["detectors"] if free else [],
         })
     return table
+
+
+def catalogue_pa(target) -> float:
+    """Position angle (degrees east of north) of the catalogue proper motion."""
+    return float(np.degrees(np.arctan2(target.pmra_masyr, target.pmdec_masyr)) % 360)
+
+
+def free_motion_of_target(epochs, stacks, marker, radius_px: float = 2.0):
+    """The catalogue-free mover found at the target's first-visit position, if any."""
+    res = movers.search_all(epochs, stacks)
+    if not epochs:
+        return None
+    x0, y0 = marker(min(ep["mjd_mid"] for ep in epochs))
+    near = [c for c in res["candidates"] if np.hypot(c["x"] - x0, c["y"] - y0) <= radius_px]
+    return near[0] if near else None

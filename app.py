@@ -14,7 +14,7 @@ import numpy as np
 import streamlit as st
 
 from coldmovers import __version__ as APP_VERSION
-from coldmovers import checks, madhava, movie, pipeline, variability
+from coldmovers import checks, madhava, movers, movie, pipeline, variability
 from coldmovers.references import PUBLISHED
 from coldmovers.targets import ALL_EXAMPLES, SHOWCASE, ServiceDown, Target, parse_coordinates, resolve_simbad
 
@@ -158,7 +158,8 @@ with g1:
         "<li><a href='#at-a-glance'>At a glance</a>: does it move, how cold is it, is it real; each answer can be "
         "audited in one click.</li>"
         "<li><a href='#the-sky'>The movie</a>: the circle and arrow show where it should be on each date; watch "
-        "whether a dot follows them while the background stays still.</li>"
+        "whether a dot follows them while the background stays still. <a href='#movers'>Section 2</a> finds "
+        "what moves with no catalogue at all.</li>"
         "<li><a href='#is-it-real'>Is it real?</a> and the traffic light: where the data cannot support a "
         "conclusion, the app says why.</li></ol></div>",
         unsafe_allow_html=True,
@@ -420,6 +421,14 @@ try:
                 f"<div class='cm-muted' style='margin-top:4px'>{small}</div></div>")
 
 
+    try:
+        from coldmovers.validation import free_motion_of_target
+
+        FREE = free_motion_of_target(epochs, view["stacks"], marker) if view.get("stacks") else None
+    except Exception:
+        FREE = None
+    FREE_NOTE = (f". Without the catalogue the app finds it moving {FREE['rate_arcsec_yr']:.1f}″/yr "
+                 f"({'confirmed' if FREE['confirmed'] else 'candidate'}; see section 2)") if FREE else ""
     s1, s2, s3 = st.columns(3)
     motion = real.get("motion") if real else None
     if motion and target.total_pm_arcsec_per_year >= 0.5:
@@ -427,7 +436,7 @@ try:
             "Does it move?", f"Yes · {motion['measured_px'] * checks.PIXEL_ARCSEC:.1f}″",
             f"measured in the SPHEREx images (centroids near the predicted track) between the first and last "
             f"visit; the catalogue predicts "
-            f"{motion['predicted_px'] * checks.PIXEL_ARCSEC:.1f}″", "#2fbf71"), unsafe_allow_html=True)
+            f"{motion['predicted_px'] * checks.PIXEL_ARCSEC:.1f}″" + FREE_NOTE, "#2fbf71"), unsafe_allow_html=True)
     elif target.total_pm_arcsec_per_year < 0.5:
         s1.markdown(summary_card(
             "Does it move?", "Too slowly to see",
@@ -455,6 +464,14 @@ try:
     with st.expander("How were these three answers calculated? (audit trail)"):
         from astropy.time import Time
 
+        def visit_file(mjd):
+            """A small cutout of one original SPHEREx image of this visit, served by NASA/IPAC IRSA."""
+            ep_rows = [r for r in rows if r.get("url") and abs(r["mjd"] - mjd) < 30 and r["inside"]]
+            if not ep_rows:
+                return None
+            r = min(ep_rows, key=lambda r: abs(r["mjd"] - mjd))
+            return f"{r['url']}?center={r['ra']:.6f},{r['dec']:.6f}d&size=0.05"
+
         a_mot, a_temp, a_real = st.tabs(["Motion", "Temperature", "Is it real?"])
         with a_mot:
             if real and real.get("positions"):
@@ -468,7 +485,10 @@ try:
                                         * checks.PIXEL_ARCSEC, 1) if np.isfinite(p["x"]) else None),
                     "Peak S/N": round(float(p["snr"]), 1) if np.isfinite(p["snr"]) else None,
                     "Used": "yes" if p["detected"] else "no (S/N < 5 or too far)",
-                } for p in real["positions"]]), use_container_width=True, hide_index=True)
+                    "Original SPHEREx image (IRSA)": visit_file(p["mjd"]),
+                } for p in real["positions"]]), use_container_width=True, hide_index=True,
+                    column_config={"Original SPHEREx image (IRSA)": st.column_config.LinkColumn(
+                        display_text="download FITS cutout")})
                 st.caption(f"Positions are flux-weighted centroids in the visit stacks of detector {real['detector']} "
                            "(the one where the target is brightest and not blended). Predicted positions come from "
                            f"{target.source}, propagated with the proper motion to each visit. 1 px = 6.15 arcsec.")
@@ -646,10 +666,117 @@ try:
 except Exception as _section_error:  # keep the rest of the page alive
     section_failed('the sky movie', _section_error)
 
+# ------------------------------------------------------------------ movers in the field
+try:
+    st.markdown("<div id='movers'></div>", unsafe_allow_html=True)
+    st.markdown("### 2 · What moves in this field? Found without any catalogue")
+    st.caption(
+        "Every point source in every visit is detected and followed from visit to visit; a straight-line motion "
+        "is fitted to its positions. No catalogue, proper motion or expected position is used. Because SPHEREx "
+        "images its six detectors at the same moments, a real mover must show the same motion in at least two "
+        "detectors to be called confirmed; one detector alone gives only a candidate."
+    )
+    if view.get("stacks"):
+        from astropy.time import Time
+
+        found = movers.search_all(epochs, view["stacks"])
+        cands = found["candidates"]
+        first_mjd = min(ep["mjd_mid"] for ep in epochs)
+        last_mjd = max(ep["mjd_mid"] for ep in epochs)
+        tx, ty = marker(first_mjd)
+
+        @st.cache_data(show_spinner=False, max_entries=32)
+        def gaia_for_movers(ra, dec, radius):
+            from coldmovers import atlas
+
+            return atlas.gaia_field(ra, dec, radius)
+
+        gaia_note = {}
+        if cands:
+            try:
+                from coldmovers import atlas
+
+                ra_c, dec_c = ref_wcs.wcs_pix2world(float(tx), float(ty), 0)
+                gstars = atlas.stars_at_year(
+                    [g for g in gaia_for_movers(round(float(ra_c), 5), round(float(dec_c), 5),
+                                                round(view["size_deg"] * 0.75, 4))],
+                    2000.0 + (first_mjd - 51544.5) / 365.25)
+                for i, c in enumerate(cands):
+                    best = None
+                    for g in gstars:
+                        gx, gy = ref_wcs.wcs_world2pix(g["ra"], g["dec"], 0)
+                        d = float(np.hypot(gx - c["x"], gy - c["y"]))
+                        if d <= 2.0 and (best is None or d < best[0]):
+                            best = (d, g)
+                    gaia_note[i] = (f"Gaia DR3 star, proper motion {np.hypot(best[1]['pmra'], best[1]['pmdec']) / 1000:.2f}″/yr"
+                                    if best else "no Gaia DR3 counterpart (too faint or too red for Gaia, like a cold "
+                                                 "brown dwarf, or not a star)")
+            except Exception:
+                gaia_note = {}
+
+        mv_left, mv_right = st.columns([3, 2])
+        with mv_left:
+            import matplotlib.pyplot as plt
+
+            det_show = cands[0]["detectors"][0] if cands else 0
+            last_ep = max((ep for ep in epochs if det_show in view["stacks"].get(ep["index"], {})),
+                          key=lambda ep: ep["mjd_mid"], default=None)
+            if last_ep is not None:
+                img = view["stacks"][last_ep["index"]][det_show]
+                v = img[np.isfinite(img)]
+                lo, hi = (np.percentile(v, [5, 99.7]) if v.size else (0, 1))
+                fig, ax = plt.subplots(figsize=(4.4, 4.6), dpi=110, facecolor="#0b0f1a")
+                ax.imshow(np.nan_to_num(np.arcsinh(np.clip((img - lo) / max(hi - lo, 1e-9), 0, None) * 10)),
+                          origin="lower", cmap="gray", interpolation="nearest")
+                for i, c in enumerate(cands[:6]):
+                    col = "#2fbf71" if c["confirmed"] else "#f2c94c"
+                    span = (last_mjd - first_mjd) / 365.25
+                    ex, ey = c["x"] + c["vx_px_yr"] * span * 3, c["y"] + c["vy_px_yr"] * span * 3
+                    ax.annotate("", xy=(ex, ey), xytext=(c["x"], c["y"]),
+                                arrowprops=dict(arrowstyle="-|>", color=col, lw=1.8))
+                    ax.text(c["x"] - 2.2, c["y"] - 2.2, f"#{i + 1}", color=col, fontsize=9, weight="bold")
+                ax.add_patch(plt.Circle((tx, ty), 3.0, fill=False, color="#ff5a36", lw=1.2, ls="--"))
+                ax.set_xticks([])
+                ax.set_yticks([])
+                ax.set_title(f"Last visit, {movie.detector_label(det_show)}\narrows: motion found, drawn 3× longer",
+                             color="#e8ecf4", fontsize=8)
+                fig.text(0.99, 0.005, movie.WATERMARK, ha="right", va="bottom", fontsize=6, color="#8a93a6")
+                fig.tight_layout()
+                st.pyplot(fig, use_container_width=True)
+        with mv_right:
+            if not cands:
+                st.markdown("<div class='cm-card'>Nothing in this field moves measurably between the visits.</div>",
+                            unsafe_allow_html=True)
+            for i, c in enumerate(cands[:6]):
+                is_target = bool(np.hypot(c["x"] - tx, c["y"] - ty) <= 2.0)
+                head = ("🟢 Confirmed mover" if c["confirmed"] else "🟡 Candidate (one detector only)")
+                cat = ""
+                if is_target and target.total_pm_arcsec_per_year > 0:
+                    cat_pa = float(np.degrees(np.arctan2(target.pmra_masyr, target.pmdec_masyr)) % 360)
+                    cat = (f"<br>This is <b>{target.name}</b>. Catalogue: {target.total_pm_arcsec_per_year:.2f}″/yr "
+                           f"towards {cat_pa:.0f}°.")
+                st.markdown(
+                    f"<div class='cm-card' style='margin-bottom:8px'><b>#{i + 1} · {head}</b><br>"
+                    f"{c['rate_arcsec_yr']:.2f}″ per year towards {c['pa_deg']:.0f}° (east of north) · "
+                    f"{c['significance']:.1f}σ · detectors {', '.join(map(str, c['detectors']))}"
+                    f"{cat}<div class='cm-muted' style='margin-top:4px'>{gaia_note.get(i, '')}</div></div>",
+                    unsafe_allow_html=True,
+                )
+            unreliable = [str(d) for d, x in found["per_detector"].items() if not x["reliable"] and x["n_sources"]]
+            st.caption(
+                "Detectors whose field could not be trusted (saturated halos, moving ghosts): "
+                + (", ".join(unreliable) if unreliable else "none") + ". Visits from "
+                + f"{Time(first_mjd, format='mjd').iso[:10]} to {Time(last_mjd, format='mjd').iso[:10]}."
+            )
+    else:
+        st.caption("No aligned images, so the search cannot run.")
+except Exception as _section_error:  # keep the rest of the page alive
+    section_failed("the mover search", _section_error)
+
 # ------------------------------------------------------------------ spectrum + Madhava
 try:
 
-    st.markdown("### 2 · Its light, and how cold it is")
+    st.markdown("### 3 · Its light, and how cold it is")
 
     c_plot, c_card = st.columns([3, 2])
     with c_plot:
@@ -766,7 +893,7 @@ except Exception as _section_error:  # keep the rest of the page alive
 # ------------------------------------------------------------------ does it change?
 try:
 
-    st.markdown("### 3 · Does it change? Brightness visit by visit")
+    st.markdown("### 4 · Does it change? Brightness visit by visit")
     v_plot, v_text = st.columns([3, 2])
     with v_text:
         st.markdown(f"<div class='cm-card'>{lc['verdict']['text']}</div>", unsafe_allow_html=True)
@@ -809,7 +936,7 @@ except Exception as _section_error:  # keep the rest of the page alive
 try:
 
     st.markdown("<div id='is-it-real'></div>", unsafe_allow_html=True)
-    st.markdown("### 4 · Is it real, or a ghost in the detector?")
+    st.markdown("### 5 · Is it real, or a ghost in the detector?")
     st.caption("Consistency checks: they tell you whether the data hang together, not whether a discovery is "
                "confirmed.")
     if real:
@@ -831,7 +958,7 @@ except Exception as _section_error:  # keep the rest of the page alive
 # ------------------------------------------------------------------ human scale
 try:
 
-    st.markdown("### 5 · On a human scale")
+    st.markdown("### 6 · On a human scale")
     h1, h2 = st.columns(2)
     with h1:
         if target.distance_pc:
@@ -867,7 +994,7 @@ except Exception as _section_error:  # keep the rest of the page alive
 # ------------------------------------------------------------------ data
 try:
 
-    st.markdown("### 6 · The data")
+    st.markdown("### 7 · The data")
     if rows:
         import pandas as pd
 
@@ -876,7 +1003,9 @@ try:
                 "soft_flag", "url"]
         df = df[[c for c in show if c in df.columns]]
         with st.expander(f"All {len(df)} measurements"):
-            st.dataframe(df, use_container_width=True, height=300)
+            st.dataframe(df, use_container_width=True, height=300,
+                         column_config={"url": st.column_config.LinkColumn("original SPHEREx file (IRSA)")})
+            st.caption("Every row links to the original SPHEREx image at NASA/IPAC IRSA from which it was measured.")
         st.download_button("Download measurements (CSV)", df.to_csv(index=False).encode(),
                            file_name=f"coldmovers_{target.key}.csv", mime="text/csv")
 

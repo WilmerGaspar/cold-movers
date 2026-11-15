@@ -89,8 +89,8 @@ with sync_playwright() as p:
         print("atlas screenshot saved")
     except Exception as exc:
         print("atlas screenshot failed:", exc)
-    for label, name in (("1 · The sky, visit by visit", "movie"), ("2 · Its light", "spectrum"),
-                        ("4 · Is it real", "is_it_real")):
+    for label, name in (("1 · The sky, visit by visit", "movie"), ("2 · What moves", "movers"),
+                        ("3 · Its light", "spectrum"), ("5 · Is it real", "is_it_real")):
         try:
             el = fr.get_by_text(label, exact=False).first
             el.scroll_into_view_if_needed()
