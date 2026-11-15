@@ -1,4 +1,8 @@
 click test R Draconis: OK
+click test TRAPPIST-1: error Locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for get_by_text("TRAPPIST-1 ·").first
+
 click test Epsilon Indi B: OK
 click test RW Aurigae: OK
 click test Barnard's Star: OK
