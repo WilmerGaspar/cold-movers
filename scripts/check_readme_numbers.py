@@ -1,0 +1,109 @@
+"""Check that the numbers quoted in README.md are the numbers the code produced.
+
+Every expected string below is built from a generated file (scoreboard, validation table, evidence records,
+benchmarks) or from running the code, never typed by hand. Prints a table; exit code 1 on any mismatch.
+"""
+
+import csv
+import json
+import os
+import re
+import subprocess
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+readme = open(os.path.join(ROOT, "README.md")).read()
+results, bad = [], 0
+
+
+def expect(what, text, source):
+    global bad
+    ok = text in readme
+    bad += not ok
+    results.append((what, text, source, "OK" if ok else "NOT IN README"))
+
+
+sb = json.load(open(os.path.join(ROOT, "data", "scoreboard.json")))
+c = sb["counts"]
+expect("Scoreboard counts", f"{c['pass']} pass · {c['partial']} partial · {c['fail']} fail ({sum(c.values())} checks)",
+       "data/scoreboard.json")
+for row in sb["rows"]:
+    m = re.match(r"(\d+) of (\d+) confirmed \((\d+)%\)", row["result"])
+    if m and "Very red" in row["check"]:
+        expect("Red movers confirmed", f"confirmed in {m.group(3)} % of cases", "data/scoreboard.json")
+    elif m:
+        snr = re.search(r"S/N (\d+)", row["check"]).group(1)
+        expect(f"Injected movers at S/N {snr}", f"{m.group(3)} %", "data/scoreboard.json")
+        if snr == "15":
+            med = re.search(r"median rate error ([\d.]+)%, direction (\d+)°", row["result"])
+            expect("S/N 15 median errors", f"median rate error {med.group(1)} %, direction {med.group(2)}°",
+                   "data/scoreboard.json")
+
+# Validation table: each object's row in the README must carry the generated values.
+val = {}
+for line in open(os.path.join(ROOT, "docs", "validation.md")):
+    cells = [x.strip() for x in line.strip().strip("|").split("|")]
+    if len(cells) == 7 and cells[0] not in ("Object", "---"):
+        val[cells[0].replace(" *(extra)*", "")] = cells
+readme_rows = {}
+for line in readme.splitlines():
+    cells = [x.strip() for x in line.strip().strip("|").split("|")]
+    if len(cells) == 7:
+        readme_rows[cells[0].replace(" *(extra)*", "").replace("−", "-")] = cells
+for name, cells in val.items():
+    row = readme_rows.get(name.replace("−", "-"))
+    if row is None:
+        bad += 1
+        results.append((f"{name}: validation row", "(row)", "docs/validation.md", "NOT IN README"))
+        continue
+    for i, label in ((1, "images / visits"), (2, "moved"), (4, "catalogue motion")):
+        want = cells[i].split(",")[0]
+        ok = want in row[i]
+        bad += not ok
+        results.append((f"{name}: {label}", want, "docs/validation.md", "OK" if ok else f"README has {row[i]!r}"))
+    m = re.match(r"([\d.]+″/yr towards \d+°)", cells[3])
+    if m:
+        ok = m.group(1) in row[3]
+        bad += not ok
+        results.append((f"{name}: found with no catalogue", m.group(1), "docs/validation.md",
+                        "OK" if ok else f"README has {row[3]!r}"))
+    t = re.search(r"([\d,]+ K)", cells[5])
+    if t:
+        ok = t.group(1) in row[5]
+        bad += not ok
+        results.append((f"{name}: temperature", t.group(1), "docs/validation.md", "OK" if ok else f"README has {row[5]!r}"))
+
+rec = {r["key"]: r for r in csv.DictReader(open(os.path.join(ROOT, "docs", "validation_records.csv")))}
+b = rec["barnard"]
+expect("Barnard's Star trajectory", f"{b['trajectory_motion_arcsec_yr']} ± {b['trajectory_err_arcsec_yr']}″ per year",
+       "docs/validation_records.csv")
+expect("Barnard's Star trajectory χ²", f"reduced χ² of {b['trajectory_chi2_red']}", "docs/validation_records.csv")
+
+before = json.load(open(os.path.join(ROOT, "docs", "benchmark_injection_before.json")))["by_snr_core"]["15.0"]
+after = json.load(open(os.path.join(ROOT, "docs", "benchmark_injection.json")))["by_snr_core"]["15.0"]
+expect("Benchmark precision before", f"precision {before['precision']:.2f}", "docs/benchmark_injection_before.json")
+expect("Benchmark precision after", f"precision {after['precision']:.2f}", "docs/benchmark_injection.json")
+expect("Benchmark recall", f"recall {before['recall']:.2f} → {after['recall']:.2f}", "benchmark JSON files")
+trials = json.load(open(os.path.join(ROOT, "docs", "benchmark_injection.json")))["trials"]
+expect("Benchmark size", f"{trials:,} trials", "docs/benchmark_injection.json")
+holdout = os.path.join(ROOT, "docs", "benchmark_holdout_A.json")
+if os.path.exists(holdout):
+    h = json.load(open(holdout))["headline_snr15_core"]
+    expect("Held-out precision (set A)", f"precision {h['precision']:.2f}", "docs/benchmark_holdout_A.json")
+    expect("Held-out recall (set A)", f"recall {h['recall']:.2f}", "docs/benchmark_holdout_A.json")
+
+out = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "madhava_correction_check.py")],
+                     capture_output=True, text=True).stdout
+m = re.search(r"(\d+)× to (\d+)×", out)
+expect("Madhava correction improvement", f"{m.group(1)} to {m.group(2)} times smaller", "scripts/madhava_correction_check.py")
+n_tests = subprocess.run([sys.executable, "-m", "pytest", "--collect-only", "-q", os.path.join(ROOT, "tests")],
+                         capture_output=True, text=True, cwd=ROOT).stdout
+m = re.search(r"(\d+) tests? collected", n_tests)
+if m:
+    expect("Number of automated tests", f"{m.group(1)} automated tests", "pytest --collect-only")
+
+print("| Claim | Expected text | From | Result |\n|---|---|---|---|")
+for r in results:
+    print("| " + " | ".join(r) + " |")
+print(f"\n{len(results) - bad} of {len(results)} README numbers match the generated results.")
+sys.exit(1 if bad else 0)

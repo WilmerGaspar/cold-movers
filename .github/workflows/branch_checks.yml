@@ -1,0 +1,157 @@
+name: branch checks (no commits)
+
+# Runs only on the global-scientific-upgrade branch. Read-only: it never commits or pushes, so main is
+# never touched. Everything it produces is kept as a downloadable artifact of the run.
+on:
+  workflow_dispatch:
+  push:
+    branches: [global-scientific-upgrade]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash  # -eo pipefail: a failing step stays failed even when piped into tee
+
+jobs:
+  from-scratch:
+    # A fresh machine, no cache: install exactly as the README says, then run everything.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install as in the README
+        run: pip install -r requirements.txt pytest
+      - name: Dependency consistency
+        run: pip check
+      - name: Unit tests
+        run: python -m pytest -q tests 2>&1 | tee tests.txt
+      - name: Frozen results open
+        run: python scripts/check_results.py
+      - name: README numbers match the generated results
+        run: python scripts/check_readme_numbers.py | tee readme_numbers.md
+      - name: The whole app, headless, for every example
+        run: python -u scripts/smoke_app.py 2>&1 | tee smoke.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: from-scratch
+          path: |
+            tests.txt
+            readme_numbers.md
+            smoke.txt
+
+  reproduce:
+    # Regenerate every published result with the code and compare with the committed files.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Keep the committed results
+        run: mkdir committed && cp data/scoreboard.json docs/scoreboard.md docs/validation.md docs/validation_records.md docs/validation_records.csv docs/benchmark_injection.json committed/ && (cp docs/benchmark_holdout_A.json committed/ || true)
+      - name: Scoreboard
+        run: python -u scripts/scoreboard.py > scoreboard_log.txt
+      - name: Validation table and evidence records
+        run: python -u scripts/validation_report.py > validation_log.txt
+      - name: Development benchmark (3,300 trials, seed 2026)
+        run: python -u scripts/benchmark_injection.py | tee benchmark_log.txt
+      - name: Held-out set A (pre-registered, seed 20261115)
+        run: python -u scripts/benchmark_holdout.py --label A | tee holdout_A_log.txt
+      - name: Compare regenerated with committed
+        run: |
+          python - <<'EOF' | tee reproduce.md
+          import json, os
+          VOLATILE = {"generated_utc", "seconds", "app_version"}
+          def clean(x):
+              if isinstance(x, dict):
+                  return {k: clean(v) for k, v in x.items() if k not in VOLATILE}
+              if isinstance(x, list):
+                  return [clean(v) for v in x]
+              return x
+          pairs = [("data/scoreboard.json", "committed/scoreboard.json"), ("docs/scoreboard.md", "committed/scoreboard.md"),
+                   ("docs/validation.md", "committed/validation.md"), ("docs/validation_records.md", "committed/validation_records.md"),
+                   ("docs/validation_records.csv", "committed/validation_records.csv"),
+                   ("docs/benchmark_injection.json", "committed/benchmark_injection.json"),
+                   ("docs/benchmark_holdout_A.json", "committed/benchmark_holdout_A.json")]
+          print("| File | Regenerated equals committed? |\n|---|---|")
+          for new, old in pairs:
+              if not os.path.exists(old):
+                  print(f"| {new} | no committed copy to compare |"); continue
+              if new.endswith(".json"):
+                  same = clean(json.load(open(new))) == clean(json.load(open(old)))
+              else:
+                  strip = lambda s: [l for l in s.splitlines() if "version 0." not in l and "Code version" not in l and "code_version" not in l]
+                  a, b = open(new).read(), open(old).read()
+                  same = a == b or (new.endswith(".md") and strip(a) == strip(b))
+                  if new.endswith(".csv") and not same:
+                      import csv
+                      ra = [{k: v for k, v in r.items() if k != "code_version"} for r in csv.DictReader(open(new))]
+                      rb = [{k: v for k, v in r.items() if k != "code_version"} for r in csv.DictReader(open(old))]
+                      same = ra == rb
+              print(f"| {new} | {'yes' if same else 'NO: differs'} |")
+          EOF
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reproduce
+          path: |
+            reproduce.md
+            data/scoreboard.json
+            docs/scoreboard.md
+            docs/validation.md
+            docs/validation_records.md
+            docs/validation_records.csv
+            docs/benchmark_injection.json
+            docs/benchmark_holdout_A.json
+            scoreboard_log.txt
+            validation_log.txt
+            benchmark_log.txt
+            holdout_A_log.txt
+
+  irsa-links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests==2.34.2
+      - run: python -u scripts/check_irsa_links.py | tee irsa_links.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: irsa-links
+          path: irsa_links.md
+
+  holdout-new-fields:
+    # Set B of the pre-registered evaluation: four SPHEREx fields never used before.
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Download the four held-out fields from IRSA
+        run: python -u scripts/fetch_holdout_fields.py holdout_fields 2>&1 | tee fetch_log.txt
+      - name: Held-out set B
+        run: python -u scripts/benchmark_holdout.py --fields-dir holdout_fields --label B --out benchmark_holdout_B.json | tee holdout_B_log.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: holdout-B
+          path: |
+            fetch_log.txt
+            holdout_B_log.txt
+            benchmark_holdout_B.json
+            holdout_fields/*/result.json

@@ -311,7 +311,7 @@ def blind_trial(epochs, stacks, baseline, x0, y0, rate_arcsec_yr, pa_deg, snr, d
                 img = img + _gauss(img.shape, x0 + vx * t, y0 + vy * t, snr * sd)
             new[ep["index"]][d] = img
     found = movers.search_all(epochs, new)
-    hit, fps = None, 0
+    hit, fps, fp_xy = None, 0, []
     for c in found["candidates"]:
         dt = (c["t0_mjd"] - t0) / 365.25
         d_inj = math.hypot(c["x"] - (x0 + vx * dt), c["y"] - (y0 + vy * dt))
@@ -320,7 +320,9 @@ def blind_trial(epochs, stacks, baseline, x0, y0, rate_arcsec_yr, pa_deg, snr, d
             continue
         if c["confirmed"] and not any(math.hypot(c["x"] - b["x"], c["y"] - b["y"]) <= 2.0 for b in baseline):
             fps += 1
-    out = {"found": hit is not None, "confirmed": bool(hit and hit[1]["confirmed"]), "false_confirmed": fps}
+            fp_xy.append((round(float(c["x"]), 1), round(float(c["y"]), 1)))
+    out = {"found": hit is not None, "confirmed": bool(hit and hit[1]["confirmed"]), "false_confirmed": fps,
+           "false_positions": fp_xy}  # where each false confirmation sat (first visit, pixels)
     if hit:
         c = hit[1]
         out.update(rate_err=(c["rate_arcsec_yr"] - rate_arcsec_yr) / rate_arcsec_yr,
