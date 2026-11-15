@@ -794,8 +794,11 @@ try:
                     else:
                         gaia_note[i] = ("no Gaia DR3 counterpart (too faint or too red for Gaia, like a cold "
                                         "brown dwarf, or not a star)")
-            except Exception:
+            except Exception as exc:
                 gaia_note = {}
+                st.caption(f"The ESA Gaia archive is not answering right now ({type(exc).__name__}), so the check "
+                           "against Gaia DR3 stars is skipped; the motion measured in the SPHEREx images is not "
+                           "affected. It is tried again in a few minutes.")
 
         mv_left, mv_right = st.columns([3, 2])
         with mv_left:

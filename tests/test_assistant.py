@@ -88,3 +88,21 @@ def test_external_calls_cannot_freeze_the_page():
     assert time.time() - t < 2.0
     with pytest.raises(ValueError):
         atlas.call_with_timeout(lambda: int("x"), 2.0)
+
+
+def test_gaia_pause_after_timeout(monkeypatch):
+    import time
+
+    import pytest
+
+    from coldmovers import atlas
+
+    calls = []
+    monkeypatch.setattr(atlas, "gaia_field", lambda *a: calls.append(1) or time.sleep(1.0))
+    monkeypatch.setattr(atlas, "_GAIA_PAUSED_UNTIL", 0.0)
+    with pytest.raises(TimeoutError):
+        atlas.gaia_field_timed(0.0, 0.0, 0.1, timeout_s=0.2)
+    t = time.time()
+    with pytest.raises(TimeoutError):  # paused: answers at once, without asking the archive
+        atlas.gaia_field_timed(0.0, 0.0, 0.1, timeout_s=0.2)
+    assert time.time() - t < 0.1 and len(calls) == 1

@@ -36,10 +36,27 @@ def fetch_allwise(ra_deg: float, dec_deg: float, fov_deg: float, size: int = 480
     return img[::-1]  # first row at the bottom, like the sky coordinates
 
 
+_GAIA_PAUSED_UNTIL = 0.0
+GAIA_PAUSE_S = 300.0
+
+
 def gaia_field_timed(ra_deg: float, dec_deg: float, radius_deg: float, timeout_s: float = 12.0,
                      max_rows: int = 400) -> list:
-    """gaia_field with a time limit (TimeoutError instead of a frozen page)."""
-    return call_with_timeout(gaia_field, timeout_s, ra_deg, dec_deg, radius_deg, max_rows)
+    """gaia_field with a time limit (TimeoutError instead of a frozen page).
+
+    After one timeout the archive is not asked again for a few minutes, so every page
+    stays fast while it is down.
+    """
+    import time
+
+    global _GAIA_PAUSED_UNTIL
+    if time.time() < _GAIA_PAUSED_UNTIL:
+        raise TimeoutError("the ESA Gaia archive stopped answering a few minutes ago")
+    try:
+        return call_with_timeout(gaia_field, timeout_s, ra_deg, dec_deg, radius_deg, max_rows)
+    except TimeoutError:
+        _GAIA_PAUSED_UNTIL = time.time() + GAIA_PAUSE_S
+        raise
 
 
 def gaia_field(ra_deg: float, dec_deg: float, radius_deg: float, max_rows: int = 400) -> list:
