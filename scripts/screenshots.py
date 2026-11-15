@@ -44,6 +44,16 @@ with sync_playwright() as p:
     page = browser.new_page(viewport={"width": 1366, "height": 900})
     fr = open_app(page, "?object=wise0855")
     page.screenshot(path=os.path.join(OUT, "desktop_top.png"))
+    try:
+        import coldmovers  # noqa: F401  (repository version, for comparison)
+    except Exception:
+        pass
+    for v in ("0.3.0", "0.2.0"):
+        if fr.get_by_text(f"version {v}", exact=False).count():
+            print(f"deployed app shows version {v}")
+            break
+    else:
+        print("deployed app shows no version number (older than 0.3.0)")
     # Click test: switch objects several times in a row; each click must load the new object.
     for name in ("R Draconis", "TRAPPIST-1", "Epsilon Indi B", "RW Aurigae", "Barnard's Star"):
         try:

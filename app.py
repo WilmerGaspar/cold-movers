@@ -13,6 +13,7 @@ import os
 import numpy as np
 import streamlit as st
 
+from coldmovers import __version__ as APP_VERSION
 from coldmovers import checks, madhava, movie, pipeline, variability
 from coldmovers.references import PUBLISHED
 from coldmovers.targets import ALL_EXAMPLES, SHOWCASE, ServiceDown, Target, parse_coordinates, resolve_simbad
@@ -116,8 +117,8 @@ st.markdown(
     "and fit its infrared light with a blackbody to estimate how cold it is (a blackbody-equivalent "
     "temperature, with an uncertainty and a warning when it should not be trusted)."
 )
-st.caption("Team Cold Movers (Honduras) · NASA Space Apps 2026 · built with AI-assisted code (Claude, Anthropic); "
-           "see the AI note at the bottom. Not an official NASA product.")
+st.caption(f"Team Cold Movers (Honduras) · NASA Space Apps 2026 · version {APP_VERSION} · built with AI-assisted "
+           "code (Claude, Anthropic); see the AI note at the bottom. Not an official NASA product.")
 
 
 @st.cache_data(show_spinner=False)

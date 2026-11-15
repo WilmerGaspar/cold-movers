@@ -5,4 +5,4 @@ Code written with AI assistance (Claude, Anthropic) under the team's direction.
 See README.md, section "AI use".
 """
 
-__version__ = "0.1.0"
+__version__ = "0.3.0"
