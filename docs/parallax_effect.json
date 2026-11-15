@@ -1,0 +1,68 @@
+{
+ "barnard": {
+  "parallax_mas": 546.975939730948,
+  "visits": 6,
+  "span_yr": 1.071,
+  "max_shift_arcsec": 1.093,
+  "bias_arcsec_yr": 0.108,
+  "bias_east_north": [
+   0.103,
+   0.033
+  ]
+ },
+ "epsindib": {
+  "parallax_mas": 270.6580324694526,
+  "visits": 4,
+  "span_yr": 1.412,
+  "max_shift_arcsec": 0.522,
+  "bias_arcsec_yr": 0.186,
+  "bias_east_north": [
+   -0.142,
+   -0.12
+  ]
+ },
+ "rdra": {
+  "parallax_mas": 1.2509180143740992,
+  "visits": 3,
+  "span_yr": 0.999,
+  "max_shift_arcsec": 0.002,
+  "bias_arcsec_yr": 0.0,
+  "bias_east_north": [
+   -0.0,
+   0.0
+  ]
+ },
+ "rwaur": {
+  "parallax_mas": 6.406249329219477,
+  "visits": 3,
+  "span_yr": 1.008,
+  "max_shift_arcsec": 0.013,
+  "bias_arcsec_yr": 0.0,
+  "bias_east_north": [
+   0.0,
+   0.0
+  ]
+ },
+ "trappist1": {
+  "parallax_mas": 80.21231612635748,
+  "visits": 3,
+  "span_yr": 0.999,
+  "max_shift_arcsec": 0.16,
+  "bias_arcsec_yr": 0.001,
+  "bias_east_north": [
+   0.0,
+   0.0
+  ]
+ },
+ "wise0855": {
+  "parallax_mas": 439.0,
+  "visits": 4,
+  "span_yr": 0.988,
+  "max_shift_arcsec": 0.877,
+  "bias_arcsec_yr": 0.103,
+  "bias_east_north": [
+   0.087,
+   -0.055
+  ]
+ }
+}

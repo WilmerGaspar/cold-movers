@@ -56,7 +56,12 @@ def validate(precomputed_dir: str) -> list:
         real = checks.run_checks(rows, view["epochs"], stacks, marker)
         fit = pipeline.fit_rows(rows)
         motion = real.get("motion")
-        free = free_motion_of_target(view["epochs"], stacks, marker)
+        found = movers.search_all(view["epochs"], stacks)
+        free = free_motion_from(found, view["epochs"], marker)
+        n_reliable = sum(bool(d["reliable"]) for d in found["per_detector"].values())
+        span_yr = (max(ep["mjd_mid"] for ep in view["epochs"]) - min(ep["mjd_mid"] for ep in view["epochs"])) / 365.25
+        m_verdict, m_why = motion_verdict(free, n_reliable, target.total_pm_arcsec_per_year, span_yr)
+        t_verdict, t_why = temperature_verdict(fit.light)
         table.append({
             "key": key,
             "name": target.name,
@@ -92,8 +97,49 @@ def validate(precomputed_dir: str) -> list:
             "last_date": assistant.mjd_to_date(max(ep["mjd_mid"] for ep in view["epochs"])),
             "checks": {c["name"]: c["status"] for c in real["checks"]},
             "position_source": getattr(target, "source", ""),
+            "reliable_detectors": n_reliable,
+            "span_years": span_yr,
+            "motion_verdict": m_verdict, "motion_verdict_why": m_why,
+            "temperature_verdict": t_verdict, "temperature_verdict_why": t_why,
         })
     return table
+
+
+# Smallest shift the blind search can confirm: two detectors at about 3.5 sigma each (combined 5), with the
+# 0.17 px shift uncertainty of a bright source (sqrt(2) x 0.12 px). The benchmarks agree: 2"/yr over a year is
+# almost never recovered, 5"/yr about 40 % of the time at S/N 15. It words the NOT DETECTED verdict only.
+DETECTION_LIMIT_PX = 0.6
+
+
+def motion_verdict(free, n_reliable: int, catalogue_rate: float, span_yr: float):
+    """CONFIRMED / CANDIDATE / NOT DETECTED / INCONCLUSIVE for the motion of the target, and why.
+
+    CONFIRMED needs the catalogue-free search to see the same motion in two or more trusted detectors with a
+    combined significance of 5 or more, and no brighter mover close enough to pull it. Anything less is a
+    CANDIDATE. With fewer than two trusted detectors nothing can be confirmed or ruled out: INCONCLUSIVE.
+    """
+    limit = DETECTION_LIMIT_PX * checks.PIXEL_ARCSEC / max(span_yr, 1e-6)
+    if free and free.get("confirmed"):
+        return "CONFIRMED", f"same motion in {len(free['detectors'])} trusted detectors, combined significance " \
+                            f"{free['significance']:.1f}"
+    if free:
+        why = ("a brighter mover passes close enough to pull its centroid" if free.get("pulled_by_neighbour")
+               else f"seen in {len(free['detectors'])} detector(s) only, combined significance {free['significance']:.1f}")
+        return "CANDIDATE", why
+    if n_reliable < 2:
+        return "INCONCLUSIVE", f"only {n_reliable} of 6 detectors line up well enough to be trusted"
+    if catalogue_rate * span_yr / checks.PIXEL_ARCSEC < DETECTION_LIMIT_PX:
+        return "NOT DETECTED", (f"no motion found; the catalogue motion ({catalogue_rate:.2f}″/yr) is below what "
+                                f"these visits can confirm (about {limit:.0f}″/yr), as expected")
+    return "NOT DETECTED", f"no motion found although about {limit:.0f}″/yr or more should be detectable: a miss"
+
+
+def temperature_verdict(light: str):
+    """MEASURED / MEASURED WITH CAVEATS / INCONCLUSIVE for the blackbody-equivalent temperature."""
+    return {"green": ("MEASURED", "one blackbody fits and its peak is inside SPHEREx's range"),
+            "yellow": ("MEASURED WITH CAVEATS", "a blackbody-equivalent value only: one blackbody does not describe "
+                                                "this light, or its peak is outside SPHEREx's range"),
+            }.get(light, ("INCONCLUSIVE", "no reliable temperature: saturated, too faint or too narrow a range"))
 
 
 def catalogue_pa(target) -> float:

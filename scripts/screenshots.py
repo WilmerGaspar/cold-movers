@@ -47,7 +47,7 @@ with sync_playwright() as p:
         import coldmovers  # noqa: F401  (repository version, for comparison)
     except Exception:
         pass
-    for v in ("0.5.0", "0.4.9"):
+    for v in ("0.6.0", "0.5.0", "0.4.9"):
         if fr.get_by_text(f"version {v}", exact=False).count():
             print(f"deployed app shows version {v}")
             break
@@ -70,7 +70,8 @@ with sync_playwright() as p:
     fr = open_app(page, "?object=epsindib")
     for text, what in (("Validation scoreboard", "scoreboard"), ("What am I looking at?", "plain-words panel"),
                        ("of 6 detectors see the same motion", "detectors that confirm"),
-                       ("Visual assistant", "visual-assistant layers")):
+                       ("Visual assistant", "visual-assistant layers"),
+                       ("For evaluators: the science on one page", "evaluator summary")):
         print(f"live check {what}: {'OK' if fr.get_by_text(text, exact=False).count() else 'MISSING'}")
     try:
         el = fr.get_by_text("What am I looking at?", exact=False).first

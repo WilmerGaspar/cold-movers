@@ -1,0 +1,44 @@
+name: held-out set B (new SPHEREx fields, no commits)
+
+# Set B of the pre-registered evaluation (evidence/HOLDOUT_PREREGISTRATION.md): four SPHEREx fields never
+# used before. Read-only, branch only; results are kept as a downloadable artifact.
+on:
+  workflow_dispatch:
+  push:
+    branches: [global-scientific-upgrade]
+    paths:
+      - "scripts/fetch_holdout_fields.py"
+      - "scripts/benchmark_holdout.py"
+      - ".github/workflows/holdout_b.yml"
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  holdout-new-fields:
+    # Set B of the pre-registered evaluation: four SPHEREx fields never used before.
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Download the four held-out fields from IRSA
+        run: python -u scripts/fetch_holdout_fields.py holdout_fields 2>&1 | tee fetch_log.txt
+      - name: Held-out set B
+        run: python -u scripts/benchmark_holdout.py --fields-dir holdout_fields --label B --out benchmark_holdout_B.json | tee holdout_B_log.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: holdout-B
+          path: |
+            fetch_log.txt
+            holdout_B_log.txt
+            benchmark_holdout_B.json
+            holdout_fields/*/result.json
