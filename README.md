@@ -44,12 +44,15 @@ NASA Space Apps Challenge 2026 · Challenge: *Planet X and SPHEREx* · Team: Col
 |---|---|---|---|---|---|---|---|
 | Development (3,300 trials, seed 2026), S/N 15 | 396 | 153 | 243 | 3 | 0.98 (0.94–0.99) | 0.39 (0.34–0.44) | 0.55 |
 | Held-out A (seed 20261115, new spots and motions, same six fields), S/N 15 | 173 | 69 | 104 | 1 | 0.99 (0.92–1.00) | 0.40 (0.33–0.47) | 0.57 |
+| Held-out B (two new SPHEREx fields), S/N 15 | 60 | 43 | 17 | 0 | 1.00 (0.92–1.00) | 0.72 (0.59–0.81) | 0.83 |
 | Development, S/N 30 | 396 | 170 | 226 | 3 | 0.98 (0.95–0.99) | 0.43 (0.38–0.48) | 0.60 |
 | Held-out A, S/N 30 | 173 | 79 | 94 | 6 | 0.93 (0.85–0.97) | 0.46 (0.38–0.53) | 0.61 |
+| Held-out B, S/N 30 | 60 | 51 | 9 | 0 | 1.00 (0.93–1.00) | 0.85 (0.74–0.92) | 0.92 |
 | Development, S/N 8 | 396 | 107 | 289 | 1 | 0.99 (0.95–1.00) | 0.27 (0.23–0.32) | 0.42 |
 | Held-out A, S/N 8 | 173 | 46 | 127 | 2 | 0.96 (0.86–0.99) | 0.27 (0.21–0.34) | 0.42 |
+| Held-out B, S/N 8 | 60 | 33 | 27 | 0 | 1.00 (0.90–1.00) | 0.55 (0.42–0.67) | 0.71 |
 
-At S/N 15 the held-out set agrees with the development set (held-out precision 0.99, recall 0.40). At S/N 30 the held-out precision is lower: a bright mover passing a star can still pull the star's centroid enough for the star to be confirmed when the mover itself is not tracked. Breakdowns by speed, environment (quiet, near a star, crowded), field and very red movers are in the [final validation report](evidence/FINAL_VALIDATION_REPORT.md).
+At S/N 15 the held-out set agrees with the development set (held-out precision 0.99, recall 0.40). At S/N 30 the held-out precision is lower: a bright mover passing a star can still pull the star's centroid enough for the star to be confirmed when the mover itself is not tracked. Set B used two SPHEREx fields never seen before, in the Galactic plane (l = 30°) and at high latitude (l = 90°, b = +45°). The two ecliptic-pole fields of the pre-registration could not be downloaded, because IRSA's search answered 502, and they are reported missing, not replaced. On set B there was no false confirmation at 5–20″/yr and recall was higher, 0.72 at S/N 15: these fields have no saturated halos. Very red movers were confirmed in 60 % of cases, against 13 % in the six test fields. This supports the diagnosis that the red-mover failure comes from sparse, disturbed long-wavelength fields. With 60 injections per S/N, set B's intervals are wide. Breakdowns by speed, environment (quiet, near a star, crowded), field and very red movers are in the [final validation report](evidence/FINAL_VALIDATION_REPORT.md).
 
 Enter sky coordinates, a star name, or pick one of the five challenge objects. Cold Movers:
 

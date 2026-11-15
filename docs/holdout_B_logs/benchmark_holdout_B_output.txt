@@ -1,0 +1,64 @@
+{
+ "label": "B",
+ "trials": 600,
+ "seconds": 11.9,
+ "fields": {
+  "gal_l30_b0": {
+   "visits": 4,
+   "reliable_detectors": 6,
+   "baseline_confirmed": 0,
+   "sources_6sigma": 14,
+   "source_density_per_1000px2": 14.57,
+   "spots": {
+    "quiet": 1,
+    "near a star": 4,
+    "crowded": 4
+   }
+  },
+  "gal_l90_b45": {
+   "visits": 3,
+   "reliable_detectors": 5,
+   "baseline_confirmed": 0,
+   "sources_6sigma": 10,
+   "source_density_per_1000px2": 10.41,
+   "spots": {
+    "quiet": 3,
+    "near a star": 4,
+    "crowded": 4
+   }
+  }
+ }
+}
+== headline_snr15_core
+  all          n=  60 TP=  43 FN=  17 FP=  0 (distinct 0) recall=0.72 [0.59-0.81] precision=1.000 [0.92-1.00] f1=0.83 rate_err_med=0.066
+== by_snr_core
+  15.0         n=  60 TP=  43 FN=  17 FP=  0 (distinct 0) recall=0.72 [0.59-0.81] precision=1.000 [0.92-1.00] f1=0.83 rate_err_med=0.066
+  30.0         n=  60 TP=  51 FN=   9 FP=  0 (distinct 0) recall=0.85 [0.74-0.92] precision=1.000 [0.93-1.00] f1=0.92 rate_err_med=0.045
+  5.0          n=  60 TP=   0 FN=  60 FP=  0 (distinct 0) recall=0.00 [0.00-0.06] precision=nan [nan-nan] f1=0.00 rate_err_med=nan
+  8.0          n=  60 TP=  33 FN=  27 FP=  0 (distinct 0) recall=0.55 [0.42-0.67] precision=1.000 [0.90-1.00] f1=0.71 rate_err_med=0.109
+== by_snr_all_speeds
+  15.0         n= 120 TP=  74 FN=  46 FP=  0 (distinct 0) recall=0.62 [0.53-0.70] precision=1.000 [0.95-1.00] f1=0.76 rate_err_med=0.099
+  30.0         n= 120 TP=  81 FN=  39 FP=  3 (distinct 2) recall=0.68 [0.59-0.75] precision=0.964 [0.90-0.99] f1=0.79 rate_err_med=0.047
+  5.0          n= 120 TP=   0 FN= 120 FP=  0 (distinct 0) recall=0.00 [0.00-0.03] precision=nan [nan-nan] f1=0.00 rate_err_med=nan
+  8.0          n= 120 TP=  47 FN=  73 FP=  0 (distinct 0) recall=0.39 [0.31-0.48] precision=1.000 [0.92-1.00] f1=0.56 rate_err_med=0.172
+== by_speed_snr15
+  10-20        n=  30 TP=  20 FN=  10 FP=  0 (distinct 0) recall=0.67 [0.49-0.81] precision=1.000 [0.84-1.00] f1=0.80 rate_err_med=0.050
+  2-5          n=  34 TP=  11 FN=  23 FP=  0 (distinct 0) recall=0.32 [0.19-0.49] precision=1.000 [0.74-1.00] f1=0.49 rate_err_med=0.413
+  20-40        n=  26 TP=  20 FN=   6 FP=  0 (distinct 0) recall=0.77 [0.58-0.89] precision=1.000 [0.84-1.00] f1=0.87 rate_err_med=0.070
+  5-10         n=  30 TP=  23 FN=   7 FP=  0 (distinct 0) recall=0.77 [0.59-0.88] precision=1.000 [0.86-1.00] f1=0.87 rate_err_med=0.143
+== by_place_snr15_core
+  crowded      n=  25 TP=  18 FN=   7 FP=  0 (distinct 0) recall=0.72 [0.52-0.86] precision=1.000 [0.82-1.00] f1=0.84 rate_err_med=0.044
+  near a star  n=  21 TP=  13 FN=   8 FP=  0 (distinct 0) recall=0.62 [0.41-0.79] precision=1.000 [0.77-1.00] f1=0.76 rate_err_med=0.197
+  quiet        n=  14 TP=  12 FN=   2 FP=  0 (distinct 0) recall=0.86 [0.60-0.96] precision=1.000 [0.76-1.00] f1=0.92 rate_err_med=0.060
+== by_place_snr30_core
+  crowded      n=  25 TP=  24 FN=   1 FP=  0 (distinct 0) recall=0.96 [0.80-0.99] precision=1.000 [0.86-1.00] f1=0.98 rate_err_med=0.034
+  near a star  n=  21 TP=  14 FN=   7 FP=  0 (distinct 0) recall=0.67 [0.45-0.83] precision=1.000 [0.78-1.00] f1=0.80 rate_err_med=0.091
+  quiet        n=  14 TP=  13 FN=   1 FP=  0 (distinct 0) recall=0.93 [0.69-0.99] precision=1.000 [0.77-1.00] f1=0.96 rate_err_med=0.032
+== by_field_snr15_core
+  gal_l30_b0   n=  31 TP=  27 FN=   4 FP=  0 (distinct 0) recall=0.87 [0.71-0.95] precision=1.000 [0.88-1.00] f1=0.93 rate_err_med=0.124
+  gal_l90_b45  n=  29 TP=  16 FN=  13 FP=  0 (distinct 0) recall=0.55 [0.38-0.72] precision=1.000 [0.81-1.00] f1=0.71 rate_err_med=0.066
+== red_D5D6_snr15_core
+  all          n=  60 TP=  36 FN=  24 FP=  1 (distinct 1) recall=0.60 [0.47-0.71] precision=0.973 [0.86-1.00] f1=0.74 rate_err_med=0.075
+== red_by_field
+  gal_l30_b0   n=  31 TP=  21 FN=  10 FP=  1 (distinct 1) recall=0.68 [0.50-0.81] precision=0.955 [0.78-0.99] f1=0.79 rate_err_med=0.080
+  gal_l90_b45  n=  29 TP=  15 FN=  14 FP=  0 (distinct 0) recall=0.52 [0.34-0.69] precision=1.000 [0.80-1.00] f1=0.68 rate_err_med=0.069

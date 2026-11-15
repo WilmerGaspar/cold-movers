@@ -28,6 +28,7 @@ def main():
     ap.add_argument("log")
     ap.add_argument("--label", default="B")
     ap.add_argument("--source", required=True)
+    ap.add_argument("--fetch-log", default=None, help="log of scripts/fetch_holdout_fields.py, to record missing fields")
     args = ap.parse_args()
     text = open(args.log).read()
     # The script first prints {label, trials, seconds, fields} as indented JSON.
@@ -41,6 +42,9 @@ def main():
             break
     out = json.loads(text[start:end])
     out["source"] = f"parsed from the printed output of scripts/benchmark_holdout.py ({args.source})"
+    if args.fetch_log:
+        missing = re.findall(r"^(\w+): FAILED \((.+?)\)\s*$", open(args.fetch_log).read(), re.M)
+        out["missing_fields"] = {k: re.sub(r" for url: \S+", "", why) for k, why in missing}
     section = None
     for line in text[end:].splitlines():
         if line.startswith("== "):

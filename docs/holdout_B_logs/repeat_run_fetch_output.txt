@@ -1,0 +1,4 @@
+nep: FAILED (RuntimeError: IRSA search failed: SIA: Unable to access the capabilities endpoint at:
+sep: 240 images, 1 visits, 0 failed downloads, 314 s
+gal_l30_b0: 240 images, 4 visits, 0 failed downloads, 643 s
+gal_l90_b45: 239 images, 3 visits, 1 failed downloads, 673 s

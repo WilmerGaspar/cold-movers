@@ -2,9 +2,13 @@
 
 TP: an injected mover confirmed within 1.5 px of where it was at that detector's first visit. FN: an injected mover not confirmed (the next column says how many of those were found as candidates). FP: a confirmed mover that was neither injected nor confirmed before injecting; in brackets, how many distinct sky positions those false confirmations came from. Precision = TP / (TP + FP); recall = TP / injections; F1 = 2PR / (P + R). Brackets after precision and recall: 95 % Wilson intervals. Brightness is the injected peak S/N over the image noise.
 
-**Sets.** *Development*: 3,300 trials, seed 2026, fixed speeds (2, 5, 10, 20, 40″/yr) and directions; the neighbour-pull rule was chosen on it, so its post-fix numbers are optimistic. *Held-out A*: pre-registered ([HOLDOUT_PREREGISTRATION.md](HOLDOUT_PREREGISTRATION.md)), seed 20261115, new spots (quiet, near a star, crowded) and random motions, same six fields. *Held-out B*: the same design on four SPHEREx fields never used before (not available when this file was generated).
+**Sets.** *Development*: 3,300 trials, seed 2026, fixed speeds (2, 5, 10, 20, 40″/yr) and directions; the neighbour-pull rule was chosen on it, so its post-fix numbers are optimistic. *Held-out A*: pre-registered ([HOLDOUT_PREREGISTRATION.md](HOLDOUT_PREREGISTRATION.md)), seed 20261115, new spots (quiet, near a star, crowded) and random motions, same six fields. *Held-out B*: the same design on four SPHEREx fields never used before, chosen by rule before the run.
 
 Held-out A: 1,740 trials, code version 0.5.0.
+Held-out B: 600 trials over gal_l30_b0 (4 visits), gal_l90_b45 (3 visits).
+Not downloaded, so missing from set B (reported, not replaced): nep (RuntimeError: IRSA search failed: SIA: 502 Server Error: Proxy Error | TAP: 502 Server Error: Proxy Error).
+Not downloaded, so missing from set B (reported, not replaced): sep (RuntimeError: IRSA search failed: SIA: 502 Server Error: Proxy Error | TAP: 502 Server Error: Proxy Error).
+Set B file parsed from the printed output of scripts/benchmark_holdout.py (GitHub Actions run 43761528257, job 132957185950, commit 7adb2b3, Nov 15 2026 21:43 UTC).
 
 ## 1. By brightness (all six detectors, speeds 5–20″/yr)
 
@@ -12,18 +16,25 @@ Held-out A: 1,740 trials, code version 0.5.0.
 |---|---|---|---|---|---|---|---|---|---|---|
 | Development | S/N 5 | 396 | 0 | 396 | 6 | 9 | 0.000 (0.00–0.30) | 0.00 (0.00–0.01) | 0.00 | — |
 | Held-out A | S/N 5 | 173 | 2 | 171 | 13 | 6 (5) | 0.250 (0.07–0.59) | 0.01 (0.00–0.04) | 0.02 | 52.8 % |
+| Held-out B | S/N 5 | 60 | 0 | 60 | — | 0 (0) | — (nothing confirmed) | 0.00 (0.00–0.06) | 0.00 | — |
 | Development | S/N 8 | 396 | 107 | 289 | 64 | 1 | 0.991 (0.95–1.00) | 0.27 (0.23–0.32) | 0.42 | 8.3 % |
 | Held-out A | S/N 8 | 173 | 46 | 127 | 35 | 2 (2) | 0.958 (0.86–0.99) | 0.27 (0.21–0.34) | 0.42 | 9.2 % |
+| Held-out B | S/N 8 | 60 | 33 | 27 | — | 0 (0) | 1.000 (0.90–1.00) | 0.55 (0.42–0.67) | 0.71 | 10.9 % |
 | Development | S/N 15 | 396 | 153 | 243 | 47 | 3 | 0.981 (0.94–0.99) | 0.39 (0.34–0.44) | 0.55 | 6.4 % |
 | Held-out A | S/N 15 | 173 | 69 | 104 | 22 | 1 (1) | 0.986 (0.92–1.00) | 0.40 (0.33–0.47) | 0.57 | 8.6 % |
+| Held-out B | S/N 15 | 60 | 43 | 17 | — | 0 (0) | 1.000 (0.92–1.00) | 0.72 (0.59–0.81) | 0.83 | 6.6 % |
 | Development | S/N 30 | 396 | 170 | 226 | 44 | 3 | 0.983 (0.95–0.99) | 0.43 (0.38–0.48) | 0.60 | 4.6 % |
 | Held-out A | S/N 30 | 173 | 79 | 94 | 27 | 6 (4) | 0.929 (0.85–0.97) | 0.46 (0.38–0.53) | 0.61 | 5.1 % |
+| Held-out B | S/N 30 | 60 | 51 | 9 | — | 0 (0) | 1.000 (0.93–1.00) | 0.85 (0.74–0.92) | 0.92 | 4.5 % |
 
 ### Pre-registered reading
 
 - S/N 8, Held-out A: development precision 0.991 is outside the held-out interval (0.860–0.988): the development figure is optimistic here.
+- S/N 8, Held-out B: development precision 0.991 is inside the held-out interval (0.896–1.000).
 - S/N 15, Held-out A: development precision 0.981 is inside the held-out interval (0.923–0.997).
+- S/N 15, Held-out B: development precision 0.981 is inside the held-out interval (0.918–1.000).
 - S/N 30, Held-out A: development precision 0.983 is outside the held-out interval (0.854–0.967): the development figure is optimistic here.
+- S/N 30, Held-out B: development precision 0.983 is inside the held-out interval (0.930–1.000).
 
 ## 2. By speed (all six detectors, S/N 15)
 
@@ -38,6 +49,10 @@ Held-out A: 1,740 trials, code version 0.5.0.
 | Held-out A | 5-10″/yr | 82 | 32 | 50 | 10 | 1 (1) | 0.970 (0.85–0.99) | 0.39 (0.29–0.50) | 0.56 | 8.6 % |
 | Held-out A | 10-20″/yr | 91 | 37 | 54 | 12 | 0 (0) | 1.000 (0.91–1.00) | 0.41 (0.31–0.51) | 0.58 | 8.1 % |
 | Held-out A | 20-40″/yr | 75 | 25 | 50 | 9 | 2 (2) | 0.926 (0.77–0.98) | 0.33 (0.24–0.45) | 0.49 | 8.6 % |
+| Held-out B | 2-5″/yr | 34 | 11 | 23 | — | 0 (0) | 1.000 (0.74–1.00) | 0.32 (0.19–0.49) | 0.49 | 41.3 % |
+| Held-out B | 5-10″/yr | 30 | 23 | 7 | — | 0 (0) | 1.000 (0.86–1.00) | 0.77 (0.59–0.88) | 0.87 | 14.3 % |
+| Held-out B | 10-20″/yr | 30 | 20 | 10 | — | 0 (0) | 1.000 (0.84–1.00) | 0.67 (0.49–0.81) | 0.80 | 5.0 % |
+| Held-out B | 20-40″/yr | 26 | 20 | 6 | — | 0 (0) | 1.000 (0.84–1.00) | 0.77 (0.58–0.89) | 0.87 | 7.0 % |
 
 ## 3. By environment (all six detectors, speeds 5–20″/yr)
 
@@ -50,11 +65,17 @@ Quiet: at least 5 px from any 4σ source. Near a star: 2.5–4 px from a 6σ sou
 | Held-out A | crowded, S/N 15 | 50 | 17 | 33 | 6 | 1 (1) | 0.944 (0.74–0.99) | 0.34 (0.22–0.48) | 0.50 | 26.1 % |
 | Held-out A | near a star, S/N 15 | 73 | 21 | 52 | 14 | 0 (0) | 1.000 (0.85–1.00) | 0.29 (0.20–0.40) | 0.45 | 9.8 % |
 | Held-out A | quiet, S/N 15 | 50 | 31 | 19 | 2 | 0 (0) | 1.000 (0.89–1.00) | 0.62 (0.48–0.74) | 0.77 | 5.6 % |
+| Held-out B | crowded, S/N 15 | 25 | 18 | 7 | — | 0 (0) | 1.000 (0.82–1.00) | 0.72 (0.52–0.86) | 0.84 | 4.4 % |
+| Held-out B | near a star, S/N 15 | 21 | 13 | 8 | — | 0 (0) | 1.000 (0.77–1.00) | 0.62 (0.41–0.79) | 0.76 | 19.7 % |
+| Held-out B | quiet, S/N 15 | 14 | 12 | 2 | — | 0 (0) | 1.000 (0.76–1.00) | 0.86 (0.60–0.96) | 0.92 | 6.0 % |
 | Development | quiet, S/N 30 | 180 | 110 | 70 | 17 | 0 | 1.000 (0.97–1.00) | 0.61 (0.54–0.68) | 0.76 | 2.9 % |
 | Development | near a star, S/N 30 | 216 | 60 | 156 | 27 | 3 | 0.952 (0.87–0.98) | 0.28 (0.22–0.34) | 0.43 | 9.5 % |
 | Held-out A | crowded, S/N 30 | 50 | 22 | 28 | 5 | 1 (1) | 0.957 (0.79–0.99) | 0.44 (0.31–0.58) | 0.60 | 11.2 % |
 | Held-out A | near a star, S/N 30 | 73 | 27 | 46 | 19 | 4 (2) | 0.871 (0.71–0.95) | 0.37 (0.27–0.48) | 0.52 | 6.6 % |
 | Held-out A | quiet, S/N 30 | 50 | 30 | 20 | 3 | 1 (1) | 0.968 (0.84–0.99) | 0.60 (0.46–0.72) | 0.74 | 2.7 % |
+| Held-out B | crowded, S/N 30 | 25 | 24 | 1 | — | 0 (0) | 1.000 (0.86–1.00) | 0.96 (0.80–0.99) | 0.98 | 3.4 % |
+| Held-out B | near a star, S/N 30 | 21 | 14 | 7 | — | 0 (0) | 1.000 (0.78–1.00) | 0.67 (0.45–0.83) | 0.80 | 9.1 % |
+| Held-out B | quiet, S/N 30 | 14 | 13 | 1 | — | 0 (0) | 1.000 (0.77–1.00) | 0.93 (0.69–0.99) | 0.96 | 3.2 % |
 
 ## 4. By field (all six detectors, S/N 15, speeds 5–20″/yr)
 
@@ -72,6 +93,8 @@ Quiet: at least 5 px from any 4σ source. Near a star: 2.5–4 px from a 6σ sou
 | Held-out A | rwaur | 24 | 15 | 9 | 8 | 1 (1) | 0.938 (0.72–0.99) | 0.62 (0.43–0.79) | 0.75 | 9.8 % |
 | Held-out A | trappist1 | 34 | 21 | 13 | 2 | 0 (0) | 1.000 (0.85–1.00) | 0.62 (0.45–0.76) | 0.76 | 8.6 % |
 | Held-out A | wise0855 | 27 | 16 | 11 | 11 | 0 (0) | 1.000 (0.81–1.00) | 0.59 (0.41–0.75) | 0.74 | 9.3 % |
+| Held-out B | gal_l30_b0 | 31 | 27 | 4 | — | 0 (0) | 1.000 (0.88–1.00) | 0.87 (0.71–0.95) | 0.93 | 12.4 % |
+| Held-out B | gal_l90_b45 | 29 | 16 | 13 | — | 0 (0) | 1.000 (0.81–1.00) | 0.55 (0.38–0.72) | 0.71 | 6.6 % |
 
 ## 5. Very red movers (detectors 5 and 6 only, S/N 15, speeds 5–20″/yr)
 
@@ -85,6 +108,9 @@ Quiet: at least 5 px from any 4σ source. Near a star: 2.5–4 px from a 6σ sou
 | Held-out A | rwaur | 24 | 6 | 18 | 6 | 0 (0) | 1.000 (0.61–1.00) | 0.25 (0.12–0.45) | 0.40 | 10.9 % |
 | Held-out A | trappist1 | 34 | 16 | 18 | 7 | 0 (0) | 1.000 (0.81–1.00) | 0.47 (0.31–0.63) | 0.64 | 8.5 % |
 | Held-out A | wise0855 | 27 | 0 | 27 | 8 | 0 (0) | — (nothing confirmed) | 0.00 (0.00–0.12) | 0.00 | — |
+| Held-out B | all fields | 60 | 36 | 24 | — | 1 (1) | 0.973 (0.86–1.00) | 0.60 (0.47–0.71) | 0.74 | 7.5 % |
+| Held-out B | gal_l30_b0 | 31 | 21 | 10 | — | 1 (1) | 0.955 (0.78–0.99) | 0.68 (0.50–0.81) | 0.79 | 8.0 % |
+| Held-out B | gal_l90_b45 | 29 | 15 | 14 | — | 0 (0) | 1.000 (0.80–1.00) | 0.52 (0.34–0.69) | 0.68 | 6.9 % |
 
 ## 6. Every condition together (all six detectors, every speed)
 
@@ -94,3 +120,7 @@ Quiet: at least 5 px from any 4σ source. Near a star: 2.5–4 px from a 6σ sou
 | Held-out A | S/N 30, 2–40″/yr | 348 | 146 | 202 | 56 | 15 (5) | 0.907 (0.85–0.94) | 0.42 (0.37–0.47) | 0.57 | 5.6 % |
 | Held-out A | S/N 5, 2–40″/yr | 348 | 3 | 345 | 26 | 18 (7) | 0.143 (0.05–0.35) | 0.01 (0.00–0.03) | 0.02 | 57.0 % |
 | Held-out A | S/N 8, 2–40″/yr | 348 | 75 | 273 | 83 | 15 (7) | 0.833 (0.74–0.90) | 0.22 (0.18–0.26) | 0.34 | 12.7 % |
+| Held-out B | S/N 15, 2–40″/yr | 120 | 74 | 46 | — | 0 (0) | 1.000 (0.95–1.00) | 0.62 (0.53–0.70) | 0.76 | 9.9 % |
+| Held-out B | S/N 30, 2–40″/yr | 120 | 81 | 39 | — | 3 (2) | 0.964 (0.90–0.99) | 0.68 (0.59–0.75) | 0.79 | 4.7 % |
+| Held-out B | S/N 5, 2–40″/yr | 120 | 0 | 120 | — | 0 (0) | — (nothing confirmed) | 0.00 (0.00–0.03) | 0.00 | — |
+| Held-out B | S/N 8, 2–40″/yr | 120 | 47 | 73 | — | 0 (0) | 1.000 (0.92–1.00) | 0.39 (0.31–0.48) | 0.56 | 17.2 % |

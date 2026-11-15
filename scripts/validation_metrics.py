@@ -57,13 +57,17 @@ def main():
          "neighbour-pull rule was chosen on it, so its post-fix numbers are optimistic. *Held-out A*: pre-registered "
          "([HOLDOUT_PREREGISTRATION.md](HOLDOUT_PREREGISTRATION.md)), seed 20261115, new spots (quiet, near a star, "
          "crowded) and random motions, same six fields. *Held-out B*: the same design on four SPHEREx fields never "
-         "used before" + ("." if len(sets) > 1 else " (not available when this file was generated)."), ""]
+         "used before, chosen by rule before the run" + ("." if len(sets) > 1 else " (not available when this file was generated)."), ""]
     if a:
         L.append(f"Held-out A: {a['trials']:,} trials, code version {a['app_version']}.")
     if len(sets) > 1:
         fl = ", ".join(f"{k} ({v.get('visits', 0)} visits)" for k, v in b["fields"].items() if "visits" in v)
         miss = ", ".join(f"{k}: {v['skipped']}" for k, v in b["fields"].items() if "skipped" in v)
         L.append(f"Held-out B: {b['trials']:,} trials over {fl}" + (f"; skipped {miss}" if miss else "") + ".")
+        for k, why in (b.get("missing_fields") or {}).items():
+            L.append(f"Not downloaded, so missing from set B (reported, not replaced): {k} ({why}).")
+        if b.get("source"):
+            L.append(f"Set B file {b['source']}.")
     L += ["", "## 1. By brightness (all six detectors, speeds 5–20″/yr)", "", HEAD]
     for snr in ("5.0", "8.0", "15.0", "30.0"):
         L.append(f"| Development | S/N {float(snr):g} | {cells(dev['by_snr_core'][snr])} |")

@@ -105,6 +105,17 @@ if os.path.exists(holdout):
     h30 = json.load(open(holdout))["by_snr_core"]["30.0"]
     expect("Held-out precision at S/N 30 (set A)", f"precision {h30['precision']:.2f} at S/N 30", "docs/benchmark_holdout_A.json")
 
+holdout_b = os.path.join(ROOT, "docs", "benchmark_holdout_B.json")
+if os.path.exists(holdout_b):
+    hb = json.load(open(holdout_b))
+    expect("Held-out recall (set B)", f"recall was higher, {hb['headline_snr15_core']['recall']:.2f} at S/N 15",
+           "docs/benchmark_holdout_B.json")
+    expect("Very red movers (set B)", f"confirmed in {100 * hb['red_D5D6_snr15_core']['recall']:.0f} % of cases",
+           "docs/benchmark_holdout_B.json")
+    for k in ("8.0", "15.0", "30.0"):
+        sb_ = hb["by_snr_core"][k]
+        expect(f"Set B row, S/N {k}", f"| {sb_['n']} | {sb_['confirmed']} | {sb_['n'] - sb_['confirmed']} | "
+               f"{sb_['false_confirmed']} | {sb_['precision']:.2f} (", "docs/benchmark_holdout_B.json")
 out = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "madhava_correction_check.py")],
                      capture_output=True, text=True).stdout
 m = re.search(r"(\d+)× to (\d+)×", out)
