@@ -75,7 +75,15 @@ jobs:
                   return {k: clean(v) for k, v in x.items() if k not in VOLATILE}
               if isinstance(x, list):
                   return [clean(v) for v in x]
+              if isinstance(x, float) and x != x:
+                  return "NaN"  # NaN never equals NaN; compare it as a label
               return x
+          def diffs(a, b, path=""):
+              if isinstance(a, dict) and isinstance(b, dict):
+                  for k in sorted(set(a) | set(b)):
+                      yield from diffs(a.get(k), b.get(k), f"{path}/{k}")
+              elif a != b:
+                  yield f"{path}: regenerated {a!r}, committed {b!r}"
           pairs = [("data/scoreboard.json", "committed/scoreboard.json"), ("docs/scoreboard.md", "committed/scoreboard.md"),
                    ("docs/validation.md", "committed/validation.md"), ("docs/validation_records.md", "committed/validation_records.md"),
                    ("docs/validation_records.csv", "committed/validation_records.csv"),
@@ -86,7 +94,10 @@ jobs:
               if not os.path.exists(old):
                   print(f"| {new} | no committed copy to compare |"); continue
               if new.endswith(".json"):
-                  same = clean(json.load(open(new))) == clean(json.load(open(old)))
+                  ca, cb = clean(json.load(open(new))), clean(json.load(open(old)))
+                  same = ca == cb
+                  for line in list(diffs(ca, cb))[:15]:
+                      print(f"|  ↳ {line} | |")
               else:
                   strip = lambda s: [l for l in s.splitlines() if "version 0." not in l and "Code version" not in l and "code_version" not in l]
                   a, b = open(new).read(), open(old).read()
@@ -98,6 +109,8 @@ jobs:
                       same = ra == rb
               print(f"| {new} | {'yes' if same else 'NO: differs'} |")
           EOF
+      - name: Print the regenerated evidence records (so they can be read from the log)
+        run: cat docs/validation_records.md docs/validation_records.csv
       - uses: actions/upload-artifact@v4
         if: always()
         with:
