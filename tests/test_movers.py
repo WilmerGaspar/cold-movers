@@ -1,4 +1,4 @@
-"""Tests for the catalogue-free mover search. AI-assisted (Claude, Anthropic), reviewed by the team."""
+"""Tests for the catalogue-free mover search."""
 
 import numpy as np
 

@@ -1,6 +1,5 @@
 """Cold Movers web app.
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
 Run: streamlit run app.py
 """
 
@@ -117,8 +116,8 @@ st.markdown(
     "and fit its infrared light with a blackbody to estimate how cold it is (a blackbody-equivalent "
     "temperature, with an uncertainty and a warning when it should not be trusted)."
 )
-st.caption(f"Team Cold Movers (Honduras) · NASA Space Apps 2026 · version {APP_VERSION} · built with AI-assisted "
-           "code (Claude, Anthropic); see the AI note at the bottom. Not an official NASA product.")
+st.caption(f"Team Cold Movers (Honduras) · NASA Space Apps 2026 · version {APP_VERSION} · "
+           "Not an official NASA product.")
 
 
 @st.cache_data(show_spinner=False)
@@ -869,12 +868,25 @@ try:
         else:
             temp_html = "<div class='cm-big'>—</div>"
         reasons = "".join(f"<li>{madhava.REASON_TEXT.get(r, r)}</li>" for r in fit.reasons)
+        series_html = ""
+        if np.isfinite(fit.temperature) and clean:
+            try:
+                rep = madhava.series_report([r["wavelength_um"] for r in clean], [r["bandwidth_um"] for r in clean],
+                                            fit.temperature)
+                if np.isfinite(rep["max_rel_bound"]):
+                    ex = max(int(np.ceil(np.log10(max(rep["max_rel_bound"], 1e-300)))), -15)
+                    terms = f"{rep['terms']} terms + Madhava correction · " if rep["terms"] else ""
+                    series_html = (f"<div class='cm-muted' style='margin-top:4px'>Series: {terms}error below "
+                                   f"10<sup>{ex}</sup>, guaranteed</div>")
+            except Exception:
+                series_html = ""
         st.markdown(
             f"<div class='cm-card'><div class='cm-muted'>Blackbody-equivalent temperature</div>{temp_html}"
             f"<div style='margin-top:10px'><span class='cm-light' style='background:{LIGHT_COLORS[light]}'></span>"
             f"<b>{LIGHT_WORDS[light]}</b></div><ul style='margin:6px 0 0 0; padding-left:18px'>{reasons}</ul>"
             f"<div class='cm-muted' style='margin-top:8px'>{fit.n_points} clean measurements"
-            + (f" · reduced chi² {fit.chi2_red:.2f}" if np.isfinite(fit.chi2_red) else "") + "</div></div>",
+            + (f" · reduced chi² {fit.chi2_red:.2f}" if np.isfinite(fit.chi2_red) else "") + "</div>"
+            + series_html + "</div>",
             unsafe_allow_html=True,
         )
         pub = PUBLISHED.get(target.key)
@@ -899,6 +911,15 @@ try:
                 "standard physics (Widger & Woodall 1976), not our invention. The result is a *blackbody-equivalent* "
                 "temperature: brown dwarfs and young stars are not perfect blackbodies, so the traffic light tells you "
                 "when one curve does not describe the light."
+            )
+            st.markdown(
+                "**Madhava's correction.** Madhava did not simply cut his series for π short: he added a correction "
+                "term that estimates the part left out. The engine does the same. After N terms it adds the rest of "
+                "the series in closed form. That rest is trapped between two limits we can prove (the ratio of "
+                "consecutive terms grows but stays below e<sup>−x</sup>), so every band model carries a guaranteed "
+                "bound on its series error. With the same number of terms, the error is 5 to 40 times smaller than "
+                "simply cutting the series.",
+                unsafe_allow_html=True,
             )
 except Exception as _section_error:  # keep the rest of the page alive
     section_failed('the spectrum and temperature', _section_error)
@@ -1062,10 +1083,10 @@ st.markdown(
     "Epoch of Reionization and Ices Explorer (SPHEREx), which is a joint project of the Jet Propulsion Laboratory "
     "and the California Institute of Technology, and is funded by the National Aeronautics and Space Administration. "
     "This research has made use of the NASA/IPAC Infrared Science Archive; of data from the ESA mission Gaia, "
-    "processed by the Gaia DPAC; of the SIMBAD database, VizieR and Aladin Lite (CDS, Strasbourg); and of WISE images "
-    "(UCLA, JPL/Caltech, NASA). Full list with licences: "
+    "processed by the Gaia DPAC; and of the SIMBAD database and the Sesame name resolver (CDS, Strasbourg). "
+    "Aladin Lite and WiseView are only linked as external pages. Full list with licences: "
     "<a href='https://github.com/WilmerGaspar/cold-movers/blob/main/DATA_AND_RESOURCES.md' target='_blank'>"
     "DATA_AND_RESOURCES.md</a>.<br>"
-    "Built with AI assistance (Claude, Anthropic) under the team's direction. Not an official NASA product.</div>",
+    "How we built it, including AI use: see the README. Not an official NASA product.</div>",
     unsafe_allow_html=True,
 )

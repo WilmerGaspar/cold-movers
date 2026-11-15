@@ -1,6 +1,4 @@
 """Check from GitHub Actions that the external services used by the atlas answer.
-
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
 """
 import time
 import traceback

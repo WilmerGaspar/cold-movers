@@ -1,6 +1,5 @@
 """Open the public app in a real browser so Streamlit Community Cloud keeps it awake.
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
 If the app has gone to sleep, press the "wake up" button and wait for it to load.
 """
 

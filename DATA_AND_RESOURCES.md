@@ -11,11 +11,9 @@ The project's own code is released under the MIT licence (see [LICENSE](LICENSE)
 | SPHEREx Data Release 1, spectral images (NASA/JPL-Caltech, NASA/IPAC IRSA) | https://doi.org/10.26131/IRSA678 | Searched (SIA2 / TAP) and downloaded as small cutouts for every position; images, FLAGS, VARIANCE and WCS-WAVE layers feed the movie, photometry and spectrum | Public NASA data; acknowledgement requested | SPHEREx acknowledgement and IRSA acknowledgement below; cite the DOI |
 | SPHEREx Quick Release 3, spectral images (NASA/IPAC IRSA) | https://irsa.ipac.caltech.edu/Missions/spherex.html | Same as DR1, for the most recent visits | Public NASA data; acknowledgement requested | Same as above |
 | NASA/IPAC Infrared Science Archive (IRSA) services: SIA2, TAP, cutout service | https://irsa.ipac.caltech.edu | Finding and cutting the SPHEREx images | Public service; acknowledgement requested | IRSA acknowledgement below |
-| Gaia Data Release 3 (ESA, Gaia/DPAC) | https://www.cosmos.esa.int/web/gaia/dr3 | Parallax (distance) of the challenge objects in the precompute; Gaia DR3 stars drawn over the sky atlas (through VizieR) | CC BY-SA 3.0 IGO | Gaia acknowledgement below; Gaia Collaboration, Vallenari et al. 2023, A&A 674, A1 |
+| Gaia Data Release 3 (ESA, Gaia/DPAC) | https://www.cosmos.esa.int/web/gaia/dr3 | Parallax (distance) of the challenge objects in the precompute; Gaia DR3 stars drawn over the SPHEREx image, and the check that a mover is a known Gaia star with the same motion (ESA Gaia archive) | CC BY-SA 3.0 IGO | Gaia acknowledgement below; Gaia Collaboration, Vallenari et al. 2023, A&A 674, A1 |
 | SIMBAD astronomical database (CDS, Strasbourg) | https://simbad.cds.unistra.fr | Positions, proper motions and parallaxes by object name | Free use with acknowledgement (CDS terms) | "This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France" (Wenger et al. 2000, A&AS 143, 9) |
 | Sesame name resolver (CDS) and its Harvard mirror | https://cds.unistra.fr/cgi-bin/Sesame | Backup name lookup when SIMBAD's TAP service is down | Free use with acknowledgement (CDS terms) | Credited with SIMBAD/CDS |
-| VizieR catalogue service (CDS) | https://vizier.cds.unistra.fr, doi:10.26093/cds/vizier | Delivers the Gaia DR3 catalogue (I/355/gaiadr3) to the sky atlas | Free use with acknowledgement (CDS terms) | "This research has made use of the VizieR catalogue access tool, CDS, Strasbourg, France" (Ochsenbein et al. 2000, A&AS 143, 23) |
-| AllWISE colour images (NASA WISE), as a CDS HiPS survey | https://irsa.ipac.caltech.edu/Missions/wise.html | Background image of the interactive sky atlas | Public NASA data; acknowledgement requested | WISE acknowledgement below |
 
 ## 2. Scientific references (facts and equations, no text or images copied)
 
@@ -53,7 +51,7 @@ The project's own code is released under the MIT licence (see [LICENSE](LICENSE)
 | Pillow | MIT-CMU (HPND) | Animated GIFs |
 | Plotly | MIT | Interactive spectrum, residuals, light curve |
 | Streamlit | Apache-2.0 | Web application |
-| Aladin Lite v3 (CDS) | GPL-3.0; loaded from the CDS server in the browser, not redistributed | Interactive sky atlas |
+| Aladin Lite (CDS) | External page only | The app links to it to explore the wider sky; nothing is embedded or downloaded |
 | pytest | MIT | Unit tests |
 | Playwright | Apache-2.0 | Opening the app on a schedule so it stays awake |
 
@@ -64,7 +62,7 @@ The project's own code is released under the MIT licence (see [LICENSE](LICENSE)
 | GitHub | GitHub Terms of Service | Code hosting |
 | GitHub Actions | GitHub Terms of Service | Running the tests, precomputing the five challenge objects, keeping the app awake |
 | Streamlit Community Cloud | Streamlit terms | Public hosting of the app at https://cold-movers.streamlit.app |
-| Claude (Anthropic) | Anthropic terms | AI coding and research assistant (see README, "AI use") |
+| Claude (Anthropic) | Anthropic terms | AI coding assistant (see README, "AI use") |
 
 ## 6. Products we generated (derived from the data above)
 
@@ -82,6 +80,5 @@ The app contains no third-party images, fonts or audio: all graphics are generat
 
 **Gaia:** This work has made use of data from the European Space Agency (ESA) mission Gaia (https://www.cosmos.esa.int/gaia), processed by the Gaia Data Processing and Analysis Consortium (DPAC, https://www.cosmos.esa.int/web/gaia/dpac/consortium). Funding for the DPAC has been provided by national institutions, in particular the institutions participating in the Gaia Multilateral Agreement.
 
-**WISE:** This publication makes use of data products from the Wide-field Infrared Survey Explorer, which is a joint project of the University of California, Los Angeles, and the Jet Propulsion Laboratory/California Institute of Technology, funded by the National Aeronautics and Space Administration.
 
-**CDS:** This research has made use of the SIMBAD database and the VizieR catalogue access tool, operated at CDS, Strasbourg, France, and of Aladin Lite.
+**CDS:** This research has made use of the SIMBAD database and the Sesame name resolver, operated at CDS, Strasbourg, France.

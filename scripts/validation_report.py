@@ -1,6 +1,5 @@
 """Write docs/validation.md with the app's own validation numbers (runs on GitHub Actions).
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
 Uses exactly the code the app uses (coldmovers.validation) on the frozen results, so the
 README can quote the same numbers a judge sees in the app.
 """

@@ -1,7 +1,5 @@
 """Validation table: how Cold Movers does on the five challenge objects.
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
-
 For each precomputed object: the motion measured in the SPHEREx images versus the
 catalogue prediction, the Madhava result and the published temperature.
 """

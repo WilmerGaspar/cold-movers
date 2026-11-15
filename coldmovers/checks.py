@@ -1,7 +1,5 @@
 """'Is it real?' checks: can the universe be fooling us?
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
-
 Four consistency checks, each reported as pass / warn / fail with the evidence:
   1. Seen again: the source is detected in more than one visit.
   2. Clean pixels: few measurements carry SPHEREx contamination flags

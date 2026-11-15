@@ -1,7 +1,5 @@
 """Precompute results for the five challenge objects (runs on GitHub Actions).
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
-
 The public app shows these results instantly, so the demo works even when IRSA is
 busy; any other coordinates are processed live in the app.
 

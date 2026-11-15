@@ -1,4 +1,4 @@
-"""Tests for forced photometry. AI-assisted (Claude, Anthropic), reviewed by the team."""
+"""Tests for forced photometry."""
 
 import numpy as np
 import pytest

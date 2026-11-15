@@ -1,4 +1,4 @@
-"""Tests for proper-motion propagation. AI-assisted (Claude, Anthropic), reviewed by the team."""
+"""Tests for proper-motion propagation."""
 
 import numpy as np
 import pytest

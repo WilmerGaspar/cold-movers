@@ -1,7 +1,5 @@
 """SPHEREx data access through NASA/IPAC IRSA.
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
-
 Search: IRSA Simple Image Access v2 (SIA2) on the DR1 and QR3 Wide collections,
 following IRSA's tutorial "Introduction to SPHEREx Spectral Images"; TAP on the
 spherex.artifact / spherex.plane tables is used as a fallback.

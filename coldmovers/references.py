@@ -1,7 +1,5 @@
 """Published temperatures of the five challenge objects, used to check our results.
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
-
 These are effective temperatures from detailed spectral modelling. A blackbody fit
 to 0.75-5 um photometry is not expected to match them exactly for objects with
 deep molecular bands or dusty disks; the comparison shows how far one can trust it.

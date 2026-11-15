@@ -1,7 +1,5 @@
 """Does it change? Brightness from visit to visit.
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
-
 Within one detector the wavelength changes from image to image (linear variable
 filters), so raw fluxes mix colour and time. For each detector we fit the smooth
 spectral shape (a quadratic in wavelength, in magnitudes) using all visits; what is

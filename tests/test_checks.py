@@ -1,4 +1,4 @@
-"""Tests for the 'Is it real?' checks. AI-assisted (Claude, Anthropic), reviewed by the team."""
+"""Tests for the 'Is it real?' checks."""
 
 import numpy as np
 import pytest

@@ -1,6 +1,5 @@
 """Headless smoke test of the Streamlit app (runs on GitHub Actions).
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
 Loads the app once per challenge object and reports any exception.
 """
 

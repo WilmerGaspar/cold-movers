@@ -1,8 +1,6 @@
 """Sky atlas images: Gaia DR3 stars with motion arrows over a SPHEREx stack (primary,
 no external image service needed) or over an AllWISE image from CDS (when CDS is up).
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
-
 The background comes from the CDS hips2fits service (AllWISE colour survey, 2010).
 Gaia DR3 stars are queried from the ESA Gaia archive; each star is drawn at its
 2010 position (the WISE epoch) with an arrow showing where its proper motion takes
@@ -105,7 +103,7 @@ def render(ra_c, dec_c, fov_deg, image, stars, obj_now, obj_2010, title="", size
     ax.set_title(title, color="#e8ecf4", fontsize=9)
     fig.text(0.01, 0.005, f"N up, E left · field {fov_deg * 60:.1f}′ · AllWISE via CDS hips2fits · Gaia DR3 (ESA)",
              ha="left", va="bottom", fontsize=6, color="#8a93a6")
-    fig.text(0.99, 0.005, "Cold Movers · AI-assisted code (Claude)", ha="right", va="bottom", fontsize=6,
+    fig.text(0.99, 0.005, "Cold Movers", ha="right", va="bottom", fontsize=6,
              color="#8a93a6")
     fig.tight_layout(rect=(0, 0.02, 1, 1))
     buf = io.BytesIO()
@@ -163,7 +161,7 @@ def render_on_spherex(image, to_px, stars, year: float, target_xy, title="", siz
     ax.set_title(title, color="#e8ecf4", fontsize=9)
     fig.text(0.01, 0.005, f"SPHEREx stack · Gaia DR3 (ESA) stars moved to {year:.1f} · arrows: 20 years of motion",
              ha="left", va="bottom", fontsize=6, color="#8a93a6")
-    fig.text(0.99, 0.005, "Cold Movers · AI-assisted code (Claude)", ha="right", va="bottom", fontsize=6,
+    fig.text(0.99, 0.005, "Cold Movers", ha="right", va="bottom", fontsize=6,
              color="#8a93a6")
     fig.tight_layout(rect=(0, 0.02, 1, 1))
     buf = io.BytesIO()

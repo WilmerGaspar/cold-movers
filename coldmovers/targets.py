@@ -1,7 +1,5 @@
 """Targets: the five challenge objects, name lookup and proper-motion propagation.
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
-
 Positions move: Barnard's Star travels about 10.4 arcsec per year, so a position
 from the year 2000 is ~270 arcsec (44 SPHEREx pixels) off by 2026. Every frame is
 therefore measured at the position propagated to that frame's own date.

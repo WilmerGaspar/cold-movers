@@ -1,7 +1,5 @@
 """Field mover search: which sources in the field move, measured without any catalogue.
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
-
 Every visit stack (all images of one visit, aligned on the same sky grid) is searched
 for point sources. Each source of the first visit is followed to the nearest source in
 the other visits, and a straight-line motion is fitted to its positions over time.

@@ -1,4 +1,4 @@
-"""Tests for the brightness-change module. AI-assisted (Claude, Anthropic), reviewed by the team."""
+"""Tests for the brightness-change module."""
 
 import numpy as np
 

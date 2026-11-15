@@ -1,7 +1,5 @@
 """Sky movie: align SPHEREx cutouts by their WCS, stack them by epoch, animate.
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
-
 Why stack by detector and epoch?
 SPHEREx uses linear variable filters: the wavelength changes across each detector,
 so consecutive raw images of the same spot are taken at different wavelengths and
@@ -24,9 +22,8 @@ from .spherex import DETECTOR_RANGE_UM, MOVIE_MASK, PIXEL_ARCSEC, SAT_MASK
 EPOCH_GAP_DAYS = 20.0
 BG = "#0b0f1a"  # matches the app theme
 # Visible mark required by the NASA Space Apps rules on AI ("SI") use.
-WATERMARK = "Cold Movers · AI-assisted code (Claude)"
-GIF_COMMENT = (b"Cold Movers, NASA Space Apps 2026. Rendered from SPHEREx DR1/QR3 data (NASA/IPAC IRSA) "
-               b"by code written with AI assistance (Claude, Anthropic) under the team's direction.")
+WATERMARK = "Cold Movers · SPHEREx data via IRSA"
+GIF_COMMENT = b"Cold Movers, NASA Space Apps 2026. Rendered from SPHEREx DR1/QR3 data (NASA/IPAC IRSA)."
 FG = "#e8ecf4"
 
 

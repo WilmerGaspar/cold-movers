@@ -1,4 +1,4 @@
-"""Tests for the Madhava engine. AI-assisted (Claude, Anthropic), reviewed by the team."""
+"""Tests for the Madhava engine."""
 
 import numpy as np
 import pytest
@@ -121,3 +121,35 @@ def test_error_floor_does_not_vanish_for_faint_points():
     ref = m._floor_reference(lam, f)
     assert ref[10] == pytest.approx(100.0)
     assert np.all(ref >= np.abs(f))
+
+
+def _exact_fraction(x):
+    """Reference: the series summed far beyond convergence with exact float summation."""
+    import math
+
+    return m._SCALE * math.fsum(math.exp(-k * x) * (x**3 / k + 3 * x * x / k**2 + 6 * x / k**3 + 6 / k**4)
+                                for k in range(1, 4000))
+
+
+@pytest.mark.parametrize("tol", [1e-3, 1e-6, 1e-10, 1e-15])
+def test_madhava_correction_bound_is_guaranteed(tol):
+    xs = np.array([0.5, 0.6, 0.8, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 20.0, 40.0, 300.0])
+    value, bound, _ = m._large_x_with_bound(xs, tol=tol)
+    err = np.abs(value - np.array([_exact_fraction(x) for x in xs]))
+    assert np.all(err <= bound + 4 * np.spacing(value))  # the bound covers truncation; 4 ulp of rounding
+    assert np.all(bound <= tol * value + 1e-300)
+
+
+def test_madhava_correction_beats_plain_truncation():
+    xs = np.array([0.5, 0.7, 1.0, 2.0])
+    value, _, n = m._large_x_with_bound(xs, tol=1e-6)
+    plain = m._SCALE * sum(np.exp(-k * xs) * m._c(k, xs, xs**2, xs**3) for k in range(1, n + 1))
+    exact = np.array([_exact_fraction(x) for x in xs])
+    assert np.max(np.abs(value - exact)) * 5 < np.max(np.abs(plain - exact))
+
+
+def test_series_report_for_spherex_bands():
+    lam = np.linspace(0.75, 5.0, 102)
+    rep = m.series_report(lam, lam / 40, 2464.0)
+    assert rep["terms"] > 0
+    assert rep["max_rel_bound"] < 1e-10

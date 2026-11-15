@@ -1,6 +1,4 @@
 """End-to-end run: coordinates -> SPHEREx images -> sky movie + spectrum + temperature.
-
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
 """
 
 from __future__ import annotations
@@ -231,8 +229,7 @@ def save(result: RunResult, outdir: str) -> dict:
         "collections": list(spherex.COLLECTIONS),
         "timings": result.timings,
         "generated_utc": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()),
-        "credits": ("Cold Movers, NASA Space Apps 2026. SPHEREx DR1/QR3 data from NASA/IPAC IRSA. "
-                    "Code written with AI assistance (Claude, Anthropic) under the team's direction."),
+        "credits": "Cold Movers, NASA Space Apps 2026. SPHEREx DR1/QR3 data from NASA/IPAC IRSA.",
     }
     with open(os.path.join(outdir, "result.json"), "w") as fh:
         json.dump(json_safe(summary), fh, indent=2, allow_nan=False)

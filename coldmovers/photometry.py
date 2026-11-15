@@ -1,7 +1,5 @@
 """Forced aperture photometry on SPHEREx cutouts.
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
-
 For each image the target position is propagated to that image's date, converted
 to a pixel with the image's own WCS, and the flux is summed in a circular aperture
 after removing the local background measured in a ring around it. Pixels with

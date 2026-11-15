@@ -1,6 +1,5 @@
 """Check that the five precomputed results exist, are valid JSON and can be opened.
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
 Exit code 1 if anything is missing or broken, so GitHub Actions marks the run red.
 """
 

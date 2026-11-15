@@ -1,7 +1,5 @@
 """Madhava engine: blackbody-equivalent temperature from band-integrated Planck fits.
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
-
 Physics
 -------
 The fraction of blackbody energy emitted at wavelengths shorter than lam is
@@ -69,45 +67,111 @@ _COEF = np.where(_K == 1, -0.5, _B) / ((_K + 3) * factorial(_K))
 _COEF[(_K % 2 == 1) & (_K > 1)] = 0.0
 
 
-def _fraction_large_x(x: np.ndarray, tol: float = 1e-15, max_terms: int = 100000) -> np.ndarray:
-    """Madhava-style series, accurate and fast for x >= ~0.5."""
-    n_terms = int(min(max_terms, np.ceil(-np.log(tol) / max(np.min(x), 1e-12)) + 2))
-    total = np.zeros_like(x)
-    x2 = x * x
-    x3 = x2 * x
-    for n in range(1, n_terms + 1):
-        term = np.exp(-n * x) * (x3 / n + 3.0 * x2 / n**2 + 6.0 * x / n**3 + 6.0 / n**4)
-        total += term
-        if np.all(term <= tol * total):
+_SCALE = 15.0 / np.pi**4
+# Bound for the Bernoulli expansion: the first term left out (k = 22), doubled. Successive
+# terms shrink by at least (x / 2 pi)^2 < 0.007 for x < 0.5, so the doubling is generous.
+_SMALL_TAIL_COEF = 2.0 * abs(float(bernoulli(22)[22])) / (25.0 * float(factorial(22)))
+
+
+def _c(n, x, x2, x3):
+    return x3 / n + 3.0 * x2 / n**2 + 6.0 * x / n**3 + 6.0 / n**4
+
+
+def _large_x_with_bound(x: np.ndarray, tol: float = 1e-15, max_terms: int = 100000):
+    """Sum N terms, then add a Madhava correction for everything that was left out.
+
+    Madhava of Sangamagrama did not simply cut his series for pi: he added a correction
+    term that estimates the part left out. We do the same here. Each term is
+    t_n = exp(-n x) c_n with c_n = x^3/n + 3x^2/n^2 + 6x/n^3 + 6/n^4. Since c_n is a sum of
+    log-convex functions of n, the ratio q_n = t_(n+1) / t_n grows with n and stays below
+    exp(-x). The part left out after N terms, R_N, is therefore trapped:
+
+        t_(N+1) / (1 - q_(N+1))  <=  R_N  <=  t_(N+1) / (1 - exp(-x))
+
+    The correction is the midpoint of that interval, and half its width is a guaranteed
+    bound on the truncation error. Returns (fraction, bound, number of terms summed).
+    """
+    x = np.asarray(x, dtype=float)
+    x2, x3 = x * x, x * x * x
+    em = np.exp(-x)
+    one_minus_em = -np.expm1(-x)
+    total = np.exp(-x) * _c(1, x, x2, x3)  # t_1
+    c_next = _c(2, x, x2, x3)
+    n = 1
+    while True:
+        nxt = np.exp(-(n + 1) * x) * c_next  # t_(n+1)
+        c_after = _c(n + 2, x, x2, x3)
+        lower = nxt / (1.0 - em * c_after / c_next)
+        upper = nxt / one_minus_em
+        bound = 0.5 * (upper - lower)
+        if n >= max_terms or np.all(bound <= tol * total):
             break
-    return 15.0 / np.pi**4 * total
+        total += nxt
+        c_next = c_after
+        n += 1
+    return _SCALE * (total + 0.5 * (lower + upper)), _SCALE * bound, n
+
+
+def _fraction_large_x(x: np.ndarray, tol: float = 1e-15, max_terms: int = 100000) -> np.ndarray:
+    """Series with Madhava's correction, accurate and fast for x >= ~0.5."""
+    return _large_x_with_bound(x, tol, max_terms)[0]
 
 
 def _fraction_small_x(x: np.ndarray) -> np.ndarray:
     """1 - (15/pi^4) * integral_0^x t^3/(e^t-1) dt, using Bernoulli numbers."""
     powers = x[..., None] ** (_K + 3)
     integral = np.sum(_COEF * powers, axis=-1)
-    return 1.0 - 15.0 / np.pi**4 * integral
+    return 1.0 - _SCALE * integral
 
 
-def blackbody_fraction(lam_um, temperature_k) -> np.ndarray:
-    """Fraction of blackbody energy emitted below wavelength lam (micrometre) at T (K)."""
+def fraction_with_bound(lam_um, temperature_k):
+    """Blackbody fraction below lam, a guaranteed bound on its series error, and terms used.
+
+    Returns (fraction, bound, terms): arrays of the broadcast shape, plus the largest
+    number of series terms summed before Madhava's correction (0 if not needed).
+    """
     lam = np.asarray(lam_um, dtype=float)
     temp = np.asarray(temperature_k, dtype=float)
     lam, temp = np.broadcast_arrays(lam, temp)
     with np.errstate(divide="ignore", over="ignore"):
         x = C2_UM_K / (lam * temp)
     out = np.empty(x.shape, dtype=float)
+    bound = np.zeros(x.shape, dtype=float)
+    terms = 0
     finite = np.isfinite(x)
     big = finite & (x >= _SMALL_X)
     small = finite & (x < _SMALL_X)
     if np.any(big):
-        out[big] = _fraction_large_x(x[big])
+        out[big], bound[big], terms = _large_x_with_bound(x[big])
     if np.any(small):
         out[small] = _fraction_small_x(x[small])
+        bound[small] = _SCALE * _SMALL_TAIL_COEF * x[small] ** 25
     out[np.isposinf(x)] = 0.0  # lam -> 0 (or T -> 0): no energy below
     out[np.isnan(x)] = np.nan
-    return np.clip(out, 0.0, 1.0)
+    bound[np.isnan(x)] = np.nan
+    return np.clip(out, 0.0, 1.0), bound, terms
+
+
+def blackbody_fraction(lam_um, temperature_k) -> np.ndarray:
+    """Fraction of blackbody energy emitted below wavelength lam (micrometre) at T (K)."""
+    return fraction_with_bound(lam_um, temperature_k)[0]
+
+
+def series_report(lam_um, bandwidth_um, temperature_k) -> dict:
+    """How the series behaved for the bands of one fit.
+
+    terms: most series terms summed before Madhava's correction.
+    max_rel_bound: guaranteed truncation error of the band models, relative to their value.
+    """
+    lam = np.asarray(lam_um, dtype=float)
+    half = 0.5 * np.asarray(bandwidth_um, dtype=float)
+    f_hi, b_hi, n_hi = fraction_with_bound(lam + half, temperature_k)
+    f_lo, b_lo, n_lo = fraction_with_bound(lam - half, temperature_k)
+    diff = np.abs(f_hi - f_lo)
+    ok = np.isfinite(diff) & (diff > 0)
+    rel = (b_hi[ok] + b_lo[ok]) / diff[ok]
+    return {"terms": int(max(n_hi, n_lo)),
+            "max_rel_bound": float(np.max(rel)) if rel.size else float("nan")}
 
 
 def planck_lambda(lam_um, temperature_k) -> np.ndarray:

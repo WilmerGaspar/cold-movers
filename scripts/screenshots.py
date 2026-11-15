@@ -1,7 +1,5 @@
 """Take screenshots of the public app in a real browser (runs on GitHub Actions).
-# Re-run marker: verify version 0.4.0 after the manual reboot (Nov 14, 20:08 local).
 
-AI-assisted code (Claude, Anthropic), directed and reviewed by team Cold Movers.
 Saves docs/screens/*.png so the team can see what a judge sees, on desktop and phone.
 """
 
@@ -49,7 +47,7 @@ with sync_playwright() as p:
         import coldmovers  # noqa: F401  (repository version, for comparison)
     except Exception:
         pass
-    for v in ("0.4.2", "0.4.1"):
+    for v in ("0.4.3", "0.4.2"):
         if fr.get_by_text(f"version {v}", exact=False).count():
             print(f"deployed app shows version {v}")
             break
