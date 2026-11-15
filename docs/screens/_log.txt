@@ -4,9 +4,11 @@ click test TRAPPIST-1: OK
 click test Epsilon Indi B: OK
 click test RW Aurigae: OK
 click test Barnard's Star: OK
+live check scoreboard: OK
+live check plain-words panel: OK
+live check detectors that confirm: OK
+live check visual-assistant layers: OK
+live check difference view: OK
 atlas: service did not answer (message shown)
 atlas screenshot saved
-spectrum screenshot failed: Locator.scroll_into_view_if_needed: Timeout 30000ms exceeded.
-Call log:
-  - waiting for get_by_text("3 · Its light").first
-
+done
