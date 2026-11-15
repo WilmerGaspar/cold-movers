@@ -15,6 +15,20 @@ from coldmovers.targets import ALL_EXAMPLES  # noqa: E402
 
 APP = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py")
 failed = 0
+
+# The challenge gives WISE 0855 as "08h55m10.831s, -7d14m42.53s": every way a judge might paste it must work.
+from coldmovers.targets import parse_coordinates  # noqa: E402
+
+WISE_RA, WISE_DEC = 133.7951292, -7.2451472
+for text in ("08h55m10.831s -7d14m42.53s", "08h55m10.831s, -7d14m42.53s", "08:55:10.831 -07:14:42.53",
+             "8 55 10.831 -7 14 42.53", "133.7951292 -7.2451472", "133.7951292, -7.2451472"):
+    try:
+        ra, dec = parse_coordinates(text)
+        ok = abs(ra - WISE_RA) < 1e-5 and abs(dec - WISE_DEC) < 1e-5
+    except Exception as exc:
+        ok, ra, dec = False, exc, ""
+    print(f"coordinates {text!r}: {'OK' if ok else 'FAILED'} -> {ra} {dec}")
+    failed += 0 if ok else 1
 for key in ALL_EXAMPLES:
     try:
         at = AppTest.from_file(APP, default_timeout=300)
