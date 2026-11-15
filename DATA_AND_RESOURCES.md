@@ -11,6 +11,7 @@ The project's own code is released under the MIT licence (see [LICENSE](LICENSE)
 | SPHEREx Data Release 1, spectral images (NASA/JPL-Caltech, NASA/IPAC IRSA) | https://doi.org/10.26131/IRSA678 | Searched (SIA2 / TAP) and downloaded as small cutouts for every position; images, FLAGS, VARIANCE and WCS-WAVE layers feed the movie, photometry and spectrum | Public NASA data; acknowledgement requested | SPHEREx acknowledgement and IRSA acknowledgement below; cite the DOI |
 | SPHEREx Quick Release 3, spectral images (NASA/IPAC IRSA) | https://irsa.ipac.caltech.edu/Missions/spherex.html | Same as DR1, for the most recent visits | Public NASA data; acknowledgement requested | Same as above |
 | NASA/IPAC Infrared Science Archive (IRSA) services: SIA2, TAP, cutout service | https://irsa.ipac.caltech.edu | Finding and cutting the SPHEREx images | Public service; acknowledgement requested | IRSA acknowledgement below |
+| NASA Exoplanet Archive (NASA/IPAC) | https://exoplanetarchive.ipac.caltech.edu | Published effective temperature of TRAPPIST-1 (Agol et al. 2021), for comparison only | Public NASA service; acknowledgement requested | "This research has made use of the NASA Exoplanet Archive, which is operated by the California Institute of Technology, under contract with the National Aeronautics and Space Administration under the Exoplanet Exploration Program." |
 | Gaia Data Release 3 (ESA, Gaia/DPAC) | https://www.cosmos.esa.int/web/gaia/dr3 | Parallax (distance) of the challenge objects in the precompute; Gaia DR3 stars drawn over the SPHEREx image, and the check that a mover is a known Gaia star with the same motion (ESA Gaia archive) | CC BY-SA 3.0 IGO | Gaia acknowledgement below; Gaia Collaboration, Vallenari et al. 2023, A&A 674, A1 |
 | SIMBAD astronomical database (CDS, Strasbourg) | https://simbad.cds.unistra.fr | Positions, proper motions and parallaxes by object name | Free use with acknowledgement (CDS terms) | "This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France" (Wenger et al. 2000, A&AS 143, 9) |
 | Sesame name resolver (CDS) and its Harvard mirror | https://cds.unistra.fr/cgi-bin/Sesame | Backup name lookup when SIMBAD's TAP service is down | Free use with acknowledgement (CDS terms) | Credited with SIMBAD/CDS |
@@ -21,6 +22,7 @@ The project's own code is released under the MIT licence (see [LICENSE](LICENSE)
 |---|---|
 | Widger, W. K. & Woodall, M. P. 1976, *Bull. Amer. Meteor. Soc.* 57, 1217 | Series for the fraction of blackbody energy below a wavelength (Madhava engine) |
 | *The SPHEREx image and spectrophotometry processing pipeline*, ApJS 285, 67 (2026), doi:10.3847/1538-4365/ae8843, arXiv:2511.15823 | Meaning of the SPHEREx data layers and flags |
+| Agol et al. 2021, Planet. Sci. J. 2, 1, arXiv:2010.01074 (via the NASA Exoplanet Archive) | Published effective temperature of TRAPPIST-1, 2,566 ± 26 K (comparison only) |
 | Jahandar et al. 2024, arXiv:2310.12125 | Published temperature of Barnard's Star (comparison only) |
 | King et al. 2010, A&A, arXiv:0911.3143 | Published temperatures of Epsilon Indi Ba and Bb (comparison only) |
 | Luhman et al. 2024, AJ, arXiv:2311.17316 | Published temperature of WISE 0855−0714 (comparison only) |
@@ -75,6 +77,8 @@ The app contains no third-party images, fonts or audio: all graphics are generat
 ## Required acknowledgements (verbatim)
 
 **SPHEREx:** This publication makes use of data products from the Spectro-Photometer for the History of the Universe, Epoch of Reionization and Ices Explorer (SPHEREx), which is a joint project of the Jet Propulsion Laboratory and the California Institute of Technology, and is funded by the National Aeronautics and Space Administration.
+
+**NASA Exoplanet Archive:** This research has made use of the NASA Exoplanet Archive, which is operated by the California Institute of Technology, under contract with the National Aeronautics and Space Administration under the Exoplanet Exploration Program.
 
 **IRSA:** This research has made use of the NASA/IPAC Infrared Science Archive, which is funded by the National Aeronautics and Space Administration and operated by the California Institute of Technology.
 

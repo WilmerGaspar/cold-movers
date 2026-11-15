@@ -53,6 +53,12 @@ Pass rules are fixed in [`coldmovers/scoreboard.py`](coldmovers/scoreboard.py) b
 - **Partial:** WISE 0855 is only a candidate (one detector, rate −22 %); Epsilon Indi B's temperature is 40 % above the published range (flagged yellow); RW Aurigae only *possibly* varies (4.6σ); S/N 8 is our detection limit.
 - **Failed, and why:** very red movers seen by only the two longest-wavelength detectors are confirmed in 28 % of cases. In sparse long-wavelength fields, the rule that checks whether a detector lines up distrusts it when the target itself moves or a saturated halo is present. Fixing this is our first next step.
 
+### Motion with its uncertainty: Barnard's Star
+
+![Trajectory of Barnard's Star in Cold Movers: measured positions with error bars, straight-line fit and catalogue prediction](docs/trajectory_barnard.png)
+
+Six SPHEREx visits, each position with its 1σ error bar (alignment between visits plus centroid noise). The weighted straight-line fit gives **10.69 ± 0.76″ per year towards 357° ± 4°**; the catalogue gives 10.39″ per year towards 356°, a difference of **0.4σ**, and the reduced χ² of 1.05 says the points follow a straight line within their errors. These positions are measured near the predicted track; the catalogue-free search (section 2 of the app) finds 9.83″/yr independently.
+
 ### The Madhava engine in action: TRAPPIST-1
 
 ![TRAPPIST-1 in Cold Movers: SPHEREx spectrum, Madhava fit and the published value](docs/trappist1_madhava.png)
@@ -134,8 +140,8 @@ The complete inventory of data, references, software, services and their licence
 - *The SPHEREx image and spectrophotometry processing pipeline*, ApJS 285, 67 (2026), doi:10.3847/1538-4365/ae8843, arXiv:2511.15823.
 - IRSA tutorials (BSD-3): "Introduction to SPHEREx Spectral Images", "Download a collection of SPHEREx Spectral Image cutouts".
 - Widger, W. K. & Woodall, M. P. 1976, *Integration of the Planck blackbody radiation function*, Bull. Amer. Meteor. Soc. 57, 1217.
-- SIMBAD astronomical database and Sesame name resolver (CDS, Strasbourg) for positions, proper motions and parallaxes; Gaia DR3 (Gaia Collaboration, Vallenari et al. 2023, A&A 674, A1) through SIMBAD.
-- Published temperatures for comparison: Jahandar et al. 2024 (Barnard's Star, arXiv:2310.12125); King et al. 2010 (ε Indi Ba/Bb, arXiv:0911.3143); Luhman et al. 2024 (WISE 0855−0714, arXiv:2311.17316); Rodriguez et al. 2013 (RW Aur disk, arXiv:1308.2017).
+- SIMBAD astronomical database and Sesame name resolver (CDS, Strasbourg) for positions, proper motions and parallaxes; Gaia DR3 (Gaia Collaboration, Vallenari et al. 2023, A&A 674, A1) from the ESA Gaia archive and through SIMBAD.
+- Published temperatures for comparison: Agol et al. 2021 (TRAPPIST-1, 2,566 ± 26 K, Planet. Sci. J. 2, 1, arXiv:2010.01074, via the NASA Exoplanet Archive); Jahandar et al. 2024 (Barnard's Star, arXiv:2310.12125); King et al. 2010 (ε Indi Ba/Bb, arXiv:0911.3143); Luhman et al. 2024 (WISE 0855−0714, arXiv:2311.17316); Rodriguez et al. 2013 (RW Aur disk, arXiv:1308.2017).
 - Inspiration for the movie view: WiseView (Caselden et al. 2018), used by the Backyard Worlds: Planet 9 citizen-science project.
 - Software: Astropy, Astroquery, PyVO, NumPy, SciPy, Matplotlib, Pillow, Plotly, Streamlit.
 
