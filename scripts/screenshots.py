@@ -121,6 +121,17 @@ with sync_playwright() as p:
             page.screenshot(path=os.path.join(OUT, f"desktop_{name}.png"))
         except Exception as exc:
             print(f"{name} screenshot failed:", exc)
+    # Barnard's Star: the trajectory panel (motion with its uncertainty)
+    try:
+        fr = open_app(page, "?object=barnard")
+        el = fr.get_by_text("Trajectory of", exact=False).first
+        el.scroll_into_view_if_needed()
+        page.wait_for_timeout(4_000)
+        page.screenshot(path=os.path.join(OUT, "desktop_trajectory.png"))
+        card = fr.get_by_text("Measured from", exact=False).first.inner_text()
+        print("live check trajectory: OK |", card[:220].replace("\n", " "))
+    except Exception as exc:
+        print("live check trajectory: error", exc)
     # TRAPPIST-1: the Madhava engine's showcase (unsaturated, published temperature to compare with)
     try:
         fr = open_app(page, "?object=trappist1")
