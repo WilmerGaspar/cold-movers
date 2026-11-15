@@ -3,7 +3,8 @@
 For every frozen object, five image URLs from the `url` column of photometry.csv (first, last and three in
 between) are opened as small cutouts (the app's own request), and the answer must be a FITS file. The IRSA
 image search (SIA2) is queried for one position, and the DOI of SPHEREx DR1 must resolve.
-Prints a Markdown table; exit code 1 if any link fails.
+Prints a Markdown table. Exit code 1 if any cited file or the DOI fails. The two search services (SIA2 and TAP)
+are reported too, as service availability: they are not cited by any result, and IRSA answers 502 when busy.
 """
 
 import csv
@@ -20,7 +21,7 @@ HEADERS = {"User-Agent": "ColdMovers-link-check"}
 rows, failures = [], 0
 
 
-def check(label, url, want_fits=False):
+def check(label, url, want_fits=False, informational=False):
     global failures
     t = time.time()
     tries = []
@@ -37,8 +38,9 @@ def check(label, url, want_fits=False):
         time.sleep(10 * (attempt + 1))
     if len(tries) > 1:
         note += f" (attempts: {' → '.join(tries)})"
-    failures += not ok
-    rows.append((label, "OK" if ok else "FAILED", note, f"{time.time() - t:.1f} s", url))
+    failures += (not ok) and not informational
+    status = "OK" if ok else ("UNAVAILABLE (service, not a cited file)" if informational else "FAILED")
+    rows.append((label, status, note, f"{time.time() - t:.1f} s", url))
 
 
 for key in sorted(os.listdir(PRE)):
@@ -54,13 +56,16 @@ for key in sorted(os.listdir(PRE)):
         check(f"{key}: image {i + 1} of {len(data)} (D{r['detector']}, MJD {float(r['mjd']):.1f})", url, want_fits=True)
 
 check("IRSA SIA2 search (spherex_dr1, TRAPPIST-1)",
-      "https://irsa.ipac.caltech.edu/SIA?COLLECTION=spherex_dr1&POS=circle+346.6264+-5.0434+0.001&RESPONSEFORMAT=VOTABLE")
+      "https://irsa.ipac.caltech.edu/SIA?COLLECTION=spherex_dr1&POS=circle+346.6264+-5.0434+0.001&RESPONSEFORMAT=VOTABLE",
+      informational=True)
 check("IRSA TAP (the app's fallback search, spherex.plane)",
-      "https://irsa.ipac.caltech.edu/TAP/sync?LANG=ADQL&FORMAT=csv&QUERY=SELECT+TOP+1+planeid+FROM+spherex.plane")
+      "https://irsa.ipac.caltech.edu/TAP/sync?LANG=ADQL&FORMAT=csv&QUERY=SELECT+TOP+1+planeid+FROM+spherex.plane",
+      informational=True)
 check("DOI of SPHEREx DR1 (doi:10.26131/IRSA678)", "https://doi.org/10.26131/IRSA678")
 
 print(f"# IRSA link check ({time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())})\n")
-print(f"{len(rows) - failures} of {len(rows)} links OK.\n")
+ok_n = sum(r[1] == "OK" for r in rows)
+print(f"{ok_n} of {len(rows)} links OK; cited files and DOI failing: {failures}.\n")
 print("| Link | Result | Answer | Time | URL |\n|---|---|---|---|---|")
 for label, res, note, dt, url in rows:
     print(f"| {label} | {res} | {note} | {dt} | {url} |")
