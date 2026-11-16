@@ -1,4 +1,4 @@
-deployed app shows version 0.6.0
+deployed app shows version 0.7.0
 click test R Draconis: OK
 click test TRAPPIST-1: OK
 click test Epsilon Indi B: OK
@@ -9,6 +9,7 @@ live check plain-words panel: OK
 live check detectors that confirm: OK
 live check visual-assistant layers: OK
 live check evaluator summary: OK
+live check evidence panel: OK
 live check difference view: OK
 atlas: service did not answer (message shown)
 atlas screenshot saved
