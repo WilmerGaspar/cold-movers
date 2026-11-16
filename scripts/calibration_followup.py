@@ -1,0 +1,116 @@
+"""Exploratory follow-up to the calibration tests (NOT pre-registered; written after seeing their results).
+
+1. Robust pull scale for the blind-search velocity uncertainty: median pull / 1.1774 (the median of a Rayleigh
+   distribution of scale 1). The pre-registered RMS-based scale is dominated by a few very large pulls.
+2. The temperature-coverage test showed the interval collapsing for very precise synthetic spectra. The cause:
+   the interval keeps the grid points of an 800-point grid (steps of 0.35 %) inside Δχ² ≤ max(1, χ²r), so it
+   can be up to one step too narrow on each side, and it is empty when the true interval is narrower than a
+   step. For the two real objects with a measured temperature, the reported interval is compared with an exact
+   scan in steps of about 0.01 %.
+Writes docs/calibration_followup.json and evidence/CALIBRATION_FOLLOWUP.md. Nothing in the app or in any decision uses it.
+"""
+
+import json
+import math
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import numpy as np  # noqa: E402
+
+from coldmovers import madhava, pipeline  # noqa: E402
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RAYLEIGH_MEDIAN = math.sqrt(2 * math.log(2))
+
+
+def robust_pulls(path):
+    z = []
+    for line in open(path):
+        t = json.loads(line)
+        if not t.get("confirmed") or t.get("set") != "all six" or not t.get("significance"):
+            continue
+        rm, rt, d = t["rate_measured"], t["rate"], math.radians(t["pa_err"])
+        z.append(math.sqrt(max(rm * rm + rt * rt - 2 * rm * rt * math.cos(d), 0.0)) / (rm / t["significance"]))
+    z = np.array(z)
+    return {"n": int(z.size), "robust_scale": float(np.median(z) / RAYLEIGH_MEDIAN), "pull_p90": float(np.percentile(z, 90))}
+
+
+def exact_interval(key):
+    view = pipeline.load(os.path.join(ROOT, "data", "precomputed", key))
+    good = pipeline.clean_rows(view["rows"])
+    fit = pipeline.fit_rows(view["rows"])
+    lam, bw, f, e = (np.array([r[k] for r in good]) for k in ("wavelength_um", "bandwidth_um", "flux_ujy", "err_ujy"))
+    ok = np.isfinite(lam) & np.isfinite(bw) & np.isfinite(f) & np.isfinite(e) & (e > 0) & (bw > 0)
+    lam, bw, f, e = lam[ok], bw[ok], f[ok], e[ok]
+    sigma = np.sqrt(e ** 2 + (madhava.DEFAULT_ERROR_FLOOR * madhava._floor_reference(lam, f)) ** 2)
+    c0 = madhava._chi2_for(fit.temperature, lam, bw, f, sigma)[0]
+    level = c0 + max(1.0, c0 / max(lam.size - 2, 1))
+    ts = np.linspace(fit.temperature * 0.8, fit.temperature * 1.2, 4001)
+    inside = np.array([madhava._chi2_for(t, lam, bw, f, sigma)[0] for t in ts]) <= level
+    i0 = int(np.argmin(np.abs(ts - fit.temperature)))
+    lo = hi = i0
+    while lo > 0 and inside[lo - 1]:
+        lo -= 1
+    while hi < ts.size - 1 and inside[hi + 1]:
+        hi += 1
+    return {"best_k": fit.temperature, "reported_k": [fit.t_low, fit.t_high], "exact_k": [float(ts[lo]), float(ts[hi])],
+            "too_narrow_percent": 100 * (1 - (fit.t_high - fit.t_low) / (ts[hi] - ts[lo]))}
+
+
+def bias_check(n=12, seed=7):
+    """Best-fit temperature of synthetic spectra (TRAPPIST-1's bands, measurement errors plus the 8 % floor)."""
+    view = pipeline.load(os.path.join(ROOT, "data", "precomputed", "trappist1"))
+    good = pipeline.clean_rows(view["rows"])
+    lam, bw = np.array([r["wavelength_um"] for r in good]), np.array([r["bandwidth_um"] for r in good])
+    rel = np.array([r["err_ujy"] / abs(r["flux_ujy"]) for r in good])
+    rng, res = np.random.default_rng(seed), {}
+    for temp in (800.0, 1200.0, 1800.0, 2500.0, 3200.0):
+        model = madhava.band_model_fnu(lam, bw, temp)
+        model = model / np.median(model) * 1000.0
+        sig = np.hypot(rel * model, madhava.DEFAULT_ERROR_FLOOR * model)
+        best = [madhava.fit_temperature(lam, bw, f, rel * np.abs(f)).temperature
+                for f in (model + rng.normal(0.0, sig) for _ in range(n))]
+        res[f"{temp:.0f}"] = {"mean_offset_k": float(np.mean(best) - temp), "scatter_k": float(np.std(best)), "n": n}
+    return res
+
+
+out = {"note": "exploratory, not pre-registered; nothing in the app uses it",
+       "best_fit_bias": bias_check(),
+       "pulls_development": robust_pulls(os.path.join(ROOT, "docs", "calibration_inputs", "development_trials.jsonl")),
+       "pulls_holdout_A": robust_pulls(os.path.join(ROOT, "docs", "calibration_inputs", "holdout_A_trials.jsonl")),
+       "interval_trappist1": exact_interval("trappist1"), "interval_epsindib": exact_interval("epsindib")}
+with open(os.path.join(ROOT, "docs", "calibration_followup.json"), "w") as fh:
+    json.dump(out, fh, indent=1)
+print(json.dumps(out, indent=1))
+
+pd, pa = out["pulls_development"], out["pulls_holdout_A"]
+md = ["# Calibration follow-up (exploratory, not pre-registered)", "",
+      "Written after seeing the pre-registered results in [CALIBRATION.md](CALIBRATION.md), to understand them. "
+      "Generated by `scripts/calibration_followup.py`. Nothing in the app, in any decision or in any displayed number "
+      "uses it.", "",
+      "## Blind-search speed uncertainties are too small", "",
+      f"The pre-registered scale (RMS of the pulls) is driven by a tail of very large pulls. Its robust version, the "
+      f"median pull divided by the median of a Rayleigh distribution, is **{pd['robust_scale']:.2f}** on the development set "
+      f"({pd['n']} confirmed injections) and **{pa['robust_scale']:.2f}** on held-out A ({pa['n']}). The 90th percentile pull is "
+      f"{pd['pull_p90']:.1f} and {pa['pull_p90']:.1f}. Reading: the quoted blind-search uncertainty (speed / significance) should "
+      f"be taken as **at least about {math.floor(min(pd['robust_scale'], pa['robust_scale']) * 10) / 10:.1f} times larger**, "
+      "with heavier tails than a Gaussian. The likely cause: the combined significance adds the detectors as if their "
+      "errors were independent, but they share the same sky, neighbours and alignment.", "",
+      "## The temperature interval is quantized", "",
+      "The interval keeps the points of an 800-point grid (steps of 0.35 %) where Δχ² ≤ max(1, χ²r). It can therefore be "
+      "up to one step too narrow on each side, and it is empty when the true interval is narrower than one step. That is "
+      "why the precise synthetic spectra fail the coverage test. The best-fit temperatures themselves are not biased "
+      "(12 synthetic spectra per temperature: " + "; ".join(f"{t} K: {v['mean_offset_k']:+.1f} ± {v['scatter_k']:.1f} K"
+                                                           for t, v in out["best_fit_bias"].items()) + "). For "
+      "the real objects the intervals are wide (their χ²r is large), so the effect is small:", "",
+      "| Object | Best fit | Reported interval | Exact scan | Reported too narrow by |", "|---|---|---|---|---|"]
+for key, name in (("interval_trappist1", "TRAPPIST-1"), ("interval_epsindib", "Epsilon Indi B")):
+    r = out[key]
+    md.append(f"| {name} | {r['best_k']:,.0f} K | {r['reported_k'][0]:,.0f}–{r['reported_k'][1]:,.0f} K | "
+              f"{r['exact_k'][0]:,.0f}–{r['exact_k'][1]:,.0f} K | {r['too_narrow_percent']:.0f} % |")
+md += ["", "The fix (find where the χ² profile crosses the level by interpolating between grid points) is not applied in "
+       "this release, as pre-registered; it must be checked again on new synthetic spectra before it is used.", ""]
+with open(os.path.join(ROOT, "evidence", "CALIBRATION_FOLLOWUP.md"), "w") as fh:
+    fh.write("\n".join(md))

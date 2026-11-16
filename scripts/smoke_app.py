@@ -61,6 +61,10 @@ for key in ALL_EXAMPLES:
             if not any("What am I looking at?" in str(m.value) for m in at.markdown):
                 failed += 1
                 print(f"{key}: the plain-words panel is missing")
+            if not any("Scientific evidence & validation" in str(m.value) for m in at.markdown) or \
+                    not any("What is still a candidate" in str(m.value) for m in at.markdown):
+                failed += 1
+                print(f"{key}: the evidence panel is missing")
             evaluator = [str(m.value) for m in at.markdown if "Motion verdict" in str(m.value)]
             if not evaluator or "CONFIRMED" not in evaluator[0] or "Held-out A" not in evaluator[0]:
                 failed += 1

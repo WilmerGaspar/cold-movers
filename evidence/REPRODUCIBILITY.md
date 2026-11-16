@@ -14,7 +14,7 @@
 ```bash
 pip install -r requirements.txt
 
-# 1. Unit tests (94): series against numerical integration and against Madhava's bound, fit, photometry,
+# 1. Unit tests (101): series against numerical integration and against Madhava's bound, fit, photometry,
 #    checks, variability, movers (including the neighbour-pull rule), assistant, scoreboard rules
 python -m pytest -q tests
 
@@ -44,7 +44,15 @@ python scripts/madhava_correction_check.py      # series error with and without 
 python scripts/check_readme_numbers.py          # every README number against the generated files
 python scripts/check_irsa_links.py              # original SPHEREx files still open at IRSA (needs internet)
 
-# 9. Run the app
+# 9. Calibration of uncertainties (pre-registered) and its exploratory follow-up, then the evidence ledger
+python scripts/benchmark_injection.py --per-trial docs/calibration_inputs/development_trials.jsonl
+python scripts/benchmark_holdout.py --label A --per-trial docs/calibration_inputs/holdout_A_trials.jsonl
+python scripts/calibration.py --dev-trials docs/calibration_inputs/development_trials.jsonl \
+    --holdout-trials docs/calibration_inputs/holdout_A_trials.jsonl      # about 12 minutes
+python scripts/calibration_followup.py
+python scripts/evidence_report.py               # ledger; README and report summaries (--check to verify)
+
+# 10. Run the app
 streamlit run app.py
 ```
 

@@ -1,10 +1,25 @@
-# Final validation report: Cold Movers 0.6.0
+# Final validation report: Cold Movers 0.7.0
 
 Branch `global-scientific-upgrade`, Nov 15, 2026. `main` was backed up first, as the branch
 `backup/main-before-final-mission` (commit `209d359`), and was not changed by this work. Every number below comes
 from a generated file named next to it. The detection metrics are all in [VALIDATION_METRICS.md](VALIDATION_METRICS.md).
 
-**Status:** every check passes. On a fresh machine the 94 tests, the headless app (all six objects) and the 58 README numbers all pass, and every published result regenerates from the code (GitHub Actions run 43765531036, commit `c184b4b`). Ready to publish once the team authorizes updating `main`. The open scientific problems are listed in §8; none is hidden.
+**Status:** STATUS_070
+
+## What the evidence shows (same table as the README and the app)
+
+<!-- evidence-summary:start -->
+| Kind of evidence | What it shows |
+|---|---|
+| **A · Real SPHEREx measurements** | Motion of Barnard's Star: **CONFIRMED**; Motion of Epsilon Indi B: **CONFIRMED**; Temperature of TRAPPIST-1: **MEASURED WITH CAVEATS**; Temperature of Epsilon Indi B: **MEASURED WITH CAVEATS**; Brightness change of R Draconis: **MEASURED**; Confirmed movers other than the known targets, six fields: **NONE FOUND**; Position errors, checked on still stars: **MEASURED** |
+| **B · Injection-recovery tests** (artificial movers in real images, never discoveries) | Injected movers at S/N 8 (scoreboard campaign): partial; Injected movers at S/N 15 (scoreboard campaign): pass; Injected movers at S/N 30 (scoreboard campaign): pass; Very red injected movers (detectors 5 and 6 only): fail; Development benchmark (3,300 trials, seed 2026): reported; Held-out set A (pre-registered, seed 20261115, same six fields): reported; Held-out set B (pre-registered, new SPHEREx fields): reported; Motion uncertainties on injections (development): reported; Motion uncertainties on injections (held-out A): reported |
+| **C · Candidates, not confirmed** | Motion of WISE 0855-0714: **CANDIDATE**; Candidates for new, unknown objects: **NONE FOUND** |
+| **D · Inconclusive or not detected** | Motion of RW Aurigae: **NOT DETECTED**; Motion of R Draconis: **INCONCLUSIVE**; Motion of TRAPPIST-1: **NOT DETECTED**; Temperature of Barnard's Star: **INCONCLUSIVE**; Temperature of WISE 0855-0714: **INCONCLUSIVE**; Temperature of RW Aurigae: **INCONCLUSIVE**; Temperature of R Draconis: **INCONCLUSIVE**; Brightness change of RW Aurigae: **INCONCLUSIVE** |
+| **S · Synthetic or computed checks** | Temperature intervals on synthetic spectra: reported; Madhava recovers known temperatures: pass; Series error stays inside Madhava's guaranteed bound: pass; Parallax bias of the straight-line motion fit: reported |
+
+**Confirmed by our own SPHEREx measurements:** 2 motions (Barnard's Star, Epsilon Indi B). Catalogue values are shown only for comparison and are never counted as our measurement.
+**Detection rates come only from injected movers:** S/N 15: precision 0.986, recall 0.40 (69 of 173, 1 false confirmation); S/N 30: precision 0.929, recall 0.46. (held-out A)
+<!-- evidence-summary:end -->
 
 ## 1. Audit and stability
 
@@ -31,8 +46,8 @@ from a generated file named next to it. The detection metrics are all in [VALIDA
 
 **Not reproducible, or not checkable from here.**
 
-- The public app follows `main` and still shows version 0.4.9 until it is rebooted. The 0.6.0 panels were
-  checked headless only.
+- The public app follows `main`; a new version is checked live by the robot only after merging and rebooting.
+  On the branch, the panels are checked headless.
 - The robot's live sky-atlas check reported that the Gaia archive did not answer; the page showed its message.
 - A live search depends on IRSA, which answered 502 and 503 several times today.
 
@@ -105,6 +120,35 @@ confirmation; 0.60 on the two new fields of set B. This supports the diagnosis t
 
 **The algorithm does not detect all moving objects.** At S/N 15 it confirms about 40 % of the injected movers in
 the six test fields and 72 % in the two new fields, and at S/N 5 almost none.
+
+## 2b. Calibration of uncertainties (new in 0.7.0)
+
+The calibration tests were pre-registered before they ran
+([CALIBRATION_PREREGISTRATION.md](CALIBRATION_PREREGISTRATION.md), commit `f3fd5c7`). Results are in
+[CALIBRATION.md](CALIBRATION.md); an exploratory follow-up, written after seeing them, is in
+[CALIBRATION_FOLLOWUP.md](CALIBRATION_FOLLOWUP.md).
+
+| Test | Result | Reading |
+|---|---|---|
+| Real-star null test (71 still-star tracks, real SPHEREx data) | Position error scale *k* = 0.42 (robust) and 1.20 (RMS); 92 % of residuals within 1σ (68 % expected); 2 of 71 still stars reach significance 5 in one detector | Most positions are more precise than the model says, but the tails are heavy. A single detector is not enough evidence, which is why confirmation needs two |
+| Injection pulls, development → held-out A | Pre-registered RMS scale 8.05 → 4.80; robust follow-up 1.67 → 2.25 | The blind-search speed uncertainty (speed / significance) is too small: read it as at least 1.7 times larger. Detectors are added as if independent, but they share sky, neighbours and alignment |
+| Temperature interval coverage (synthetic spectra, real bands) | 22 % with the noise the fit assumes (68 % expected); 59 % with measurement noise only | The interval is quantized to a 0.35 % grid. It is too narrow for precise spectra, and 9 % (TRAPPIST-1) and 7 % (Epsilon Indi B) too narrow for the real objects. Best fits are not biased |
+
+As pre-registered, no threshold, decision or displayed number was changed because of these tests. The fixes are
+identified: an independence correction for the combined significance, and interpolating the χ² crossing. Each
+must be checked on new data before it is used.
+
+**Evidence ledger (new in 0.7.0).** `coldmovers/evidence.py` builds one ledger of every important result from
+the generated files, labelled A (real measurement), B (injection test), C (candidate), D (inconclusive or not
+detected) or S (synthetic or computed). The app's "Scientific evidence & validation" panel, the README section
+"What the Evidence Actually Shows" and this report's summary are all rendered from it.
+`tests/test_evidence_ledger.py` checks four things:
+- nothing is CONFIRMED without the rule (two or more trusted detectors, combined significance of 5 or more);
+- injection and synthetic results never carry an observation status;
+- the README and the report match the ledger;
+- every trace points to an existing file.
+
+Full table: [EVIDENCE_LEDGER.md](EVIDENCE_LEDGER.md).
 
 ## 3. Astrometry and temperature
 
@@ -188,7 +232,8 @@ rules, has been run on them ([COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md))
 | After the fix | v0.5.0 | development set (the rule was chosen on it) | 0.981 | 0.39 | 14 pass · 4 partial · 1 fail |
 | Independent check | v0.5.0 search, unchanged | held-out set A | 0.986 (0.92–1.00) | 0.40 (0.33–0.47) | — |
 | Independent check on new fields | v0.5.0 search, unchanged | held-out set B (2 new fields) | 1.000 (0.92–1.00) | 0.72 (0.59–0.81) | — |
-| This release | v0.6.0: verdicts, evaluator panel, checks; the search itself unchanged | — | — | — | 14 pass · 4 partial · 1 fail (regenerated, identical) |
+| v0.6.0 | verdicts, evaluator panel, checks; the search itself unchanged | — | — | — | 14 pass · 4 partial · 1 fail (regenerated, identical) |
+| v0.7.0 | evidence ledger and calibration; the search unchanged, no displayed number changed | — | — | — | unchanged |
 
 No validated result was changed to improve a metric. The search code is unchanged since v0.5.0. In this work,
 `coldmovers/scoreboard.py` only records where each false confirmation sits, and `coldmovers/validation.py` only
@@ -210,6 +255,19 @@ adds verdicts.
 - **Workflows:** `.github/workflows/branch_checks.yml` and `holdout_b.yml`. Both are read-only and run only on this
   branch; none of them commits.
 
+**Added in 0.7.0:**
+- **Code:** `coldmovers/evidence.py` (the ledger); `coldmovers/scoreboard.py` also records the measured speed,
+  direction and significance of each trial (no counts change); `coldmovers/__init__.py` (0.7.0); `app.py`
+  (evidence panel and traceability table).
+- **Scripts:** `calibration.py`, `calibration_followup.py`, `evidence_report.py`; the benchmarks can write
+  per-trial records.
+- **Results:** `docs/calibration.json`, `docs/calibration_followup.json`, `docs/evidence_ledger.json`, and
+  `docs/calibration_inputs/` (per-trial records).
+- **Documents:** `evidence/CALIBRATION_PREREGISTRATION.md`, `CALIBRATION.md`, `CALIBRATION_FOLLOWUP.md`,
+  `EVIDENCE_LEDGER.md`.
+- **Tests:** `tests/test_evidence_ledger.py` (7 tests).
+- **CI:** a `calibration` job that re-runs the calibration and compares it with the committed result.
+
 ## 8. Open problems
 
 1. **Very red movers** (detectors 5 and 6 only) are rarely confirmed: 13 % in held-out A and 28 % in the
@@ -222,9 +280,11 @@ adds verdicts.
    visits.
 6. **The blind search's speed uncertainty** is an approximation (speed / significance).
 7. **No independent photometric calibration** against 2MASS or WISE has been done.
-8. **The public app runs 0.4.9** until `main` is updated and the app is rebooted.
+8. **The public app runs the version on `main`** until the branch is merged and the app is rebooted.
 9. **Set B covers only two of the four pre-registered fields.** IRSA's search was unavailable, and at the ecliptic poles the visit rule finds a single visit. With 60 injections per S/N its intervals are wide.
 10. **IRSA's search services** (SIA2 and TAP) answered 502 in several runs today. The files cited by the results all opened; a live search in the app may have to wait.
+11. **The blind-search speed uncertainties are too small** (calibration, §2b). The fix is identified but not applied.
+12. **The temperature interval is quantized.** For the real objects it is 7 to 9 % too narrow; the fix is identified but not applied.
 
 ## 9. How to publish the final version (needs the team's authorization)
 
@@ -235,11 +295,11 @@ adds verdicts.
    git push origin main
    ```
 2. **Let GitHub Actions run on `main`.** `tests.yml` runs the unit tests and the headless app.
-   `scoreboard.yml` regenerates the scoreboard, with the same results stamped 0.6.0. `screenshots.yml`
+   `scoreboard.yml` regenerates the scoreboard, with the same results stamped 0.7.0. `screenshots.yml`
    regenerates the evidence records and checks the live app.
 3. **Reboot the app.** At share.streamlit.io, open the cold-movers app and choose Reboot. Check that the page says
-   **version 0.6.0** under the title and shows "For evaluators: the science on one page".
-4. **Confirm the robot.** The `app screenshots` run should print "deployed app shows version 0.6.0" and
-   "live check evaluator summary: OK".
+   **version 0.7.0** under the title and shows "Scientific evidence & validation".
+4. **Confirm the robot.** The `app screenshots` run should print "deployed app shows version 0.7.0" and
+   "live check evidence panel: OK".
 5. **Roll back if needed.** The previous `main` is kept as `backup/main-before-final-mission` (`209d359`). Restoring
    it is a deliberate overwrite of `main` and needs the team's explicit decision.

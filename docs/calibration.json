@@ -1,0 +1,132 @@
+{
+ "code_version": "0.6.0",
+ "preregistration": "evidence/CALIBRATION_PREREGISTRATION.md",
+ "null_test": {
+  "per_field": {
+   "barnard": {
+    "tracks": 2,
+    "residuals": 16
+   },
+   "epsindib": {
+    "tracks": 11,
+    "residuals": 82
+   },
+   "rdra": {
+    "tracks": 0,
+    "residuals": 0
+   },
+   "rwaur": {
+    "tracks": 19,
+    "residuals": 114
+   },
+   "trappist1": {
+    "tracks": 21,
+    "residuals": 120
+   },
+   "wise0855": {
+    "tracks": 18,
+    "residuals": 130
+   }
+  },
+  "residuals": 462,
+  "tracks": 71,
+  "position_scale_robust": 0.41997640497460104,
+  "position_scale_rms": 1.1959661473127468,
+  "within_1sigma": 0.9155844155844156,
+  "within_2sigma": 0.9523809523809523,
+  "significance_median": 0.3483591466072802,
+  "significance_rayleigh_scale": 1.6511648829805454,
+  "frac_significance_ge_3": 0.04225352112676056,
+  "frac_significance_ge_5": 0.028169014084507043,
+  "n_significance_ge_3": 3,
+  "n_significance_ge_5": 2,
+  "expected_if_calibrated": {
+   "within_1sigma": 0.6827,
+   "within_2sigma": 0.9545,
+   "frac_significance_ge_3": 0.011108996538242306,
+   "frac_significance_ge_5": 3.726653172078671e-06,
+   "note": "significance uses the first-to-last shift uncertainty sqrt(2) x sigma_pos, larger than the slope uncertainty when there are more than two visits, so a calibrated position model gives fewer threshold crossings than this"
+  }
+ },
+ "pulls_development": {
+  "n": 536,
+  "rayleigh_scale": 8.04828569696031,
+  "median_pull": 1.9657482317505017,
+  "within_68_radius": 0.4123134328358209,
+  "within_95_radius": 0.5690298507462687,
+  "expected_if_calibrated": {
+   "rayleigh_scale": 1.0,
+   "within_68_radius": 0.6827,
+   "within_95_radius": 0.9545
+  }
+ },
+ "pulls_holdout_A": {
+  "n": 350,
+  "rayleigh_scale": 4.802361405230791,
+  "median_pull": 2.64756412255034,
+  "within_68_radius": 0.3457142857142857,
+  "within_95_radius": 0.47714285714285715,
+  "expected_if_calibrated": {
+   "rayleigh_scale": 1.0,
+   "within_68_radius": 0.6827,
+   "within_95_radius": 0.9545
+  }
+ },
+ "temperature_coverage": {
+  "points_per_spectrum": 237,
+  "spectra_per_temperature": 60,
+  "seed": 20261116,
+  "cases": {
+   "measurement errors only": {
+    "by_temperature": {
+     "800": {
+      "coverage": 0.0,
+      "green": 1.0
+     },
+     "1200": {
+      "coverage": 0.0,
+      "green": 1.0
+     },
+     "1800": {
+      "coverage": 1.0,
+      "green": 1.0
+     },
+     "2500": {
+      "coverage": 0.9833333333333333,
+      "green": 1.0
+     },
+     "3200": {
+      "coverage": 0.95,
+      "green": 1.0
+     }
+    },
+    "coverage_mean": 0.5866666666666667
+   },
+   "measurement errors plus the 8 % floor the fit assumes": {
+    "by_temperature": {
+     "800": {
+      "coverage": 0.0,
+      "green": 1.0
+     },
+     "1200": {
+      "coverage": 0.0,
+      "green": 1.0
+     },
+     "1800": {
+      "coverage": 0.5166666666666667,
+      "green": 1.0
+     },
+     "2500": {
+      "coverage": 0.4,
+      "green": 1.0
+     },
+     "3200": {
+      "coverage": 0.2,
+      "green": 1.0
+     }
+    },
+    "coverage_mean": 0.22333333333333333
+   }
+  }
+ }
+}

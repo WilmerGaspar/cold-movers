@@ -116,6 +116,16 @@ if os.path.exists(holdout_b):
         sb_ = hb["by_snr_core"][k]
         expect(f"Set B row, S/N {k}", f"| {sb_['n']} | {sb_['confirmed']} | {sb_['n'] - sb_['confirmed']} | "
                f"{sb_['false_confirmed']} | {sb_['precision']:.2f} (", "docs/benchmark_holdout_B.json")
+cal_path, fol_path = os.path.join(ROOT, "docs", "calibration.json"), os.path.join(ROOT, "docs", "calibration_followup.json")
+if os.path.exists(cal_path) and os.path.exists(fol_path):
+    cal, fol = json.load(open(cal_path)), json.load(open(fol_path))
+    k = min(fol["pulls_development"]["robust_scale"], fol["pulls_holdout_A"]["robust_scale"])
+    expect("Blind-search uncertainty scale", f"at least {k:.1f} times larger", "docs/calibration_followup.json")
+    expect("Still stars", f"On {cal['null_test']['tracks']} real still stars", "docs/calibration.json")
+    tc = [v for m, v in cal["temperature_coverage"]["cases"].items() if "plus" in m][0]
+    expect("Temperature coverage", f"{100 * tc['coverage_mean']:.0f} % of precise synthetic fits", "docs/calibration.json")
+    expect("Interval too narrow (TRAPPIST-1)", f"{fol['interval_trappist1']['too_narrow_percent']:.0f} % (TRAPPIST-1)",
+           "docs/calibration_followup.json")
 out = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "madhava_correction_check.py")],
                      capture_output=True, text=True).stdout
 m = re.search(r"(\d+)× to (\d+)×", out)

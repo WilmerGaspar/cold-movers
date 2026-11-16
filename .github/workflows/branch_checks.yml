@@ -36,6 +36,9 @@ jobs:
       - name: README numbers match the generated results
         if: always()
         run: python scripts/check_readme_numbers.py | tee readme_numbers.md
+      - name: README, app and report use the same evidence ledger
+        if: always()
+        run: python scripts/evidence_report.py --check
       - name: The whole app, headless, for every example
         if: always()
         run: python -u scripts/smoke_app.py 2>&1 | tee smoke.txt
@@ -143,6 +146,38 @@ jobs:
             validation_log.txt
             benchmark_log.txt
             holdout_A_log.txt
+
+  calibration:
+    # Re-run the pre-registered calibration from the committed per-trial files and compare.
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Calibration tests (about 12 minutes)
+        run: |
+          cp docs/calibration.json committed_calibration.json
+          python -u scripts/calibration.py --dev-trials docs/calibration_inputs/development_trials.jsonl --holdout-trials docs/calibration_inputs/holdout_A_trials.jsonl --out regenerated_calibration.json > /dev/null
+          python - <<'PY'
+          import json
+          def walk(a, b, p=""):
+              if isinstance(a, dict):
+                  for k in sorted(set(a) | set(b)):
+                      if k != "code_version":
+                          yield from walk(a.get(k), b.get(k), f"{p}/{k}")
+              elif isinstance(a, float) and isinstance(b, float):
+                  if abs(a - b) > 1e-6 * max(1.0, abs(a)):
+                      yield f"{p}: {a} vs {b}"
+              elif a != b:
+                  yield f"{p}: {a} vs {b}"
+          d = list(walk(json.load(open("regenerated_calibration.json")), json.load(open("committed_calibration.json"))))
+          print("calibration regenerated equals committed:", "yes" if not d else "NO")
+          for x in d[:20]:
+              print("  ", x)
+          PY
 
   irsa-links:
     runs-on: ubuntu-latest

@@ -334,6 +334,60 @@ def evaluator_summary(vt, sb):
     return "\n".join(out)
 
 
+@st.cache_data(show_spinner=False)
+def evidence_ledger():
+    from coldmovers import evidence
+
+    return evidence.build_ledger(os.path.dirname(os.path.abspath(__file__)))
+
+
+def evidence_blocks(ledger):
+    """Six short blocks for evaluators, all written from the evidence ledger."""
+    def lines(entries, fmt):
+        return "".join(f"<li>{fmt(e)}</li>" for e in entries) or "<li>none</li>"
+
+    def short(e):
+        return e["evidence"].split(". ")[0]
+
+    measured = [e for e in ledger if e["category"] == "A"]
+    simulated = [e for e in ledger if e["category"] in ("B", "S")]
+    confirmed = [e for e in ledger if e["status"] == "CONFIRMED"]
+    candidates = [e for e in ledger if e["category"] == "C"]
+    undemonstrated = [e for e in ledger if e["category"] == "D"]
+    limits = [f"<b>{e['claim']}</b>: {e['limitations']}" for e in ledger
+              if e["limitations"] and e["id"] in ("injection-red", "benchmark-dev", "benchmark-B", "parallax",
+                                                  "calibration-null", "calibration-pulls-A",
+                                                  "calibration-temperature", "temperature-trappist1")]
+    card = "<div class='cm-card' style='margin-top:6px'><b>{}</b><ul style='margin:4px 0 0 0'>{}</ul></div>"
+    left = (card.format("✅ What was measured in real SPHEREx images (A)",
+                        lines(measured, lambda e: f"{e['claim']}: <b>{e['status']}</b>"))
+            + card.format("🟢 What was confirmed by our own measurements",
+                          lines(confirmed, lambda e: f"{e['claim']}: {short(e)}"))
+            + card.format("🟡 What is still a candidate (C)",
+                          lines(candidates, lambda e: f"{e['claim']}: <b>{e['status']}</b>")))
+    right = (card.format("🧪 What was simulated: injection tests (B) and synthetic checks (S), never discoveries",
+                         lines(simulated, lambda e: f"{e['claim']} ({e['category']})"))
+             + card.format("⚪ What could not be shown (D)",
+                           lines(undemonstrated, lambda e: f"{e['claim']}: <b>{e['status']}</b>"))
+             + card.format("⚠️ Known scientific limits", "".join(f"<li>{x}</li>" for x in limits)))
+    return left, right
+
+
+try:
+    _ledger = evidence_ledger()
+    st.markdown("#### Scientific evidence & validation: what is real, what is a test, what is still a candidate")
+    _l, _r = st.columns(2)
+    _left, _right = evidence_blocks(_ledger)
+    _l.markdown(_left, unsafe_allow_html=True)
+    _r.markdown(_right, unsafe_allow_html=True)
+    with st.expander("🔗 Traceability: every claim, its kind of evidence, its status and where to check it"):
+        from coldmovers import evidence as _evidence
+
+        st.markdown(_evidence.traceability_markdown(_ledger))
+        st.caption("Generated from the result files by coldmovers/evidence.py; the README and the final report show "
+                   "the same summary, and automated tests check that they agree.")
+except Exception as _exc:
+    note_problem("evidence ledger", _exc)
 try:
     with st.expander("🔬 For evaluators: the science on one page (data, method, validation, results, limits)"):
         st.markdown(evaluator_summary(vt_top, sb if "sb" in dir() else None))
