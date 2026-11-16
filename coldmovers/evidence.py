@@ -149,8 +149,9 @@ def build_ledger(root: str) -> list:
             ("benchmark-A", "Held-out set A (pre-registered, seed 20261115, same six fields)", ha,
              "docs/benchmark_holdout_A.json", "no parameter changed after the run"),
             ("benchmark-B", "Held-out set B (pre-registered, new SPHEREx fields)", hb, "docs/benchmark_holdout_B.json",
-             "two of the four pre-registered fields: the ecliptic poles could not be used (IRSA search errors; at the "
-             "poles SPHEREx observes almost continuously, so all images fall in one visit and no motion can be measured)")):
+             "two of the four pre-registered fields: in the run that counts, IRSA's search failed for both ecliptic "
+             "poles. In a repeat run the south pole gave a single visit (no gap longer than 20 days between its images), "
+             "so no motion can be measured there; a later automatic run reached the north pole (4 visits)")):
         if not data:
             continue
         s = data["by_snr_core"]["15.0"]

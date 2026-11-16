@@ -380,7 +380,7 @@
   "method": "blind search, matched afterwards; all six detectors, 5–20″/yr",
   "evidence": "S/N 15: precision 1.000, recall 0.72 (43 of 60, 0 false confirmations); S/N 30: precision 1.000, recall 0.85.",
   "uncertainty": "95 % Wilson intervals in evidence/VALIDATION_METRICS.md",
-  "limitations": "two of the four pre-registered fields: the ecliptic poles could not be used (IRSA search errors; at the poles SPHEREx observes almost continuously, so all images fall in one visit and no motion can be measured)",
+  "limitations": "two of the four pre-registered fields: in the run that counts, IRSA's search failed for both ecliptic poles. In a repeat run the south pole gave a single visit (no gap longer than 20 days between its images), so no motion can be measured there; a later automatic run reached the north pole (4 visits)",
   "trace": [
    "docs/benchmark_holdout_B.json",
    "evidence/VALIDATION_METRICS.md",
